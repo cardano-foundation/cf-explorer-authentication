@@ -1,0 +1,5 @@
+-- user schema
+-- CREATE TABLE student
+-- (
+--
+-- )
