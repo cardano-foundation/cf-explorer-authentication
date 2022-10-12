@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${HOST}:${PORT_DB}/auth?currentSchema=${SPRING_PROFILES_ACTIVE}
+    name: auth-service
+    username: ${USERNAME_DB}
+    password: ${PASSWORD_DB}
+    driver-class-name: org.postgresql.Driver
+    tomcat:
+      max-wait: 10000
+      max-active: 50
+      test-on-borrow: true
+    jpa:
+      database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+      openInView: false
+      show_sql: true
+      generate-ddl: false
+      hibernate:
+        ddl-auto: create
+        naming-strategy: org.hibernate.cfg.EJB3NamingStrategy
+      properties:
+        hibernate.cache.use_second_level_cache: true
+        hibernate.cache.use_query_cache: false
+        hibernate.generate_statistics: false
+        hibernate.cache.region.factory_class: org.hibernate.cache.internal.NoCachingRegionFactory
+        hibernate.jdbc.lob.non_contextual_creation: true
+
+  ## Flyway config
+  flyway:
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    group: true
+    sql-migration-prefix: V
+    sql-migration-separator: __
+    sql-migration-suffixes: .sql
+    baseline-on-migrate: true

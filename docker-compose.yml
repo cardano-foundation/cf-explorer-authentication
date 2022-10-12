@@ -1,0 +1,20 @@
+version: '3.9'
+networks:
+  default:
+    name: infrastructure-net
+    external: true
+
+services:
+  cardano-authentication:
+    container_name: cardano-authentication
+    image: cardano-authentication
+    build:
+      context: .
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - HOST=${HOST}
+      - PORT_DB=${PORT_DB}
+      - USERNAME_DB=${USERNAME_DB}
+      - PASSWORD_DB=${PASSWORD_DB}
+    volumes:
+      - $PWD/cardano/volumes/logs/cardano-authentication:/cardano-authentication/logs/
