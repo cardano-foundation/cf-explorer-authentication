@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://${HOST}:${PORT_DB}/auth?currentSchema=${SPRING_PROFILES_ACTIVE}
-    name: auth-service
+    name: cardano-authentication
     username: ${USERNAME_DB}
     password: ${PASSWORD_DB}
     driver-class-name: org.postgresql.Driver
