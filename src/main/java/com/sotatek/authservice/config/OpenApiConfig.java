@@ -15,7 +15,7 @@ public class OpenApiConfig {
   @Bean
   public OpenAPI openAPI() {
     return new OpenAPI().servers(
-            Arrays.asList(new Server().url("http://localhost:8021"), new Server().url("server host")))
+            Arrays.asList(new Server().url("http://localhost:8021"), new Server().url("http://172.16.1.230:8021")))
         .info(new Info().title("Authentication APIs").description("Sample OpenAPI 3.0").contact(
                 new Contact().email("potal.sotatek@sotatek.com").name("Sotatek")
                     .url("https://www.sotatek.com/")).license(
