@@ -1,4 +1,4 @@
-package com.sotatek.authservice;
+package com.sotatek.authservice.signature;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,6 +18,7 @@ import java.security.MessageDigest;
 import java.security.Signature;
 import java.util.Arrays;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
@@ -30,7 +31,8 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
 
-public class VerifySignatureTest {
+@Log4j2
+class VerifySignatureTest {
 
   public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
@@ -38,8 +40,7 @@ public class VerifySignatureTest {
       EdDSANamedCurveTable.ED_25519);
 
   @Test
-  public void testRecoverAddressFromSignature() {
-
+  void testRecoverAddressFromSignatureMetaMaskWallet() {
     String signature = "0x2c6401216c9031b9a6fb8cbfccab4fcec6c951cdf40e2320108d1856eb532250576865fbcd452bcdc4c57321b619ed7a9cfd38bd973c3e1e0243ac2777fe9d5b1b";
     String address = "0x31b26e43651e9371c88af3d36c14cfd938baf4fd";
     String message = "v0G9u7huK4mJb2K1";
@@ -54,7 +55,6 @@ public class VerifySignatureTest {
         (byte[]) Arrays.copyOfRange(signatureBytes, 32, 64));
     String addressRecovered = null;
     boolean match = false;
-    // Iterate for each possible key to recover
     for (int i = 0; i < 4; i++) {
       BigInteger publicKey = Sign.recoverFromSignature((byte) i,
           new ECDSASignature(new BigInteger(1, sd.getR()), new BigInteger(1, sd.getS())), msgHash);
@@ -71,41 +71,33 @@ public class VerifySignatureTest {
   }
 
   @Test
-  public void testRecoverMessageFromSignatureCardanoWallet() throws Exception {
-    //Payload = "hello"
-    String coseSignMsgInHex = "845869a30127045820674d11e432450118d70ea78673d5e31d5cc1aec63de0ff6284784876544be3406761646472657373583901d2eb831c6cad4aba700eb35f86966fbeff19d077954430e32ce65e8da79a3abe84f4ce817fad066acc1435be2ffc6bd7dce2ec1cc6cca6cba166686173686564f44568656c6c6f5840a3b5acd99df5f3b5e4449c5a116078e9c0fcfc126a4d4e2f6a9565f40b0c77474cafd89845e768fae3f6eec0df4575fcfe7094672c8c02169d744b415c617609";
-    //CBOR parsing starts here ###################
-    List<DataItem> dataItemList = CborDecoder.decode(HexUtil.decodeHexString(coseSignMsgInHex));
+  void testRecoverMessageAndAddressFromSignatureCardanoWallet() throws Exception {
+    String signMsgInHex = "845869a30127045820674d11e432450118d70ea78673d5e31d5cc1aec63de0ff6284784876544be3406761646472657373583901d2eb831c6cad4aba700eb35f86966fbeff19d077954430e32ce65e8da79a3abe84f4ce817fad066acc1435be2ffc6bd7dce2ec1cc6cca6cba166686173686564f44568656c6c6f5840a3b5acd99df5f3b5e4449c5a116078e9c0fcfc126a4d4e2f6a9565f40b0c77474cafd89845e768fae3f6eec0df4575fcfe7094672c8c02169d744b415c617609";
+    List<DataItem> dataItemList = CborDecoder.decode(HexUtil.decodeHexString(signMsgInHex));
     List<DataItem> topArray = ((Array) dataItemList.get(0)).getDataItems();
     ByteString protectedHeaderBs = (ByteString) topArray.get(0);
-    Map unprotectedMap = (Map) topArray.get(1);
     ByteString messageToSignBS = (ByteString) topArray.get(2);
     ByteString signatureArrayBS = (ByteString) topArray.get(3);
     byte[] message = messageToSignBS.getBytes();
     byte[] signature = signatureArrayBS.getBytes();
-    System.out.println(new String(message));
-    //parse protected header map bytestring
+    log.warn(new String(message));
     List<DataItem> protectedHeaderMapDIList = CborDecoder.decode(protectedHeaderBs.getBytes());
     Map protectedHeaderMap = (Map) protectedHeaderMapDIList.get(0);
     ByteString publicKeyBS = (ByteString) protectedHeaderMap.get(new UnsignedInteger(4));
     byte[] publicKeyBytes = publicKeyBS.getBytes();
     ByteString addressBS = (ByteString) protectedHeaderMap.get(new UnicodeString("address"));
-    System.out.println("Address >> " + HexUtil.encodeHexString(addressBS.getBytes()));
-    //CBOR parsing ends her ###################
-    //Create SignatureStructure. This is passed as message during signature verification
+    log.warn("Address >> " + HexUtil.encodeHexString(addressBS.getBytes()));
     Array sigStructArray = new Array();
     sigStructArray.add(new UnicodeString("Signature1"));
     sigStructArray.add(protectedHeaderBs);
     sigStructArray.add(new ByteString(new byte[0]));
     sigStructArray.add(messageToSignBS);
     byte[] messageToVerify = CborSerializationUtil.serialize(sigStructArray); //serialize
-    //End SignatureStructure
     boolean verified = verify(messageToVerify, signature, publicKeyBytes);
-    assertEquals(verified, true);
+    assertTrue(verified);
   }
 
   public boolean verify(byte[] message, byte[] signatureBytes, byte[] publicKeyBytes) {
-
     try {
       net.i2p.crypto.eddsa.EdDSAPublicKey publicKey = new net.i2p.crypto.eddsa.EdDSAPublicKey(
           new EdDSAPublicKeySpec(publicKeyBytes, spec));
