@@ -2,11 +2,11 @@ package com.sotatek.authservice.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sotatek.authservice.exception.AccessTokenExpireException;
-import com.sotatek.authservice.exception.BusinessException;
-import com.sotatek.authservice.exception.ErrorResponse;
-import com.sotatek.authservice.exception.InvalidAccessTokenException;
-import com.sotatek.authservice.exception.enums.CommonErrorCode;
+import com.sotatek.cardanocommonapi.exceptions.AccessTokenExpireException;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.sotatek.cardanocommonapi.exceptions.ErrorResponse;
+import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
+import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
