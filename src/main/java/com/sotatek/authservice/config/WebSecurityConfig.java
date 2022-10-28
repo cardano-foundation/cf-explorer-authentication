@@ -1,7 +1,7 @@
 package com.sotatek.authservice.config;
 
 import com.sotatek.authservice.constant.AuthConstant;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,10 +16,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
-  @Autowired
-  private AuthEntryPointJwt unauthorizedHandler;
+  private final AuthEntryPointJwt unauthorizedHandler;
 
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
