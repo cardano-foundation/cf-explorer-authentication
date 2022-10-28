@@ -1,11 +1,11 @@
 package com.sotatek.authservice.config;
 
 import com.sotatek.authservice.constant.AuthConstant;
-import com.sotatek.authservice.exception.InvalidAccessTokenException;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.service.AuthenticationService;
 import com.sotatek.authservice.service.UserService;
+import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
 import java.io.IOException;
 import java.util.stream.Stream;
 import javax.servlet.FilterChain;

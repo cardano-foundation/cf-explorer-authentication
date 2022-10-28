@@ -1,12 +1,12 @@
 package com.sotatek.authservice.service.impl;
 
-import com.sotatek.authservice.exception.TokenRefreshException;
-import com.sotatek.authservice.exception.enums.CommonErrorCode;
 import com.sotatek.authservice.model.entity.RefreshTokenEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.repository.RefreshTokenRepository;
 import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.RefreshTokenService;
+import com.sotatek.cardanocommonapi.exceptions.TokenRefreshException;
+import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;

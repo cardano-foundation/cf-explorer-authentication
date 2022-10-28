@@ -1,10 +1,10 @@
 package com.sotatek.authservice.provider;
 
 import com.sotatek.authservice.config.RsaConfig;
-import com.sotatek.authservice.exception.BusinessException;
-import com.sotatek.authservice.exception.enums.CommonErrorCode;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;

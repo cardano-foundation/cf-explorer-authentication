@@ -1,7 +1,7 @@
 package com.sotatek.authservice.controller.advice;
 
 
-import com.sotatek.authservice.exception.base.GlobalExceptionHandlerBase;
+import com.sotatek.cardanocommonapi.exceptions.base.GlobalExceptionHandlerBase;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
