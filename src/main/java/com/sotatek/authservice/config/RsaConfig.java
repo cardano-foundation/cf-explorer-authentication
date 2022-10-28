@@ -23,7 +23,7 @@ public class RsaConfig {
   private RsaProvider rsaProvider;
 
   @PostConstruct
-  public void createRsaKey() throws Exception {
+  public void createRsaKey() {
     java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     rsaKey = rsaProvider.getPrivateKey(rsaKeyFile);
   }
