@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
+    active: local
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
