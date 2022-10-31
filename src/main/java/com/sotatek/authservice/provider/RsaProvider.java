@@ -1,8 +1,5 @@
 package com.sotatek.authservice.provider;
 
-import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -15,33 +12,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class RsaProvider {
 
-  public PrivateKey getPrivateKey(String filename) {
+  public PrivateKey getPrivateKey(String filename) throws Exception {
     byte[] bytes = readFile(filename);
     return getPrivateKey(bytes);
   }
 
-  public PrivateKey getPrivateKey(byte[] bytes) {
-    bytes = Base64.getDecoder().decode(bytes);
-    PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
-    try {
-      KeyFactory factory = KeyFactory.getInstance("RSA");
-      return factory.generatePrivate(spec);
-    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build();
-    }
+  public String getPrivateKeyString(String filename) throws Exception {
+    byte[] bytes = readFile(filename);
+    return new String(bytes);
   }
 
-  private byte[] readFile(String filename) {
-    try {
-      InputStream resourceAsStream = this.getClass().getResourceAsStream(filename);
-      assert resourceAsStream != null;
-      return resourceAsStream.readAllBytes();
-    } catch (IOException e) {
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build();
-    }
+  public PrivateKey getPrivateKey(byte[] bytes)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    bytes = Base64.getDecoder().decode(bytes);
+    PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
+    KeyFactory factory = KeyFactory.getInstance("RSA");
+    return factory.generatePrivate(spec);
+  }
+
+  private byte[] readFile(String filename) throws Exception {
+    InputStream resourceAsStream = this.getClass().getResourceAsStream(filename);
+    assert resourceAsStream != null;
+    return resourceAsStream.readAllBytes();
   }
 }

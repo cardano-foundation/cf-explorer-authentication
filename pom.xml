@@ -15,16 +15,6 @@
 	<description>Auth Service for Spring Boot</description>
 	<properties>
 		<java.version>11</java.version>
-		<sonar.language>java</sonar.language>
-		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.jacoco.reportsPaths>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportsPaths>
-		<sonar.tests>src/test/java</sonar.tests>
-		<sonar.projectKey>sonar-test</sonar.projectKey>
-		<sonar.host.url>http://172.16.1.230:9111</sonar.host.url>
-<!--		<sonar.login>phuc.nguyen5@sotatek.com</sonar.login>-->
-<!--		<sonar.password>12345678a@</sonar.password>-->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -161,11 +151,6 @@
 			<artifactId>cardano-common-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>0.8.6</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -181,26 +166,6 @@
 						</exclude>
 					</excludes>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.7</version>
-				<executions>
-					<execution>
-						<id>jacoco-initialize</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>jacoco-site</id>
-						<phase>package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
