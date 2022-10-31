@@ -15,12 +15,16 @@
 	<description>Auth Service for Spring Boot</description>
 	<properties>
 		<java.version>11</java.version>
-		<!-- JaCoCo Properties -->
-		<jacoco.version>0.8.6</jacoco.version>
+		<sonar.language>java</sonar.language>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
-		<sonar.language>java</sonar.language>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.jacoco.reportsPaths>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportsPaths>
+		<sonar.tests>src/test/java</sonar.tests>
+		<sonar.projectKey>sonar-test</sonar.projectKey>
+		<sonar.host.url>http://172.16.1.230:9111</sonar.host.url>
+<!--		<sonar.login>phuc.nguyen5@sotatek.com</sonar.login>-->
+<!--		<sonar.password>12345678a@</sonar.password>-->
 	</properties>
 	<dependencies>
 		<dependency>
