@@ -35,3 +35,7 @@ spring:
     sql-migration-separator: __
     sql-migration-suffixes: .sql
     baseline-on-migrate: true
+
+domain:
+  client: http://localhost:3000
+  server: http://localhost:8021

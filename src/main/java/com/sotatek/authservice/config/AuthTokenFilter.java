@@ -58,7 +58,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(@NotNull HttpServletRequest request) throws ServletException {
     return Stream.of(AuthConstant.AUTH_WHITELIST, AuthConstant.USER_WHITELIST,
-            AuthConstant.DOCUMENT_WHITELIST).flatMap(Stream::of)
+            AuthConstant.CSRF_TOKEN_PATH, AuthConstant.DOCUMENT_WHITELIST).flatMap(Stream::of)
         .anyMatch(x -> new AntPathMatcher().match(x, request.getServletPath()));
   }
 }
