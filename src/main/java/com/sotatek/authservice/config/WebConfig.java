@@ -24,7 +24,7 @@ public class WebConfig {
   private String domain;
 
   @Bean
-  public FilterRegistrationBean filterRegistrationBean() {
+  public FilterRegistrationBean<CorsFilter> filterRegistrationBean() {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowCredentials(true);
@@ -37,7 +37,7 @@ public class WebConfig {
             HttpMethod.OPTIONS.name(), HttpMethod.DELETE.name()));
     config.setMaxAge(MAX_AGE);
     source.registerCorsConfiguration("/**", config);
-    FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(
+    FilterRegistrationBean<CorsFilter> filterRegistrationBean = new FilterRegistrationBean<>(
         new CorsFilter(source));
     filterRegistrationBean.setOrder(CORS_FILTER_ORDER);
     return filterRegistrationBean;

@@ -5,6 +5,8 @@ import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.authservice.util.NonceUtils;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,14 +30,20 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     UserEntity user = userRepository.findByUsername(username).orElseThrow(
-        () -> new UsernameNotFoundException("User not found with username: " + username));
+        () -> BusinessException.builder()
+            .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode())
+            .errorMsg(CommonErrorCode.USER_IS_NOT_EXIST.getDesc() + " with username: " + username)
+            .build());
     return UserDetailsImpl.build(user);
   }
 
   @Override
   public String findNonceByAddress(String publicAddress) {
     UserEntity user = userRepository.findByPublicAddress(publicAddress).orElseThrow(
-        () -> new RuntimeException("User not found with public address: " + publicAddress));
+        () -> BusinessException.builder()
+            .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode()).errorMsg(
+                CommonErrorCode.USER_IS_NOT_EXIST.getDesc() + " with address: " + publicAddress)
+            .build());
     return user.getNonce();
   }
 

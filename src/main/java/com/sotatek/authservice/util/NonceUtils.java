@@ -1,13 +1,13 @@
 package com.sotatek.authservice.util;
 
-import java.util.Random;
+import java.security.SecureRandom;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NonceUtils {
 
-  private static final Random random = new Random();
+  private static final SecureRandom random = new SecureRandom();
 
   /*
    * @author: phuc.nguyen5
