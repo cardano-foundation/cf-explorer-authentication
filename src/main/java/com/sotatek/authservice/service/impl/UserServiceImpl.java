@@ -1,8 +1,10 @@
 package com.sotatek.authservice.service.impl;
 
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.repository.UserRepository;
+import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.authservice.util.NonceUtils;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
@@ -18,42 +20,39 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
 
-  @Value("${nonce.expirationMs}")
-  private Long nonceExpirationMs;
-
   @Autowired
   private UserRepository userRepository;
 
   @Autowired
-  private PasswordEncoder encoder;
+  private WalletRepository walletRepository;
+
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    UserEntity user = userRepository.findByUsername(username).orElseThrow(
-        () -> BusinessException.builder()
-            .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode())
-            .errorMsg(CommonErrorCode.USER_IS_NOT_EXIST.getDesc() + " with username: " + username)
-            .build());
-    return UserDetailsImpl.build(user);
+  public UserDetails loadUserByUsername(String stakeAddress) throws UsernameNotFoundException {
+    WalletEntity wallet = walletRepository.findByStakeAddress(stakeAddress).orElseThrow(() -> BusinessException.builder()
+        .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode())
+        .errorMsg(CommonErrorCode.USER_IS_NOT_EXIST.getDesc() + " with stakeAddress: " + stakeAddress)
+        .build());
+    UserEntity user = wallet.getUser();
+    return UserDetailsImpl.build(user, wallet);
   }
 
   @Override
-  public String findNonceByAddress(String publicAddress) {
-    UserEntity user = userRepository.findByPublicAddress(publicAddress).orElseThrow(
-        () -> BusinessException.builder()
-            .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode()).errorMsg(
-                CommonErrorCode.USER_IS_NOT_EXIST.getDesc() + " with address: " + publicAddress)
-            .build());
-    return user.getNonce();
+  public String findNonceByAddress(String stakeAddress) {
+    WalletEntity wallet = walletRepository.findByStakeAddress(stakeAddress).orElseThrow(() -> BusinessException.builder()
+        .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode())
+        .errorMsg(CommonErrorCode.USER_IS_NOT_EXIST.getDesc() + " with stakeAddress: " + stakeAddress)
+        .build());
+    return wallet.getNonce();
   }
 
-  @Override
-  public void updateNewNonce(UserEntity user) {
-    String nonce = NonceUtils.createNonce();
-    String nonceEncode = encoder.encode(nonce);
-    user.setNonce(nonce);
-    user.setNonceEncode(nonceEncode);
-    user.setExpiryDateNonce(Instant.now().plusMillis(nonceExpirationMs));
-    userRepository.save(user);
-  }
+//  @Override
+//  public void updateNewNonce(UserEntity user) {
+//    String nonce = NonceUtils.createNonce();
+//    String nonceEncode = encoder.encode(nonce);
+//    user.setNonce(nonce);
+//    user.setNonceEncode(nonceEncode);
+//    user.setExpiryDateNonce(Instant.now().plusMillis(nonceExpirationMs));
+//    userRepository.save(user);
+//  }
 }

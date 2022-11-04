@@ -1,11 +1,11 @@
 package com.sotatek.authservice.service.impl;
 
-import com.sotatek.authservice.model.entity.AuthenticationHistoryEntity;
+import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.enums.EUserAction;
-import com.sotatek.authservice.repository.AuthenticationHistoryRepository;
+import com.sotatek.authservice.repository.UserHistoryRepository;
 import com.sotatek.authservice.repository.UserRepository;
-import com.sotatek.authservice.service.AuthenticationHistoryService;
+import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
@@ -14,18 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthenticationHistoryServiceImpl implements AuthenticationHistoryService {
+public class UserHistoryServiceImpl implements UserHistoryService {
 
   @Autowired
-  private AuthenticationHistoryRepository authenticationHistoryRepository;
+  private UserHistoryRepository userHistoryRepository;
 
   @Autowired
   private UserRepository userRepository;
 
   @Override
-  public void saveAuthenticationHistory(EUserAction action, String ipAddress, Instant actionTime,
+  public void saveUserHistory(EUserAction action, String ipAddress, Instant actionTime,
       Boolean isSuccess, String username) {
-    AuthenticationHistoryEntity authenticationHistory = new AuthenticationHistoryEntity();
+    UserHistoryEntity authenticationHistory = new UserHistoryEntity();
     Optional<UserEntity> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
       throw BusinessException.builder()
@@ -37,6 +37,6 @@ public class AuthenticationHistoryServiceImpl implements AuthenticationHistorySe
     authenticationHistory.setIpAddress(ipAddress);
     authenticationHistory.setUserAction(action);
     authenticationHistory.setIsSuccess(true);
-    authenticationHistoryRepository.save(authenticationHistory);
+    userHistoryRepository.save(authenticationHistory);
   }
 }

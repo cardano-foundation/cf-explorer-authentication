@@ -1,12 +1,12 @@
 package com.sotatek.authservice.crud;
 
-import com.sotatek.authservice.model.entity.AuthenticationHistoryEntity;
+import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.entity.RefreshTokenEntity;
 import com.sotatek.authservice.model.entity.RoleEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.enums.ERole;
 import com.sotatek.authservice.model.enums.EUserAction;
-import com.sotatek.authservice.repository.AuthenticationHistoryRepository;
+import com.sotatek.authservice.repository.UserHistoryRepository;
 import com.sotatek.authservice.repository.RefreshTokenRepository;
 import com.sotatek.authservice.repository.RoleRepository;
 import com.sotatek.authservice.repository.UserRepository;
@@ -30,7 +30,7 @@ public class CRUDTest {
   private UserRepository userRepository;
 
   @Autowired
-  private AuthenticationHistoryRepository authenticationHistoryRepository;
+  private UserHistoryRepository userHistoryRepository;
 
   @Autowired
   private RefreshTokenRepository refreshTokenRepository;
@@ -88,12 +88,12 @@ public class CRUDTest {
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
-    AuthenticationHistoryEntity authenticationHistory = new AuthenticationHistoryEntity();
+    UserHistoryEntity authenticationHistory = new UserHistoryEntity();
     authenticationHistory.setUserAction(EUserAction.LOGIN);
     authenticationHistory.setActionTime(Instant.now());
     authenticationHistory.setIsSuccess(true);
     authenticationHistory.setUser(userInsert);
-    AuthenticationHistoryEntity authenticationHistoryTest = authenticationHistoryRepository.save(
+    UserHistoryEntity authenticationHistoryTest = userHistoryRepository.save(
         authenticationHistory);
     Assertions.assertNotNull(authenticationHistoryTest);
   }

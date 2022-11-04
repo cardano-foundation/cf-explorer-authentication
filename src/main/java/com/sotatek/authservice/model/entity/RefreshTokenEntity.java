@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "refresh_token", schema = "local1")
+@Table(name = "refresh_token")
 @Getter
 @Setter
 @Builder

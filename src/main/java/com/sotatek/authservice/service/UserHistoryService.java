@@ -3,7 +3,7 @@ package com.sotatek.authservice.service;
 import com.sotatek.authservice.model.enums.EUserAction;
 import java.time.Instant;
 
-public interface AuthenticationHistoryService {
+public interface UserHistoryService {
 
   /*
    * @author: phuc.nguyen5
@@ -11,5 +11,5 @@ public interface AuthenticationHistoryService {
    * description: save authentication history after login, logout
    * @update:
    */
-  void saveAuthenticationHistory(EUserAction action, String ipAddress, Instant actionTime, Boolean isSuccess, String username);
+  void saveUserHistory(EUserAction action, String ipAddress, Instant actionTime, Boolean isSuccess, String username);
 }

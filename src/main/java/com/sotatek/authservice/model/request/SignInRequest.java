@@ -7,7 +7,9 @@ import lombok.Data;
 @Data
 public class SignInRequest {
 
-  private String publicAddress;
+  private String ipAddress;
+
+  private String stakeAddress;
 
   @NotBlank
   @NotNull

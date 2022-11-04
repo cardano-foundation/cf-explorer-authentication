@@ -15,8 +15,8 @@ public class UserController {
   @Autowired
   private UserService userService;
 
-  @GetMapping("/get-nonce/{publicAddress}")
-  public ResponseEntity<String> findNonceByAddress(@PathVariable String publicAddress) {
-    return ResponseEntity.ok(userService.findNonceByAddress(publicAddress));
+  @GetMapping("/get-nonce/{stakeAddress}")
+  public ResponseEntity<String> findNonceByAddress(@PathVariable String stakeAddress) {
+    return ResponseEntity.ok(userService.findNonceByAddress(stakeAddress));
   }
 }

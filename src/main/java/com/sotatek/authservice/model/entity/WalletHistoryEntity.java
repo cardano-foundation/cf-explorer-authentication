@@ -1,6 +1,8 @@
 package com.sotatek.authservice.model.entity;
 
 import com.sotatek.authservice.model.enums.EUserAction;
+import com.sotatek.authservice.model.enums.EWalletAction;
+import java.io.Serializable;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,19 +20,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "authentication_history")
+@Table(name = "wallet_history")
 @Getter
 @Setter
 @NoArgsConstructor
-public class AuthenticationHistoryEntity {
+public class WalletHistoryEntity implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "user_action")
+  @Column(name = "wallet_action")
   @Enumerated(EnumType.STRING)
-  private EUserAction userAction;
+  private EWalletAction walletAction;
 
   @Column(name = "ip_address")
   private String ipAddress;
@@ -42,7 +44,6 @@ public class AuthenticationHistoryEntity {
   private Boolean isSuccess;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private UserEntity user;
-
+  @JoinColumn(name = "wallet_id")
+  private WalletEntity wallet;
 }

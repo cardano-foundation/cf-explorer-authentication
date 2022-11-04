@@ -19,5 +19,5 @@ public interface UserService extends UserDetailsService {
    * description: update new nonce value in user table
    * @update:
    */
-  void updateNewNonce(UserEntity user);
+//  void updateNewNonce(UserEntity user);
 }

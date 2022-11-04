@@ -12,6 +12,7 @@ import com.sotatek.authservice.constant.RedisConstant;
 import com.sotatek.authservice.model.entity.RefreshTokenEntity;
 import com.sotatek.authservice.model.entity.RoleEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.model.enums.ERole;
 import com.sotatek.authservice.model.enums.EUserAction;
@@ -19,16 +20,19 @@ import com.sotatek.authservice.model.request.RefreshTokenRequest;
 import com.sotatek.authservice.model.request.SignInRequest;
 import com.sotatek.authservice.model.request.SignOutRequest;
 import com.sotatek.authservice.model.request.SignUpRequest;
+import com.sotatek.authservice.model.request.WalletRequest;
 import com.sotatek.authservice.model.response.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.SignInResponse;
 import com.sotatek.authservice.model.response.SignUpResponse;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.repository.RoleRepository;
 import com.sotatek.authservice.repository.UserRepository;
-import com.sotatek.authservice.service.AuthenticationHistoryService;
+import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.AuthenticationService;
 import com.sotatek.authservice.service.RefreshTokenService;
+import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.authservice.service.UserService;
+import com.sotatek.authservice.service.WalletService;
 import com.sotatek.authservice.util.NonceUtils;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.TokenRefreshException;
@@ -72,6 +76,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private RoleRepository roleRepository;
 
   @Autowired
+  private WalletRepository walletRepository;
+
+  @Autowired
   private AuthenticationManager authenticationManager;
 
   @Autowired
@@ -81,10 +88,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private RefreshTokenService refreshTokenService;
 
   @Autowired
-  private AuthenticationHistoryService authenticationHistoryService;
+  private UserHistoryService userHistoryService;
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private WalletService walletService;
 
   @Autowired
   private PasswordEncoder encoder;
@@ -109,37 +119,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public ResponseEntity<SignInResponse> signIn(SignInRequest signInRequest) {
     try {
-      // Get the signature from the request
       String signature = signInRequest.getSignature();
-      //CBOR parsing starts here
+      String ipAddress = signInRequest.getIpAddress();
+      String stakeAddress = signInRequest.getStakeAddress();
       List<DataItem> itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));
       List<DataItem> topArray = ((Array) itemList.get(0)).getDataItems();
-      //Get the message from signature
       ByteString messageToSign = (ByteString) topArray.get(2);
       byte[] message = messageToSign.getBytes();
       String nonceCheck = new String(message);
-      //Get address from signature
-      ByteString protectedHeader = (ByteString) topArray.get(0);
-      List<DataItem> protectedHeaderMapDIList = CborDecoder.decode(protectedHeader.getBytes());
-      Map protectedHeaderMap = (Map) protectedHeaderMapDIList.get(0);
-      ByteString address = (ByteString) protectedHeaderMap.get(new UnicodeString("address"));
-      String addressStr = HexUtil.encodeHexString(address.getBytes());
+//      ByteString protectedHeader = (ByteString) topArray.get(0);
+//      List<DataItem> protectedHeaderMapDIList = CborDecoder.decode(protectedHeader.getBytes());
+//      Map protectedHeaderMap = (Map) protectedHeaderMapDIList.get(0);
+//      ByteString address = (ByteString) protectedHeaderMap.get(new UnicodeString("address"));
+//      String hexAddress = HexUtil.encodeHexString(address.getBytes());
       // Find the nonce value from the DB that was used to sign this message
-      Optional<UserEntity> userOpt = userRepository.findByPublicAddress(addressStr);
+      Optional<UserEntity> userOpt = userRepository.findByStakeAddress(stakeAddress);
       if (userOpt.isEmpty()) {
         throw BusinessException.builder()
             .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode())
             .errorMsg(CommonErrorCode.USER_IS_NOT_EXIST.getDesc()).build();
       }
       UserEntity user = userOpt.get();
-      if (user.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
-        userService.updateNewNonce(user);
+      Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddress(stakeAddress);
+      WalletEntity wallet = walletOpt.get();
+      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
+        walletService.updateNewNonce(wallet);
         throw BusinessException.builder()
             .errorCode(CommonErrorCode.NONCE_EXPIRED.getServiceErrorCode())
             .errorMsg(CommonErrorCode.NONCE_EXPIRED.getDesc()).build();
       }
       Authentication authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(user.getUsername(), nonceCheck));
+          new UsernamePasswordAuthenticationToken(stakeAddress, nonceCheck));
       SecurityContextHolder.getContext().setAuthentication(authentication);
       String jwt = jwtProvider.generateJwtToken(authentication);
       UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -147,12 +157,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
           .collect(Collectors.toList());
       RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userDetails.getId(),
           jwt);
-      authenticationHistoryService.saveAuthenticationHistory(EUserAction.LOGIN, null, Instant.now(),
-          true, userDetails.getUsername());
-      userService.updateNewNonce(user);
-      return ResponseEntity.ok(SignInResponse.builder().token(jwt).id(userDetails.getId())
-          .username(userDetails.getUsername()).email(userDetails.getEmail()).role(roles)
-          .tokenType("Bearer").refreshToken(refreshToken.getToken()).build());
+      userHistoryService.saveUserHistory(EUserAction.LOGIN, ipAddress, Instant.now(), true,
+          user.getUsername());
+      walletService.updateNewNonce(wallet);
+      return ResponseEntity.ok(
+          SignInResponse.builder().token(jwt).id(userDetails.getId()).username(user.getUsername())
+              .email(userDetails.getEmail()).role(roles).tokenType("Bearer")
+              .refreshToken(refreshToken.getToken()).build());
     } catch (AuthenticationException ex) {
       throw ValidSignatureException.builder()
           .errCode(CommonErrorCode.SIGNATURE_INVALID.getServiceErrorCode())
@@ -166,20 +177,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public ResponseEntity<SignUpResponse> signUp(SignUpRequest signUpRequest) {
-    if (Boolean.TRUE.equals(userRepository.existsByUsername(signUpRequest.getUsername()))) {
+    String username = signUpRequest.getUsername();
+    if (Boolean.TRUE.equals(userRepository.existsByUsername(username))) {
       return ResponseEntity.badRequest()
           .body(new SignUpResponse("Error: Username is already exist!"));
     }
+    WalletRequest walletRequest = signUpRequest.getWallet();
     if (Boolean.TRUE.equals(
-        userRepository.existsByPublicAddress(signUpRequest.getPublicAddress()))) {
+        walletRepository.existsByStakeAddress(walletRequest.getStakeAddress()))) {
       return ResponseEntity.badRequest()
-          .body(new SignUpResponse("Error: Address is already in exist!"));
+          .body(new SignUpResponse("Error: Wallet is already in exist!"));
     }
     String nonce = NonceUtils.createNonce();
     UserEntity user = UserEntity.builder().username(signUpRequest.getUsername())
-        .email(signUpRequest.getEmail()).nonce(nonce).nonceEncode(encoder.encode(nonce))
-        .publicAddress(signUpRequest.getPublicAddress())
-        .expiryDateNonce(Instant.now().plusMillis(nonceExpirationMs)).build();
+        .email(signUpRequest.getEmail()).phone(signUpRequest.getPhone()).avatar(null).build();
     Set<Integer> setRoles = signUpRequest.getRoles();
     Set<RoleEntity> roles = new HashSet<>();
     if (setRoles == null || setRoles.isEmpty()) {
@@ -205,9 +216,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       });
     }
     user.setRoles(roles);
-    userRepository.save(user);
+    UserEntity userSave = userRepository.save(user);
+    WalletEntity wallet = WalletEntity.builder().stakeAddress(walletRequest.getStakeAddress())
+        .walletName(walletRequest.getWalletName()).balanceAtLogin(walletRequest.getBalanceAtLogin())
+        .networkId(walletRequest.getNetworkId()).networkType(walletRequest.getNetworkType())
+        .nonce(nonce).nonceEncode(encoder.encode(nonce))
+        .expiryDateNonce(Instant.now().plusMillis(nonceExpirationMs)).user(userSave).build();
+    walletRepository.save(wallet);
+    userHistoryService.saveUserHistory(EUserAction.CREATED, signUpRequest.getIpAddress(),
+        Instant.now(), true, user.getUsername());
     return ResponseEntity.ok(
-        SignUpResponse.builder().message(user.getUsername() + " registered successfully!").build());
+        SignUpResponse.builder().message(username + ": registered successfully!").build());
   }
 
   @Override
@@ -237,14 +256,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public ResponseEntity<String> signOut(SignOutRequest signOutRequest) {
     String accessToken = signOutRequest.getAccessToken();
     String username = signOutRequest.getUsername();
+    String ipAddress = signOutRequest.getIpAddress();
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(accessToken))) {
       throw BusinessException.builder()
           .errorCode(CommonErrorCode.INVALID_TOKEN.getServiceErrorCode())
           .errorMsg(CommonErrorCode.INVALID_TOKEN.getDesc()).build();
     }
     refreshTokenService.revokeRefreshToken(signOutRequest.getRefreshToken());
-    authenticationHistoryService.saveAuthenticationHistory(EUserAction.LOGOUT,
-        signOutRequest.getIpAddress(), Instant.now(), true, username);
+    userHistoryService.saveUserHistory(EUserAction.LOGOUT, ipAddress, Instant.now(), true,
+        username);
     blacklistJwt(accessToken, username);
     return ResponseEntity.ok("User successfully logout");
   }

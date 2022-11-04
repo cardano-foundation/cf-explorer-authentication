@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum EUserAction {
-  LOGIN("login"), LOGOUT("logout");
+  CREATED("created"), UPDATED("updated"), DELETED("deleted"), LOGIN("login"), LOGOUT("logout"); //Todo add action
 
   private final String action;
   private static final Map<String, EUserAction> userActionMap = Arrays.stream(values())
