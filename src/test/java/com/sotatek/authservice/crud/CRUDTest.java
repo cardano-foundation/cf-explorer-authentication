@@ -1,15 +1,20 @@
 package com.sotatek.authservice.crud;
 
-import com.sotatek.authservice.model.entity.AuthenticationHistoryEntity;
 import com.sotatek.authservice.model.entity.RefreshTokenEntity;
 import com.sotatek.authservice.model.entity.RoleEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.entity.UserHistoryEntity;
+import com.sotatek.authservice.model.entity.WalletEntity;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.enums.ERole;
 import com.sotatek.authservice.model.enums.EUserAction;
-import com.sotatek.authservice.repository.AuthenticationHistoryRepository;
+import com.sotatek.authservice.model.enums.EWalletName;
 import com.sotatek.authservice.repository.RefreshTokenRepository;
 import com.sotatek.authservice.repository.RoleRepository;
+import com.sotatek.authservice.repository.UserHistoryRepository;
 import com.sotatek.authservice.repository.UserRepository;
+import com.sotatek.authservice.repository.WalletRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 import org.junit.Test;
@@ -30,7 +35,7 @@ public class CRUDTest {
   private UserRepository userRepository;
 
   @Autowired
-  private AuthenticationHistoryRepository authenticationHistoryRepository;
+  private UserHistoryRepository userHistoryRepository;
 
   @Autowired
   private RefreshTokenRepository refreshTokenRepository;
@@ -38,22 +43,21 @@ public class CRUDTest {
   @Autowired
   private RoleRepository roleRepository;
 
+  @Autowired
+  private WalletRepository walletRepository;
+
   @Test
   public void whenInsertUser() {
-    UserEntity user = UserEntity.builder().username("test1").publicAddress("123456789QWERTY")
-        .email("test@gmail.com").nonce("8890825581941064700")
-        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).isDeleted(false).build();
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity userTest = userRepository.save(user);
     Assertions.assertNotNull(userTest);
   }
 
   @Test
   public void whenFindByUsername() {
-    UserEntity user = UserEntity.builder().username("test1").publicAddress("123456789QWERTY")
-        .email("test@gmail.com").nonce("8890825581941064700")
-        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).isDeleted(false).build();
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
     userRepository.save(user);
     Optional<UserEntity> userOpt = userRepository.findByUsername("test1");
     Assertions.assertTrue(userOpt.isPresent());
@@ -61,68 +65,92 @@ public class CRUDTest {
 
   @Test
   public void whenExistsByUsername() {
-    UserEntity user = UserEntity.builder().username("test1").publicAddress("123456789QWERTY")
-        .email("test@gmail.com").nonce("8890825581941064700")
-        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).isDeleted(false).build();
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
     userRepository.save(user);
     Boolean isExist = userRepository.existsByUsername("test1");
     Assertions.assertTrue(isExist);
   }
 
   @Test
-  public void whenExistsByPublicAddress() {
-    UserEntity user = UserEntity.builder().username("test1").publicAddress("123456789QWERTY")
-        .email("test@gmail.com").nonce("8890825581941064700")
+  public void whenInsertWallet() {
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
+    UserEntity user1 = userRepository.save(user);
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.Nami)
+        .stakeAddress("123456789QWERTY").nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).isDeleted(false).build();
-    userRepository.save(user);
-    Boolean isExist = userRepository.existsByPublicAddress("123456789QWERTY");
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .balanceAtLogin(BigDecimal.ONE).user(user1).build();
+    WalletEntity walletTest = walletRepository.save(wallet);
+    Assertions.assertNotNull(walletTest);
+  }
+
+  @Test
+  public void whenFindByStakeAddress() {
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
+    UserEntity user1 = userRepository.save(user);
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.Nami)
+        .stakeAddress("123456789QWERTY").nonce("8890825581941064700")
+        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .balanceAtLogin(BigDecimal.ONE).user(user1).build();
+    walletRepository.save(wallet);
+    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddress("123456789QWERTY");
+    Assertions.assertTrue(walletOpt.isPresent());
+  }
+
+  @Test
+  public void whenExistsByStakeAddress() {
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
+    UserEntity user1 = userRepository.save(user);
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.Nami)
+        .stakeAddress("123456789QWERTY").nonce("8890825581941064700")
+        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .balanceAtLogin(BigDecimal.ONE).user(user1).build();
+    walletRepository.save(wallet);
+    Boolean isExist = walletRepository.existsByStakeAddress("123456789QWERTY");
     Assertions.assertTrue(isExist);
   }
 
   @Test
-  public void whenInsertAuthenticationHistory() {
-    UserEntity user = UserEntity.builder().username("test1").publicAddress("123456789QWERTY")
-        .email("test@gmail.com").nonce("8890825581941064700")
-        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).isDeleted(false).build();
+  public void whenInsertUserHistory() {
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
-    AuthenticationHistoryEntity authenticationHistory = new AuthenticationHistoryEntity();
-    authenticationHistory.setUserAction(EUserAction.LOGIN);
-    authenticationHistory.setActionTime(Instant.now());
-    authenticationHistory.setIsSuccess(true);
-    authenticationHistory.setUser(userInsert);
-    AuthenticationHistoryEntity authenticationHistoryTest = authenticationHistoryRepository.save(
-        authenticationHistory);
-    Assertions.assertNotNull(authenticationHistoryTest);
+    UserHistoryEntity userHistory = new UserHistoryEntity();
+    userHistory.setUserAction(EUserAction.LOGIN);
+    userHistory.setActionTime(Instant.now());
+    userHistory.setIsSuccess(true);
+    userHistory.setUser(userInsert);
+    UserHistoryEntity userHistoryTest = userHistoryRepository.save(userHistory);
+    Assertions.assertNotNull(userHistoryTest);
   }
 
   @Test
   public void whenInsertRefreshToken() {
-    UserEntity user = UserEntity.builder().username("test1").publicAddress("123456789QWERTY")
-        .email("test@gmail.com").nonce("8890825581941064700")
-        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).isDeleted(false).build();
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().token("123qsf34fwf45fwdeaf5gsfc")
         .accessToken("sadqwdqvdcdft45yg45vrsfdsf4wccdc").user(userInsert).expiryDate(Instant.now())
-        .build();
+        .stakeAddress("123456789QWERTY").build();
     RefreshTokenEntity refreshTokenTest = refreshTokenRepository.save(refreshToken);
     Assertions.assertNotNull(refreshTokenTest);
   }
 
   @Test
   public void whenFindRefreshTokenByToken() {
-    UserEntity user = UserEntity.builder().username("test1").publicAddress("123456789QWERTY")
-        .email("test@gmail.com").nonce("8890825581941064700")
-        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).isDeleted(false).build();
+    UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
+        .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().token("123qsf34fwf45fwdeaf5gsfc")
         .accessToken("sadqwdqvdcdft45yg45vrsfdsf4wccdc").user(userInsert).expiryDate(Instant.now())
-        .build();
-    RefreshTokenEntity refreshTokenTest = refreshTokenRepository.save(refreshToken);
+        .stakeAddress("123456789QWERTY").build();
+    refreshTokenRepository.save(refreshToken);
     Optional<RefreshTokenEntity> refreshTokenOpt = refreshTokenRepository.findByToken(
         "123qsf34fwf45fwdeaf5gsfc");
     Assertions.assertTrue(refreshTokenOpt.isPresent());

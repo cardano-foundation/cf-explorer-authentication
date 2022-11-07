@@ -19,7 +19,7 @@ public interface RefreshTokenService {
    * description: create refresh token record
    * @update:
    */
-  RefreshTokenEntity createRefreshToken(Long userId, String jwt);
+  RefreshTokenEntity createRefreshToken(Long userId, String jwt, String stakeAddress);
 
   /*
    * @author: phuc.nguyen5

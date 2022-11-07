@@ -5,7 +5,9 @@ import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.service.AuthenticationService;
 import com.sotatek.authservice.service.UserService;
+import com.sotatek.authservice.service.WalletService;
 import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
+import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.io.IOException;
 import java.util.stream.Stream;
 import javax.servlet.FilterChain;
@@ -33,20 +35,25 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   @Autowired
   private UserService userService;
 
+  @Autowired
+  private WalletService walletService;
+
 
   @Override
   protected void doFilterInternal(@NotNull HttpServletRequest request,
       @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
       throws ServletException, IOException {
-    String jwt = jwtProvider.parseJwt(request);
-    jwtProvider.validateJwtToken(jwt);
-    if (authenticationService.isTokenBlacklisted(jwt)) {
-      throw new InvalidAccessTokenException(jwt);
+    String token = jwtProvider.parseJwt(request);
+    jwtProvider.validateJwtToken(token);
+    if (authenticationService.isTokenBlacklisted(token)) {
+      throw new InvalidAccessTokenException();
     }
 
-    String username = jwtProvider.getUserNameFromJwtToken(jwt);
-    if (username != null) {
-      UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(username);
+    String username = jwtProvider.getUserNameFromJwtToken(token);
+    String walletId = jwtProvider.getWalletIdFromJwtToken(token);
+    if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(walletId)) {
+      String stakeAddress = walletService.getStakeAddressByWalletId(Long.valueOf(walletId));
+      UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(stakeAddress);
       UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
           username, null, userDetails.getAuthorities());
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
