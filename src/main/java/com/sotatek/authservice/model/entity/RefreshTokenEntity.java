@@ -27,8 +27,11 @@ public class RefreshTokenEntity extends BaseEntity {
   @Column(name = "expiry_date", nullable = false)
   private Instant expiryDate;
 
-  @Column(name = "access_token")
+  @Column(name = "access_token", nullable = false)
   private String accessToken;
+
+  @Column(name = "stake_address", nullable = false)
+  private String stakeAddress;
 
   @OneToOne
   @JoinColumn(name = "user_id", referencedColumnName = "id")

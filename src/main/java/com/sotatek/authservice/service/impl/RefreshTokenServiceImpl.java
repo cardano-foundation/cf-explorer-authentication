@@ -32,11 +32,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public RefreshTokenEntity createRefreshToken(Long userId, String jwt) {
+  public RefreshTokenEntity createRefreshToken(Long userId, String jwt, String stakeAddress) {
     Optional<UserEntity> userOpt = userRepository.findById(userId);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(userOpt.orElse(null))
         .expiryDate(Instant.now().plusMillis(refreshExpirationMs))
-        .token(UUID.randomUUID().toString()).accessToken(jwt).build();
+        .token(UUID.randomUUID().toString()).accessToken(jwt).stakeAddress(stakeAddress).build();
     refreshToken = refreshTokenRepository.save(refreshToken);
     return refreshToken;
   }
@@ -45,7 +45,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   public RefreshTokenEntity verifyExpiration(RefreshTokenEntity token) {
     if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
       refreshTokenRepository.delete(token);
-      throw new TokenRefreshException(token.getToken(), CommonErrorCode.REFRESH_TOKEN_EXPIRED);
+      throw new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
     }
     return token;
   }

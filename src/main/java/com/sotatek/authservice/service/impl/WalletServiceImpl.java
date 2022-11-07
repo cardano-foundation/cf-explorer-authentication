@@ -4,6 +4,8 @@ import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.WalletService;
 import com.sotatek.authservice.util.NonceUtils;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,5 +32,12 @@ public class WalletServiceImpl implements WalletService {
     wallet.setNonceEncode(nonceEncode);
     wallet.setExpiryDateNonce(Instant.now().plusMillis(nonceExpirationMs));
     walletRepository.save(wallet);
+  }
+
+  @Override
+  public String getStakeAddressByWalletId(Long walletId) {
+    WalletEntity wallet = walletRepository.findById(walletId)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    return wallet.getStakeAddress();
   }
 }

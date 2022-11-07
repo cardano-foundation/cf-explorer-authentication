@@ -9,6 +9,8 @@ public class SignInRequest {
 
   private String ipAddress;
 
+  @NotBlank
+  @NotNull
   private String stakeAddress;
 
   @NotBlank

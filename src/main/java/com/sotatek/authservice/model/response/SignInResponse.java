@@ -12,7 +12,7 @@ public class SignInResponse {
 
   private String tokenType;
 
-  private Long id;
+  private Long walletId;
 
   private String username;
 

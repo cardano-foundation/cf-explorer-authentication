@@ -1,7 +1,6 @@
 package com.sotatek.authservice.provider;
 
 import com.sotatek.authservice.config.RsaConfig;
-import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
@@ -31,23 +30,27 @@ public class JwtProvider {
   private RsaConfig rsaConfig;
 
 
-  public String generateJwtToken(Authentication authentication) {
+  public String generateJwtToken(Authentication authentication, String username) {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-    return Jwts.builder().setId(String.valueOf(userPrincipal.getId()))
-        .setSubject(userPrincipal.getUsername()).setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + expirationMs))
+    return Jwts.builder().setSubject(username).setId(String.valueOf(userPrincipal.getId()))
+        .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getRsaKey(), SignatureAlgorithm.RS256).compact();
   }
 
-  public String generateTokenFromUsername(UserEntity user) {
-    return Jwts.builder().setSubject(user.getUsername()).setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + expirationMs))
+  public String generateTokenFromRefreshToken(String username, Long walletId) {
+    return Jwts.builder().setSubject(username).setId(String.valueOf(walletId))
+        .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getRsaKey(), SignatureAlgorithm.RS256).compact();
   }
 
   public String getUserNameFromJwtToken(String token) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(token)
         .getBody().getSubject();
+  }
+
+  public String getWalletIdFromJwtToken(String token) {
+    return Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(token)
+        .getBody().getId();
   }
 
   public String parseJwt(HttpServletRequest request) {
@@ -64,29 +67,19 @@ public class JwtProvider {
       Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(authToken);
     } catch (SignatureException e) {
       log.error("Invalid JWT signature: {}", e.getMessage());
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.TOKEN_INVALID_SIGNATURE.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.TOKEN_INVALID_SIGNATURE.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.TOKEN_INVALID_SIGNATURE);
     } catch (MalformedJwtException e) {
       log.error("Invalid JWT token: {}", e.getMessage());
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.INVALID_TOKEN.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.INVALID_TOKEN.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
     } catch (ExpiredJwtException e) {
       log.error("JWT token is expired: {}", e.getMessage());
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.TOKEN_EXPIRED.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.TOKEN_EXPIRED.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.TOKEN_EXPIRED);
     } catch (UnsupportedJwtException e) {
       log.error("JWT token is unsupported: {}", e.getMessage());
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.TOKEN_UNSUPPORTED.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.TOKEN_UNSUPPORTED.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.TOKEN_UNSUPPORTED);
     } catch (IllegalArgumentException e) {
       log.error("JWT claims string is empty: {}", e.getMessage());
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.TOKEN_IS_NOT_EMPTY.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.TOKEN_IS_NOT_EMPTY.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.TOKEN_IS_NOT_EMPTY);
     }
   }
 }

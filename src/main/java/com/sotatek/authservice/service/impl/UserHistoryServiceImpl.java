@@ -1,7 +1,7 @@
 package com.sotatek.authservice.service.impl;
 
-import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.repository.UserHistoryRepository;
 import com.sotatek.authservice.repository.UserRepository;
@@ -28,9 +28,7 @@ public class UserHistoryServiceImpl implements UserHistoryService {
     UserHistoryEntity authenticationHistory = new UserHistoryEntity();
     Optional<UserEntity> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.USER_IS_NOT_EXIST.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST);
     }
     authenticationHistory.setUser(userOpt.get());
     authenticationHistory.setActionTime(actionTime);

@@ -12,12 +12,4 @@ public interface UserService extends UserDetailsService {
    * @update:
    */
   String findNonceByAddress(String publicAddress);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 21/10/2022
-   * description: update new nonce value in user table
-   * @update:
-   */
-//  void updateNewNonce(UserEntity user);
 }

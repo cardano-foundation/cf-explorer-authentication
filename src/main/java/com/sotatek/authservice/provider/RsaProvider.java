@@ -27,9 +27,7 @@ public class RsaProvider {
       KeyFactory factory = KeyFactory.getInstance("RSA");
       return factory.generatePrivate(spec);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
     }
   }
 
@@ -39,9 +37,7 @@ public class RsaProvider {
       assert resourceAsStream != null;
       return resourceAsStream.readAllBytes();
     } catch (IOException e) {
-      throw BusinessException.builder()
-          .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
-          .errorMsg(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build();
+      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
     }
   }
 }

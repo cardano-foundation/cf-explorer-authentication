@@ -12,4 +12,12 @@ public interface WalletService {
    * @update:
    */
   void updateNewNonce(WalletEntity wallet);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 07/11/2022
+   * description: get stake address by wallet id
+   * @update:
+   */
+  String getStakeAddressByWalletId(Long walletId);
 }
