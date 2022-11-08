@@ -7,13 +7,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SignInRequest extends BaseRequest {
+public class TransfersWalletRequest extends BaseRequest {
 
-  @NotBlank
   @NotNull
-  private String stakeAddress;
+  @NotBlank
+  private String username;
 
-  @NotBlank
   @NotNull
-  private String signature;
+  private WalletRequest wallet;
+
+  @NotNull
+  @NotBlank
+  private String refreshToken;
 }

@@ -3,13 +3,14 @@ package com.sotatek.authservice.model.request;
 import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.format.annotation.NumberFormat;
 
-@Data
-public class SignUpRequest {
+@Getter
+@Setter
+public class SignUpRequest extends BaseRequest {
 
   @NotNull
   @NotBlank
@@ -26,7 +27,5 @@ public class SignUpRequest {
   @NotNull
   private WalletRequest wallet;
 
-  private String ipAddress;
-
-  private Set<Integer> roles;
+  private Set<Integer> iRoles;
 }

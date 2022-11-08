@@ -2,14 +2,12 @@ package com.sotatek.authservice.model.request;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class SignOutRequest {
-
-  @NotNull
-  @NotBlank
-  private String accessToken;
+@Getter
+@Setter
+public class SignOutRequest extends BaseRequest {
 
   @NotNull
   @NotBlank
@@ -18,7 +16,4 @@ public class SignOutRequest {
   @NotNull
   @NotBlank
   private String username;
-
-  private String ipAddress;
-
 }

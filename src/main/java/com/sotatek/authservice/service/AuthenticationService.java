@@ -4,9 +4,11 @@ import com.sotatek.authservice.model.request.RefreshTokenRequest;
 import com.sotatek.authservice.model.request.SignInRequest;
 import com.sotatek.authservice.model.request.SignOutRequest;
 import com.sotatek.authservice.model.request.SignUpRequest;
+import com.sotatek.authservice.model.request.TransfersWalletRequest;
 import com.sotatek.authservice.model.response.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.SignInResponse;
 import com.sotatek.authservice.model.response.SignUpResponse;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthenticationService {
@@ -49,13 +51,24 @@ public interface AuthenticationService {
    * description: process gen new access token by refresh token
    * @update:
    */
-  ResponseEntity<RefreshTokenResponse> refreshToken(RefreshTokenRequest refreshTokenRequest);
+  ResponseEntity<RefreshTokenResponse> refreshToken(RefreshTokenRequest refreshTokenRequest,
+      HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
    * @since: 24/10/2022
    * description: process logout account
+   * @update: 8/11/2022
+   */
+  ResponseEntity<String> signOut(SignOutRequest signOutRequest,
+      HttpServletRequest httpServletRequest);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 8/11/2022
+   * description: process transfers wallet in account
    * @update:
    */
-  ResponseEntity<String> signOut(SignOutRequest signOutRequest);
+  ResponseEntity<SignInResponse> transfersWallet(TransfersWalletRequest transfersWalletRequest,
+      HttpServletRequest httpServletRequest);
 }

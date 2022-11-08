@@ -35,7 +35,7 @@ public interface RefreshTokenService {
    * description: delete refresh token record by username
    * @update:
    */
-  void revokeRefreshToken(String refreshToken);
+  void revokeRefreshToken(String token);
 
   /*
    * @author: phuc.nguyen5

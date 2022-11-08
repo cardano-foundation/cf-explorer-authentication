@@ -4,10 +4,12 @@ import com.sotatek.authservice.model.request.RefreshTokenRequest;
 import com.sotatek.authservice.model.request.SignInRequest;
 import com.sotatek.authservice.model.request.SignOutRequest;
 import com.sotatek.authservice.model.request.SignUpRequest;
+import com.sotatek.authservice.model.request.TransfersWalletRequest;
 import com.sotatek.authservice.model.response.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.SignInResponse;
 import com.sotatek.authservice.model.response.SignUpResponse;
 import com.sotatek.authservice.service.AuthenticationService;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,12 +37,21 @@ public class AuthController {
 
   @PostMapping("/refresh-token")
   public ResponseEntity<RefreshTokenResponse> refreshToken(
-      @Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
-    return authenticationService.refreshToken(refreshTokenRequest);
+      @Valid @RequestBody RefreshTokenRequest refreshTokenRequest,
+      HttpServletRequest httpServletRequest) {
+    return authenticationService.refreshToken(refreshTokenRequest, httpServletRequest);
   }
 
   @PostMapping("/sign-out")
-  public ResponseEntity<String> signOut(@Valid @RequestBody SignOutRequest signOutRequest) {
-    return authenticationService.signOut(signOutRequest);
+  public ResponseEntity<String> signOut(@Valid @RequestBody SignOutRequest signOutRequest,
+      HttpServletRequest httpServletRequest) {
+    return authenticationService.signOut(signOutRequest, httpServletRequest);
+  }
+
+  @PostMapping("/transfers-wallet")
+  public ResponseEntity<SignInResponse> transfersWallet(
+      @Valid @RequestBody TransfersWalletRequest transfersWalletRequest,
+      HttpServletRequest httpServletRequest) {
+    return authenticationService.transfersWallet(transfersWalletRequest, httpServletRequest);
   }
 }

@@ -136,7 +136,7 @@ public class CRUDTest {
         .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().token("123qsf34fwf45fwdeaf5gsfc")
-        .accessToken("sadqwdqvdcdft45yg45vrsfdsf4wccdc").user(userInsert).expiryDate(Instant.now())
+        .user(userInsert).expiryDate(Instant.now())
         .stakeAddress("123456789QWERTY").build();
     RefreshTokenEntity refreshTokenTest = refreshTokenRepository.save(refreshToken);
     Assertions.assertNotNull(refreshTokenTest);
@@ -148,7 +148,7 @@ public class CRUDTest {
         .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().token("123qsf34fwf45fwdeaf5gsfc")
-        .accessToken("sadqwdqvdcdft45yg45vrsfdsf4wccdc").user(userInsert).expiryDate(Instant.now())
+        .user(userInsert).expiryDate(Instant.now())
         .stakeAddress("123456789QWERTY").build();
     refreshTokenRepository.save(refreshToken);
     Optional<RefreshTokenEntity> refreshTokenOpt = refreshTokenRepository.findByToken(

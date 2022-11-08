@@ -5,10 +5,12 @@ import com.sotatek.authservice.model.enums.EWalletName;
 import java.math.BigDecimal;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class WalletRequest {
+@Getter
+@Setter
+public class WalletRequest extends BaseRequest {
 
   @NotNull
   @NotBlank
