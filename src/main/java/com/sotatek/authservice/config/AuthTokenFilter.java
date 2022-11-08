@@ -49,13 +49,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       throw new InvalidAccessTokenException();
     }
 
-    String username = jwtProvider.getUserNameFromJwtToken(token);
     String walletId = jwtProvider.getWalletIdFromJwtToken(token);
-    if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(walletId)) {
+    if (Boolean.TRUE.equals(StringUtils.isNotBlank(walletId))) {
       String stakeAddress = walletService.getStakeAddressByWalletId(Long.valueOf(walletId));
       UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(stakeAddress);
       UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-          username, null, userDetails.getAuthorities());
+          stakeAddress, null, userDetails.getAuthorities());
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }

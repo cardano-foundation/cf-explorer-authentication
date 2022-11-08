@@ -37,7 +37,7 @@ public class JwtProvider {
         .signWith(rsaConfig.getRsaKey(), SignatureAlgorithm.RS256).compact();
   }
 
-  public String generateTokenFromRefreshToken(String username, Long walletId) {
+  public String generateJwtTokenFromUsername(String username, Long walletId) {
     return Jwts.builder().setSubject(username).setId(String.valueOf(walletId))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getRsaKey(), SignatureAlgorithm.RS256).compact();
@@ -62,9 +62,9 @@ public class JwtProvider {
     return null;
   }
 
-  public void validateJwtToken(String authToken) {
+  public void validateJwtToken(String token) {
     try {
-      Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(authToken);
+      Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(token);
     } catch (SignatureException e) {
       log.error("Invalid JWT signature: {}", e.getMessage());
       throw new BusinessException(CommonErrorCode.TOKEN_INVALID_SIGNATURE);

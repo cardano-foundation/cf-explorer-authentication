@@ -2,10 +2,12 @@ package com.sotatek.authservice.model.request;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class RefreshTokenRequest {
+@Getter
+@Setter
+public class RefreshTokenRequest extends BaseRequest {
 
   @NotBlank
   @NotNull

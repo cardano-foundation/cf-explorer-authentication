@@ -27,10 +27,10 @@ public class NonceUtils {
    * @update: 04/11/2022
    */
   public static String createNonce() {
-    Integer nonce1 = Math.abs(random.nextInt(Integer.MAX_VALUE));
-    Integer nonce2 = Math.abs(random.nextInt(Integer.MAX_VALUE));
-    Integer nonce3 = Math.abs(random.nextInt(Integer.MAX_VALUE));
-    return nonce1 + nonce2 + String.valueOf(nonce3);
+    int nonce1 = Math.abs(random.nextInt(Integer.MAX_VALUE));
+    int nonce2 = Math.abs(random.nextInt(Integer.MAX_VALUE));
+    int nonce3 = Math.abs(random.nextInt(Integer.MAX_VALUE));
+    return String.valueOf(nonce1) + nonce2 + nonce3;
   }
 
   /*

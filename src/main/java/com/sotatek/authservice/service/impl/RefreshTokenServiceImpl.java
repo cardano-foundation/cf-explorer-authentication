@@ -36,7 +36,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     Optional<UserEntity> userOpt = userRepository.findById(userId);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(userOpt.orElse(null))
         .expiryDate(Instant.now().plusMillis(refreshExpirationMs))
-        .token(UUID.randomUUID().toString()).accessToken(jwt).stakeAddress(stakeAddress).build();
+        .token(UUID.randomUUID().toString()).stakeAddress(stakeAddress).build();
     refreshToken = refreshTokenRepository.save(refreshToken);
     return refreshToken;
   }
@@ -51,11 +51,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public void revokeRefreshToken(String refreshToken) {
-    Optional<RefreshTokenEntity> refreshTokenOpt = refreshTokenRepository.findByToken(refreshToken);
-    if (refreshTokenOpt.isPresent()) {
-      refreshTokenRepository.delete(refreshTokenOpt.get());
-    }
+  public void revokeRefreshToken(String token) {
+    RefreshTokenEntity refreshToken = refreshTokenRepository.findByToken(token)
+        .orElseThrow(() -> new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_IS_NOT_EXIST));
+    refreshTokenRepository.delete(refreshToken);
   }
 
   @Override
