@@ -38,4 +38,4 @@ spring:
 
 domain:
   client: http://localhost:3000
-  server: http://localhost:8021
+  server: http://${HOST}:8021
