@@ -1,4 +1,4 @@
-package com.sotatek.authservice.model.request;
+package com.sotatek.authservice.model.request.base;
 
 import lombok.Getter;
 import lombok.Setter;

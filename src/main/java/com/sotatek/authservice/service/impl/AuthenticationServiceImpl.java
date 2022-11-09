@@ -10,12 +10,12 @@ import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.model.enums.ERole;
 import com.sotatek.authservice.model.enums.EUserAction;
-import com.sotatek.authservice.model.request.RefreshTokenRequest;
-import com.sotatek.authservice.model.request.SignInRequest;
-import com.sotatek.authservice.model.request.SignOutRequest;
-import com.sotatek.authservice.model.request.SignUpRequest;
-import com.sotatek.authservice.model.request.TransfersWalletRequest;
-import com.sotatek.authservice.model.request.WalletRequest;
+import com.sotatek.authservice.model.request.auth.RefreshTokenRequest;
+import com.sotatek.authservice.model.request.auth.SignInRequest;
+import com.sotatek.authservice.model.request.auth.SignOutRequest;
+import com.sotatek.authservice.model.request.auth.SignUpRequest;
+import com.sotatek.authservice.model.request.auth.TransfersWalletRequest;
+import com.sotatek.authservice.model.request.auth.WalletRequest;
 import com.sotatek.authservice.model.response.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.SignInResponse;
 import com.sotatek.authservice.model.response.SignUpResponse;
@@ -53,6 +53,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Log4j2
@@ -115,6 +116,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return redisTemplate.opsForValue().get(RedisConstant.JWT + token) != null;
   }
 
+  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public ResponseEntity<SignInResponse> signIn(SignInRequest signInRequest) {
     String signature = signInRequest.getSignature();
@@ -123,7 +125,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String nonceFromSign = NonceUtils.getNonceFromSignature(signature);
     UserEntity user = userRepository.findByStakeAddress(stakeAddress)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    WalletEntity wallet = walletRepository.findByStakeAddress(stakeAddress)
+    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(stakeAddress)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     if (wallet.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
       walletService.updateNewNonce(wallet);
@@ -153,15 +155,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             .tokenType(TOKEN_TYPE).refreshToken(refreshToken.getToken()).build());
   }
 
+  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public ResponseEntity<SignUpResponse> signUp(SignUpRequest signUpRequest) {
     String username = signUpRequest.getUsername();
-    if (Boolean.TRUE.equals(userRepository.existsByUsername(username))) {
+    if (Boolean.TRUE.equals(userRepository.existsByUsernameAndIsDeletedFalse(username))) {
       return ResponseEntity.badRequest().body(new SignUpResponse("Username is already exist"));
     }
     WalletRequest walletRequest = signUpRequest.getWallet();
     if (Boolean.TRUE.equals(
-        walletRepository.existsByStakeAddress(walletRequest.getStakeAddress()))) {
+        walletRepository.existsByStakeAddressAndIsDeletedFalse(walletRequest.getStakeAddress()))) {
       return ResponseEntity.badRequest().body(new SignUpResponse("Wallet is already in exist"));
     }
     String nonce = NonceUtils.createNonce();
@@ -179,6 +182,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return ResponseEntity.ok(new SignUpResponse("Success", nonce));
   }
 
+  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public ResponseEntity<RefreshTokenResponse> refreshToken(RefreshTokenRequest refreshTokenRequest,
       HttpServletRequest httpServletRequest) {
@@ -189,7 +193,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     final String username = refreshToken.getUser().getUsername();
     blacklistJwt(accessToken, username);
     refreshTokenService.verifyExpiration(refreshToken);
-    WalletEntity wallet = walletRepository.findByStakeAddress(refreshToken.getStakeAddress())
+    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(
+            refreshToken.getStakeAddress())
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     String token = jwtProvider.generateJwtTokenFromUsername(username, wallet.getId());
     return ResponseEntity.ok(
@@ -197,6 +202,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             .tokenType(TOKEN_TYPE).build());
   }
 
+  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public ResponseEntity<String> signOut(SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
@@ -210,6 +216,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return ResponseEntity.ok("Success");
   }
 
+  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public ResponseEntity<SignInResponse> transfersWallet(
       TransfersWalletRequest transfersWalletRequest, HttpServletRequest httpServletRequest) {
@@ -218,9 +225,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Long walletId = null;
     String username = transfersWalletRequest.getUsername();
     WalletRequest walletRequest = transfersWalletRequest.getWallet();
-    UserEntity user = userRepository.findByUsername(username)
+    UserEntity user = userRepository.findByUsernameAndIsDeletedFalse(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddress(
+    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddressAndIsDeletedFalse(
         walletRequest.getStakeAddress());
     if (walletOpt.isEmpty()) {
       String nonce = NonceUtils.createNonce();
