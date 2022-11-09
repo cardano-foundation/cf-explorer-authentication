@@ -1,5 +1,6 @@
-package com.sotatek.authservice.model.request;
+package com.sotatek.authservice.model.request.auth;
 
+import com.sotatek.authservice.model.request.base.BaseRequest;
 import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

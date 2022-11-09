@@ -1,7 +1,7 @@
 package com.sotatek.authservice.mapper;
 
 import com.sotatek.authservice.model.entity.UserEntity;
-import com.sotatek.authservice.model.request.SignUpRequest;
+import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

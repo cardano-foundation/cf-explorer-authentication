@@ -59,7 +59,7 @@ public class CRUDTest {
     UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
         .phone("0123456789").avatar(null).isDeleted(false).build();
     userRepository.save(user);
-    Optional<UserEntity> userOpt = userRepository.findByUsername("test1");
+    Optional<UserEntity> userOpt = userRepository.findByUsernameAndIsDeletedFalse("test1");
     Assertions.assertTrue(userOpt.isPresent());
   }
 
@@ -68,7 +68,7 @@ public class CRUDTest {
     UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
         .phone("0123456789").avatar(null).isDeleted(false).build();
     userRepository.save(user);
-    Boolean isExist = userRepository.existsByUsername("test1");
+    Boolean isExist = userRepository.existsByUsernameAndIsDeletedFalse("test1");
     Assertions.assertTrue(isExist);
   }
 
@@ -77,7 +77,7 @@ public class CRUDTest {
     UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
         .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
-    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.Nami)
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
         .stakeAddress("123456789QWERTY").nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
@@ -91,13 +91,13 @@ public class CRUDTest {
     UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
         .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
-    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.Nami)
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
         .stakeAddress("123456789QWERTY").nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
         .balanceAtLogin(BigDecimal.ONE).user(user1).build();
     walletRepository.save(wallet);
-    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddress("123456789QWERTY");
+    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddressAndIsDeletedFalse("123456789QWERTY");
     Assertions.assertTrue(walletOpt.isPresent());
   }
 
@@ -106,13 +106,13 @@ public class CRUDTest {
     UserEntity user = UserEntity.builder().username("test1").email("test@gmail.com")
         .phone("0123456789").avatar(null).isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
-    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.Nami)
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
         .stakeAddress("123456789QWERTY").nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
         .balanceAtLogin(BigDecimal.ONE).user(user1).build();
     walletRepository.save(wallet);
-    Boolean isExist = walletRepository.existsByStakeAddress("123456789QWERTY");
+    Boolean isExist = walletRepository.existsByStakeAddressAndIsDeletedFalse("123456789QWERTY");
     Assertions.assertTrue(isExist);
   }
 

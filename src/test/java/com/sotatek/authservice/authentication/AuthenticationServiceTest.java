@@ -3,10 +3,10 @@
 //import com.sotatek.authservice.model.entity.RefreshTokenEntity;
 //import com.sotatek.authservice.model.entity.UserEntity;
 //import com.sotatek.authservice.model.enums.ERole;
-//import com.sotatek.authservice.model.request.RefreshTokenRequest;
-//import com.sotatek.authservice.model.request.SignInRequest;
-//import com.sotatek.authservice.model.request.SignOutRequest;
-//import com.sotatek.authservice.model.request.SignUpRequest;
+//import com.sotatek.authservice.model.request.auth.RefreshTokenRequest;
+//import com.sotatek.authservice.model.request.auth.SignInRequest;
+//import com.sotatek.authservice.model.request.auth.SignOutRequest;
+//import com.sotatek.authservice.model.request.auth.SignUpRequest;
 //import com.sotatek.authservice.model.response.SignUpResponse;
 //import com.sotatek.authservice.repository.RoleRepository;
 //import com.sotatek.authservice.repository.UserRepository;
