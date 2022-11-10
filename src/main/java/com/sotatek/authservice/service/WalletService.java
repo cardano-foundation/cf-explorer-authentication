@@ -1,6 +1,5 @@
 package com.sotatek.authservice.service;
 
-import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.WalletEntity;
 
 public interface WalletService {

@@ -1,6 +1,5 @@
 package com.sotatek.authservice.model.entity;
 
-import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.enums.EWalletAction;
 import java.io.Serializable;
 import java.time.Instant;
