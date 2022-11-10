@@ -65,9 +65,9 @@ public class UserServiceImpl implements UserService {
     user.setPhone(editUserRequest.getPhone());
     user.setEmail(editUserRequest.getEmail());
     user.setAvatar(editUserRequest.getAvatar());
-    userRepository.save(user);
+    UserEntity userEdit = userRepository.save(user);
     userHistoryService.saveUserHistory(EUserAction.UPDATED, editUserRequest.getIpAddress(),
-        Instant.now(), true, username);
+        Instant.now(), true, userEdit);
     return true;
   }
 
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
       });
     }
     userHistoryService.saveUserHistory(EUserAction.DELETED, deleteUserRequest.getIpAddress(),
-        Instant.now(), true, username);
+        Instant.now(), true, user);
     return true;
   }
 }

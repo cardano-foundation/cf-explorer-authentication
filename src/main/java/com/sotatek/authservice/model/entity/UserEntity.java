@@ -26,7 +26,7 @@ import lombok.Setter;
 @Builder
 public class UserEntity extends BaseEntity {
 
-  @Column(name = "username", length = 64, unique = true, nullable = false)
+  @Column(name = "username", length = 64, nullable = false)
   @NotNull
   private String username;
 
