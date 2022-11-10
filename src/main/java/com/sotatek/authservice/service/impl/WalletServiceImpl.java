@@ -1,5 +1,7 @@
 package com.sotatek.authservice.service.impl;
 
+import com.sotatek.authservice.mapper.WalletMapper;
+import com.sotatek.authservice.model.dto.WalletDto;
 import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.WalletService;
@@ -24,6 +26,8 @@ public class WalletServiceImpl implements WalletService {
   @Autowired
   private PasswordEncoder encoder;
 
+  private WalletMapper walletMapper = WalletMapper.INSTANCE;
+
   @Override
   public void updateNewNonce(WalletEntity wallet) {
     String nonce = NonceUtils.createNonce();
@@ -39,5 +43,21 @@ public class WalletServiceImpl implements WalletService {
     WalletEntity wallet = walletRepository.findById(walletId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     return wallet.getStakeAddress();
+  }
+
+  @Override
+  public WalletDto getWalletInfo(String stakeAddress) {
+    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(stakeAddress)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    return walletMapper.entityToDto(wallet);
+  }
+
+  @Override
+  public Boolean deleteWallet(String stakeAddress) {
+    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(stakeAddress)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    wallet.setDeleted(true);
+    walletRepository.save(wallet);
+    return true;
   }
 }
