@@ -9,9 +9,6 @@ spring:
     port: 6379
     timeout: 3000ms
 
-server:
-  port: 8021
-
 logging:
   level:
     root: info
