@@ -15,5 +15,6 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
   List<BookMarkEntity> findAllBookMarkByUsername(@Param("username") String username);
 
   @Query("SELECT be FROM BookMarkEntity be INNER JOIN UserEntity ue ON be.user.id = ue.id WHERE ue.isDeleted = false AND ue.username = :username AND be.type = :type")
-  List<BookMarkEntity> findAllBookMarkByUsernameAndType(@Param("username") String username, @Param("type") EBookMarkType type);
+  List<BookMarkEntity> findAllBookMarkByUsernameAndType(@Param("username") String username,
+      @Param("type") EBookMarkType type);
 }
