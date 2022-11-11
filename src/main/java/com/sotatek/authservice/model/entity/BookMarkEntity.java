@@ -4,6 +4,8 @@ import com.sotatek.authservice.model.enums.EBookMarkType;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -35,10 +37,11 @@ public class BookMarkEntity extends BaseEntity {
   @Column(name = "access_time", nullable = false)
   private Instant accessTime;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "type", nullable = false)
   private EBookMarkType type;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")
   private UserEntity user;
 }
