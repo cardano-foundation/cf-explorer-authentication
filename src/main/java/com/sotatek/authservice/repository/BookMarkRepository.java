@@ -11,9 +11,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> {
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 10/11/2022
+   * description: find all bookmark by username with deleted is false
+   * @update:
+   */
   @Query("SELECT be FROM BookMarkEntity be INNER JOIN UserEntity ue ON be.user.id = ue.id WHERE ue.isDeleted = false AND ue.username = :username")
   List<BookMarkEntity> findAllBookMarkByUsername(@Param("username") String username);
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 10/11/2022
+   * description: find all bookmark by username and type with deleted is false
+   * @update:
+   */
   @Query("SELECT be FROM BookMarkEntity be INNER JOIN UserEntity ue ON be.user.id = ue.id WHERE ue.isDeleted = false AND ue.username = :username AND be.type = :type")
   List<BookMarkEntity> findAllBookMarkByUsernameAndType(@Param("username") String username,
       @Param("type") EBookMarkType type);

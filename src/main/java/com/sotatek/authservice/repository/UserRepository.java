@@ -10,12 +10,36 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 26/10/2022
+   * description: find user by username with deleted is false
+   * @update:
+   */
   Optional<UserEntity> findByUsernameAndIsDeletedFalse(String username);
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 26/10/2022
+   * description: find user by username
+   * @update:
+   */
   Optional<UserEntity> findByUsername(String username);
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 26/10/2022
+   * description: check exist user by username with deleted is false
+   * @update:
+   */
   Boolean existsByUsernameAndIsDeletedFalse(String username);
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 26/10/2022
+   * description: find user by stake address wallet with deleted is false
+   * @update:
+   */
   @Query("SELECT ue FROM UserEntity ue INNER JOIN WalletEntity we ON ue.id = we.user.id WHERE we.stakeAddress = :stakeAddress AND ue.isDeleted = false AND we.isDeleted = false")
   Optional<UserEntity> findByStakeAddress(@Param("stakeAddress") String stakeAddress);
 
