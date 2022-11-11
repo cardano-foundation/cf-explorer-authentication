@@ -39,8 +39,7 @@ public class BookMarkServiceImpl implements BookMarkService {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
     UserEntity user = userRepository.findByUsernameAndIsDeletedFalse(username)
-        .orElseThrow(() -> new BusinessException(
-            CommonErrorCode.USER_IS_NOT_EXIST));
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
     bookMark.setAccessTime(Instant.now());
     bookMark.setUser(user);
@@ -72,9 +71,7 @@ public class BookMarkServiceImpl implements BookMarkService {
     String username = jwtProvider.getUserNameFromJwtToken(token);
     List<BookMarkEntity> bookMarks = bookMarkRepository.findAllBookMarkByUsername(username);
     if (bookMarks != null) {
-      bookMarks.forEach(bookMark -> {
-        bookMarkRepository.delete(bookMark);
-      });
+      bookMarks.forEach(bookMark -> bookMarkRepository.delete(bookMark));
     }
     return true;
   }
@@ -86,9 +83,7 @@ public class BookMarkServiceImpl implements BookMarkService {
     List<BookMarkEntity> bookMarks = bookMarkRepository.findAllBookMarkByUsernameAndType(username,
         bookMarkType);
     if (bookMarks != null) {
-      bookMarks.forEach(bookMark -> {
-        bookMarkRepository.delete(bookMark);
-      });
+      bookMarks.forEach(bookMark -> bookMarkRepository.delete(bookMark));
     }
     return true;
   }
