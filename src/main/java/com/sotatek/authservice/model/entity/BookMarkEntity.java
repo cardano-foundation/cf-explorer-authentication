@@ -15,6 +15,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "bookmark")
@@ -44,4 +46,27 @@ public class BookMarkEntity extends BaseEntity {
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")
   private UserEntity user;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    BookMarkEntity bookMark = (BookMarkEntity) o;
+
+    return new EqualsBuilder().append(tittlePage, bookMark.tittlePage)
+        .append(urlPage, bookMark.urlPage).append(keyword, bookMark.keyword)
+        .append(accessTime, bookMark.accessTime).append(type, bookMark.type).isEquals();
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder(17, 37).append(tittlePage).append(urlPage).append(keyword)
+        .append(accessTime).append(type).toHashCode();
+  }
 }

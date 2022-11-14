@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "refresh_token")
@@ -34,4 +36,25 @@ public class RefreshTokenEntity extends BaseEntity {
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private UserEntity user;
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    RefreshTokenEntity that = (RefreshTokenEntity) o;
+
+    return new EqualsBuilder().append(token, that.token).append(expiryDate, that.expiryDate)
+        .append(stakeAddress, that.stakeAddress).isEquals();
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder(17, 37).append(token).append(expiryDate).append(stakeAddress)
+        .toHashCode();
+  }
 }

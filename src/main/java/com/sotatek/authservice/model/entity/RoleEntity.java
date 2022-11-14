@@ -10,6 +10,8 @@ import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "role")
@@ -26,4 +28,25 @@ public class RoleEntity extends BaseEntity {
   @Column(name = "description", length = 256)
   @NotNull
   private String description;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    RoleEntity role = (RoleEntity) o;
+
+    return new EqualsBuilder().append(name, role.name).append(description, role.description)
+        .isEquals();
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder(17, 37).append(name).append(description).toHashCode();
+  }
 }
