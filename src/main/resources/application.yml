@@ -15,11 +15,12 @@ logging:
 
 rsa:
   key:
-    rsa-key-file: /key/rsa_key
+    private-key-file: /key/private_key
+    public-key-file: /key/public_key
 
 jwt:
-  expirationMs: 300000 #5 minutes
-  refreshExpirationMs: 600000 #10 minutes
+  expirationMs: 3600000 #60 minutes
+  refreshExpirationMs: 7200000 #120 minutes
 
 nonce:
   expirationMs: 43200000 #12 hours

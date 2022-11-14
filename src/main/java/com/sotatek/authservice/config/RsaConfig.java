@@ -2,6 +2,7 @@ package com.sotatek.authservice.config;
 
 import com.sotatek.authservice.provider.RsaProvider;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,9 +16,13 @@ import org.springframework.stereotype.Component;
 @Setter
 public class RsaConfig {
 
-  private String rsaKeyFile;
+  private String privateKeyFile;
 
-  private PrivateKey rsaKey;
+  private String publicKeyFile;
+
+  private PrivateKey privateKey;
+
+  private PublicKey publicKey;
 
   @Autowired
   private RsaProvider rsaProvider;
@@ -25,6 +30,7 @@ public class RsaConfig {
   @PostConstruct
   public void createRsaKey() {
     java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    rsaKey = rsaProvider.getPrivateKey(rsaKeyFile);
+    privateKey = rsaProvider.getPrivateKey(privateKeyFile);
+    publicKey = rsaProvider.getPublicKey(publicKeyFile);
   }
 }

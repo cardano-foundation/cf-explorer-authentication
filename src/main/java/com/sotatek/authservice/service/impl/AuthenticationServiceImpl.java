@@ -30,6 +30,7 @@ import com.sotatek.authservice.service.UserService;
 import com.sotatek.authservice.service.WalletService;
 import com.sotatek.authservice.util.NonceUtils;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.sotatek.cardanocommonapi.exceptions.IgnoreRollbackException;
 import com.sotatek.cardanocommonapi.exceptions.TokenRefreshException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import com.sotatek.cardanocommonapi.utils.StringUtils;
@@ -116,7 +117,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return redisTemplate.opsForValue().get(RedisConstant.JWT + token) != null;
   }
 
-  @Transactional(rollbackFor = {RuntimeException.class})
+  @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
+      IgnoreRollbackException.class})
   @Override
   public ResponseEntity<SignInResponse> signIn(SignInRequest signInRequest) {
     log.info("login with cardano wallet is running...");
@@ -130,7 +132,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (wallet.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
       log.error("error: nonce value is expired");
       walletService.updateNewNonce(wallet);
-      throw new BusinessException(CommonErrorCode.NONCE_EXPIRED);
+      throw new IgnoreRollbackException(CommonErrorCode.NONCE_EXPIRED);
     }
     Authentication authentication = null;
     try {
@@ -147,7 +149,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .collect(Collectors.toList());
     RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getId(),
         accessToken, stakeAddress);
-    userHistoryService.saveUserHistory(EUserAction.LOGIN, signInRequest.getIpAddress(), Instant.now(), true, user);
+    userHistoryService.saveUserHistory(EUserAction.LOGIN, signInRequest.getIpAddress(),
+        Instant.now(), true, user);
     walletService.updateNewNonce(wallet);
     return ResponseEntity.ok(
         SignInResponse.builder().token(accessToken).walletId(userDetails.getId())
@@ -211,7 +214,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     refreshTokenService.revokeRefreshToken(signOutRequest.getRefreshToken());
     UserEntity user = userRepository.findByUsernameAndIsDeletedFalse(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    userHistoryService.saveUserHistory(EUserAction.LOGOUT, signOutRequest.getIpAddress(), Instant.now(), true, user);
+    userHistoryService.saveUserHistory(EUserAction.LOGOUT, signOutRequest.getIpAddress(),
+        Instant.now(), true, user);
     blacklistJwt(accessToken, username);
     return ResponseEntity.ok("Success");
   }

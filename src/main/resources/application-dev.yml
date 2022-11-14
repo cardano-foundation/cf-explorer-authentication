@@ -9,20 +9,18 @@ spring:
       max-wait: 10000
       max-active: 50
       test-on-borrow: true
-    jpa:
-      database-platform: org.hibernate.dialect.PostgreSQL10Dialect
-      openInView: false
-      show_sql: true
-      generate-ddl: false
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
       hibernate:
-        ddl-auto: create
-        naming-strategy: org.hibernate.cfg.EJB3NamingStrategy
-      properties:
-        hibernate.cache.use_second_level_cache: true
-        hibernate.cache.use_query_cache: false
-        hibernate.generate_statistics: false
-        hibernate.cache.region.factory_class: org.hibernate.cache.internal.NoCachingRegionFactory
-        hibernate.jdbc.lob.non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: authentication
+        show_sql: true
+        format_sql: true
 
   ## Flyway config
   flyway:

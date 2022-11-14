@@ -34,22 +34,24 @@ public class JwtProvider {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
     return Jwts.builder().setSubject(username).setId(String.valueOf(userPrincipal.getId()))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
-        .signWith(rsaConfig.getRsaKey(), SignatureAlgorithm.RS256).compact();
+        .signWith(rsaConfig.getPrivateKey(), SignatureAlgorithm.RS256).compact();
   }
 
   public String generateJwtTokenFromUsername(String username, Long walletId) {
     return Jwts.builder().setSubject(username).setId(String.valueOf(walletId))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
-        .signWith(rsaConfig.getRsaKey(), SignatureAlgorithm.RS256).compact();
+        .signWith(rsaConfig.getPrivateKey(), SignatureAlgorithm.RS256).compact();
   }
 
   public String getUserNameFromJwtToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(token)
+    return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKey()).build()
+        .parseClaimsJws(token)
         .getBody().getSubject();
   }
 
   public String getWalletIdFromJwtToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(token)
+    return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKey()).build()
+        .parseClaimsJws(token)
         .getBody().getId();
   }
 
@@ -64,7 +66,7 @@ public class JwtProvider {
 
   public void validateJwtToken(String token) {
     try {
-      Jwts.parserBuilder().setSigningKey(rsaConfig.getRsaKey()).build().parseClaimsJws(token);
+      Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKey()).build().parseClaimsJws(token);
     } catch (SignatureException e) {
       log.error("Invalid JWT signature: {}", e.getMessage());
       throw new BusinessException(CommonErrorCode.TOKEN_INVALID_SIGNATURE);
