@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,22 @@ public class RsaProvider {
     try {
       KeyFactory factory = KeyFactory.getInstance("RSA");
       return factory.generatePrivate(spec);
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
+    }
+  }
+
+  public PublicKey getPublicKey(String filename) {
+    byte[] bytes = readFile(filename);
+    return getPublicKey(bytes);
+  }
+
+  public PublicKey getPublicKey(byte[] bytes) {
+    bytes = Base64.getDecoder().decode(bytes);
+    X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
+    try {
+      KeyFactory factory = KeyFactory.getInstance("RSA");
+      return factory.generatePublic(spec);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
     }
