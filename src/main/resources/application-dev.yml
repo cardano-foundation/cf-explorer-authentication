@@ -24,7 +24,7 @@ spring:
 
   ## Flyway config
   flyway:
-    enabled: true
+    enabled: false
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
