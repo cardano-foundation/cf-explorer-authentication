@@ -8,11 +8,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "refresh_token")
@@ -21,6 +20,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class RefreshTokenEntity extends BaseEntity {
 
   @Column(name = "token", nullable = false, unique = true)
@@ -34,27 +34,6 @@ public class RefreshTokenEntity extends BaseEntity {
 
   @OneToOne
   @JoinColumn(name = "user_id", referencedColumnName = "id")
+  @EqualsAndHashCode.Exclude
   private UserEntity user;
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    RefreshTokenEntity that = (RefreshTokenEntity) o;
-
-    return new EqualsBuilder().append(token, that.token).append(expiryDate, that.expiryDate)
-        .append(stakeAddress, that.stakeAddress).isEquals();
-  }
-
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(token).append(expiryDate).append(stakeAddress)
-        .toHashCode();
-  }
 }

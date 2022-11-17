@@ -15,11 +15,10 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "wallet")
@@ -28,6 +27,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class WalletEntity extends BaseEntity {
 
   @Column(name = "stake_address", nullable = false)
@@ -62,32 +62,6 @@ public class WalletEntity extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")
+  @EqualsAndHashCode.Exclude
   private UserEntity user;
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    WalletEntity wallet = (WalletEntity) o;
-
-    return new EqualsBuilder().append(isDeleted, wallet.isDeleted)
-        .append(stakeAddress, wallet.stakeAddress).append(walletName, wallet.walletName)
-        .append(nonce, wallet.nonce).append(nonceEncode, wallet.nonceEncode)
-        .append(expiryDateNonce, wallet.expiryDateNonce)
-        .append(balanceAtLogin, wallet.balanceAtLogin).append(networkId, wallet.networkId)
-        .append(networkType, wallet.networkType).isEquals();
-  }
-
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(stakeAddress).append(walletName).append(nonce)
-        .append(nonceEncode).append(expiryDateNonce).append(balanceAtLogin).append(networkId)
-        .append(networkType).append(isDeleted).toHashCode();
-  }
 }

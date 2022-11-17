@@ -14,17 +14,17 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "user_history")
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserHistoryEntity implements Serializable {
 
   @Id
@@ -46,28 +46,6 @@ public class UserHistoryEntity implements Serializable {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
+  @EqualsAndHashCode.Exclude
   private UserEntity user;
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    UserHistoryEntity that = (UserHistoryEntity) o;
-
-    return new EqualsBuilder().append(id, that.id).append(userAction, that.userAction)
-        .append(ipAddress, that.ipAddress).append(actionTime, that.actionTime)
-        .append(isSuccess, that.isSuccess).isEquals();
-  }
-
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(id).append(userAction).append(ipAddress)
-        .append(actionTime).append(isSuccess).toHashCode();
-  }
 }
