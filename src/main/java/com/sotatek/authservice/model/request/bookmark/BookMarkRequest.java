@@ -8,8 +8,6 @@ import lombok.Setter;
 @Setter
 public class BookMarkRequest {
 
-  private String tittlePage;
-
   private String urlPage;
 
   private String keyword;

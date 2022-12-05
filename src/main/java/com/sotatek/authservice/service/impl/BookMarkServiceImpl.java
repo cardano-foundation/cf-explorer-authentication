@@ -1,5 +1,6 @@
 package com.sotatek.authservice.service.impl;
 
+import com.sotatek.authservice.constant.CommonConstant;
 import com.sotatek.authservice.mapper.BookMarkMapper;
 import com.sotatek.authservice.model.dto.BookMarkDto;
 import com.sotatek.authservice.model.entity.BookMarkEntity;
@@ -40,6 +41,14 @@ public class BookMarkServiceImpl implements BookMarkService {
     String username = jwtProvider.getUserNameFromJwtToken(token);
     UserEntity user = userRepository.findByUsernameAndIsDeletedFalse(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+    if (bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
+        bookMarkRequest.getType()) != null) {
+      throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);
+    }
+    Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId());
+    if (countCurrent > CommonConstant.LIMIT_BOOKMARK) {
+      throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);
+    }
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
     bookMark.setAccessTime(Instant.now());
     bookMark.setUser(user);

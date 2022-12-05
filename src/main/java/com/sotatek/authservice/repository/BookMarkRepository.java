@@ -29,4 +29,17 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
   @Query("SELECT be FROM BookMarkEntity be INNER JOIN UserEntity ue ON be.user.id = ue.id WHERE ue.isDeleted = false AND ue.username = :username AND be.type = :type")
   List<BookMarkEntity> findAllBookMarkByUsernameAndType(@Param("username") String username,
       @Param("type") EBookMarkType type);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 05/12/2022
+   * description: get count bookmark
+   * @update:
+   */
+  @Query(value = "SELECT count(bm.id) FROM BookMarkEntity bm WHERE bm.user.id = :userId")
+  Integer getCountBookMarkByUser(@Param("userId") Long userId);
+
+  @Query(value = "SELECT bm.id FROM BookMarkEntity bm WHERE bm.user.id = :userId AND bm.keyword = :keyword AND bm.type = :type")
+  Long checkExistBookMark(@Param("userId") Long userId, @Param("keyword") String keyword,
+      @Param("type") EBookMarkType type);
 }
