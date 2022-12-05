@@ -24,7 +24,7 @@ public class BookMarkController {
   @Autowired
   private BookMarkService bookMarkService;
 
-  @PostMapping("/create")
+  @PostMapping("/add")
   public ResponseEntity<Long> addBookMark(@Valid @RequestBody BookMarkRequest bookMarkRequest,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));
