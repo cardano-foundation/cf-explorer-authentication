@@ -1,10 +1,7 @@
 package com.sotatek.authservice.model.entity;
 
-import com.sotatek.authservice.model.enums.EBookMarkType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -27,9 +24,8 @@ public class PrivateNoteEntity extends BaseEntity {
   @Column(name = "note")
   private String note;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "type", nullable = false)
-  private EBookMarkType type;
+  @Column(name = "tx_hash", unique = true)
+  private String txHash;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")
