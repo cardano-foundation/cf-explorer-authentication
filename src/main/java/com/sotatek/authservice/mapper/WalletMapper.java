@@ -1,6 +1,5 @@
 package com.sotatek.authservice.mapper;
 
-import com.sotatek.authservice.model.dto.WalletDto;
 import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.model.request.auth.WalletRequest;
 import org.mapstruct.Mapper;
@@ -12,6 +11,4 @@ public interface WalletMapper {
   WalletMapper INSTANCE = Mappers.getMapper(WalletMapper.class);
 
   WalletEntity requestToEntity(WalletRequest request);
-
-  WalletDto entityToDto(WalletEntity wallet);
 }

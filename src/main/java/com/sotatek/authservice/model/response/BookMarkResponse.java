@@ -1,4 +1,4 @@
-package com.sotatek.authservice.model.dto;
+package com.sotatek.authservice.model.response;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
 import java.time.Instant;
@@ -7,17 +7,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BookMarkDto {
+public class BookMarkResponse {
 
   private Long id;
-
-  private String tittlePage;
 
   private String urlPage;
 
   private String keyword;
 
-  private Instant accessTime;
-
   private EBookMarkType type;
+
+  private Instant createdDate;
 }

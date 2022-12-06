@@ -12,8 +12,8 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -21,13 +21,13 @@ import org.springframework.util.StringUtils;
 
 @Component
 @Log4j2
+@RequiredArgsConstructor
 public class JwtProvider {
 
   @Value("${jwt.expirationMs}")
   private Long expirationMs;
 
-  @Autowired
-  private RsaConfig rsaConfig;
+  private final RsaConfig rsaConfig;
 
 
   public String generateJwtToken(Authentication authentication, String username) {

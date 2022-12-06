@@ -5,8 +5,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("rsa.key")
 @Getter
 @Setter
+@RequiredArgsConstructor
 public class RsaConfig {
 
   private String privateKeyFile;
@@ -24,8 +25,7 @@ public class RsaConfig {
 
   private PublicKey publicKey;
 
-  @Autowired
-  private RsaProvider rsaProvider;
+  private final RsaProvider rsaProvider;
 
   @PostConstruct
   public void createRsaKey() {

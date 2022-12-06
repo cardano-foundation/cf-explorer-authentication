@@ -1,32 +1,27 @@
 package com.sotatek.authservice.service.impl;
 
-import com.sotatek.authservice.mapper.WalletMapper;
-import com.sotatek.authservice.model.dto.WalletDto;
 import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.WalletService;
 import com.sotatek.authservice.util.NonceUtils;
-import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Log4j2
 public class WalletServiceImpl implements WalletService {
 
   @Value("${nonce.expirationMs}")
   private Long nonceExpirationMs;
 
-  @Autowired
-  private WalletRepository walletRepository;
+  private final WalletRepository walletRepository;
 
-  @Autowired
-  private PasswordEncoder encoder;
-
-  private WalletMapper walletMapper = WalletMapper.INSTANCE;
+  private final PasswordEncoder encoder;
 
   @Override
   public void updateNewNonce(WalletEntity wallet) {
@@ -36,28 +31,5 @@ public class WalletServiceImpl implements WalletService {
     wallet.setNonceEncode(nonceEncode);
     wallet.setExpiryDateNonce(Instant.now().plusMillis(nonceExpirationMs));
     walletRepository.save(wallet);
-  }
-
-  @Override
-  public String getStakeAddressByWalletId(Long walletId) {
-    WalletEntity wallet = walletRepository.findById(walletId)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    return wallet.getStakeAddress();
-  }
-
-  @Override
-  public WalletDto getWalletInfo(String stakeAddress) {
-    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(stakeAddress)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    return walletMapper.entityToDto(wallet);
-  }
-
-  @Override
-  public Boolean deleteWallet(String stakeAddress) {
-    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(stakeAddress)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    wallet.setDeleted(true);
-    walletRepository.save(wallet);
-    return true;
   }
 }

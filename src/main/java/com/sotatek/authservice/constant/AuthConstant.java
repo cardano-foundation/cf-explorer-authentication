@@ -16,7 +16,7 @@ public final class AuthConstant {
       BASE_AUTH_PATH + "sign-up", BASE_AUTH_PATH + "refresh-token", BASE_AUTH_PATH + "sign-out",
       BASE_AUTH_PATH + "transfers-wallet"};
 
-  public static final String[] USER_WHITELIST = {BASE_USER_PATH + "get-nonce/*"};
+  public static final String[] USER_WHITELIST = {BASE_USER_PATH + "get-nonce"};
 
   public static final String[] DOCUMENT_WHITELIST = {"/v3/api-docs/**", "/planning/",
       "/swagger-ui/**", "/swagger-ui.html"};

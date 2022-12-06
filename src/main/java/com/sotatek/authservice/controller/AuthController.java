@@ -11,7 +11,7 @@ import com.sotatek.authservice.model.response.SignUpResponse;
 import com.sotatek.authservice.service.AuthenticationService;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-  @Autowired
-  private AuthenticationService authenticationService;
+  private final AuthenticationService authenticationService;
 
   @PostMapping("/sign-in")
   public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {

@@ -1,7 +1,9 @@
 package com.sotatek.authservice.service;
 
-import com.sotatek.authservice.model.request.user.DeleteUserRequest;
 import com.sotatek.authservice.model.request.user.EditUserRequest;
+import com.sotatek.authservice.model.response.UserInfoResponse;
+import com.sotatek.authservice.model.response.UserResponse;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
@@ -12,7 +14,7 @@ public interface UserService extends UserDetailsService {
    * description: get nonce value by public address from user table
    * @update:
    */
-  String findNonceByAddress(String publicAddress);
+  String findNonceByAddress(String address);
 
   /*
    * @author: phuc.nguyen5
@@ -25,16 +27,16 @@ public interface UserService extends UserDetailsService {
   /*
    * @author: phuc.nguyen5
    * @since: 9/11/2022
-   * description: check exist username
-   * @update:
+   * description: edit user
+   * @update: 05/12/2022
    */
-  Boolean editUser(EditUserRequest editUserRequest, String username);
+  UserResponse editUser(EditUserRequest editUserRequest, HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
-   * @since: 9/11/2022
-   * description: delete user
+   * @since: 05/11/2022
+   * description: get user info
    * @update:
    */
-  Boolean deleteUser(DeleteUserRequest deleteUserRequest);
+  UserInfoResponse infoUser(HttpServletRequest httpServletRequest);
 }

@@ -33,19 +33,10 @@ public class UserEntity extends BaseEntity {
   private String username;
 
   @Column(name = "email", length = 64)
-  @NotNull
   private String email;
-
-  @Column(name = "phone", length = 20)
-  @NotNull
-  private String phone;
 
   @Column(name = "avatar")
   private String avatar;
-
-  @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  @NotNull
-  private boolean isDeleted;
 
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))

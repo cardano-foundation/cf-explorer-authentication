@@ -4,20 +4,18 @@ import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.repository.UserHistoryRepository;
-import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.UserHistoryService;
 import java.time.Instant;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Log4j2
 public class UserHistoryServiceImpl implements UserHistoryService {
 
-  @Autowired
-  private UserHistoryRepository userHistoryRepository;
-
-  @Autowired
-  private UserRepository userRepository;
+  private final UserHistoryRepository userHistoryRepository;
 
   @Override
   public void saveUserHistory(EUserAction action, String ipAddress, Instant actionTime,

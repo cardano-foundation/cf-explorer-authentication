@@ -21,10 +21,7 @@ public class WebSecurityConfig {
 
   private final AuthEntryPointJwt unauthorizedHandler;
 
-  @Bean
-  public AuthTokenFilter authenticationJwtTokenFilter() {
-    return new AuthTokenFilter();
-  }
+  private final AuthTokenFilter authTokenFilter;
 
   @Bean
   public ExceptionHandlerFilter exceptionHandlerFilter() {
@@ -45,7 +42,8 @@ public class WebSecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf().disable().cors()
-//        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        //Todo confirm set csrf
+        //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
         .and().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
         .authorizeRequests().antMatchers(AuthConstant.CLIENT_WHITELIST).permitAll()
@@ -53,7 +51,7 @@ public class WebSecurityConfig {
         .antMatchers(AuthConstant.USER_WHITELIST).permitAll()
         .antMatchers(AuthConstant.CSRF_TOKEN_PATH).permitAll()
         .antMatchers(AuthConstant.DOCUMENT_WHITELIST).permitAll().anyRequest().authenticated();
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+    http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(exceptionHandlerFilter(), AuthTokenFilter.class);
     return http.build();
   }

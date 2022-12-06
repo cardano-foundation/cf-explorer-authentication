@@ -35,5 +35,5 @@ spring:
     baseline-on-migrate: true
 
 domain:
-  client: http://localhost:3000
+  client: http://${HOST}:9296
   server: http://${HOST}:8021

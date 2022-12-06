@@ -2,8 +2,6 @@ package com.sotatek.authservice.model.request.auth;
 
 import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.enums.EWalletName;
-import com.sotatek.authservice.model.request.base.BaseRequest;
-import java.math.BigDecimal;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
@@ -11,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class WalletRequest extends BaseRequest {
+public class WalletRequest {
 
   @NotNull
   @NotBlank
@@ -20,8 +18,6 @@ public class WalletRequest extends BaseRequest {
   @NotNull
   @NotBlank
   private EWalletName walletName;
-
-  private BigDecimal balanceAtLogin;
 
   private String networkId;
 

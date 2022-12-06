@@ -1,7 +1,6 @@
 package com.sotatek.authservice.model.entity;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
-import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -32,9 +31,6 @@ public class BookMarkEntity extends BaseEntity {
 
   @Column(name = "keyword")
   private String keyword;
-
-  @Column(name = "access_time", nullable = false)
-  private Instant accessTime;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "type", nullable = false)

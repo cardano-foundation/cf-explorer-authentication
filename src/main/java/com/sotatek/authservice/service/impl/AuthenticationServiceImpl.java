@@ -1,6 +1,6 @@
 package com.sotatek.authservice.service.impl;
 
-import com.sotatek.authservice.constant.RedisConstant;
+import com.sotatek.authservice.constant.CommonConstant;
 import com.sotatek.authservice.mapper.UserMapper;
 import com.sotatek.authservice.mapper.WalletMapper;
 import com.sotatek.authservice.model.entity.RefreshTokenEntity;
@@ -20,20 +20,19 @@ import com.sotatek.authservice.model.response.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.SignInResponse;
 import com.sotatek.authservice.model.response.SignUpResponse;
 import com.sotatek.authservice.provider.JwtProvider;
+import com.sotatek.authservice.provider.RedisProvider;
 import com.sotatek.authservice.repository.RoleRepository;
 import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.AuthenticationService;
 import com.sotatek.authservice.service.RefreshTokenService;
 import com.sotatek.authservice.service.UserHistoryService;
-import com.sotatek.authservice.service.UserService;
 import com.sotatek.authservice.service.WalletService;
 import com.sotatek.authservice.util.NonceUtils;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.IgnoreRollbackException;
 import com.sotatek.cardanocommonapi.exceptions.TokenRefreshException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
-import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
@@ -41,10 +40,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,65 +55,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Log4j2
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Value("${nonce.expirationMs}")
   private Long nonceExpirationMs;
 
-  @Autowired
-  private RedisTemplate<String, Object> redisTemplate;
+  private final UserRepository userRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  private final RoleRepository roleRepository;
 
-  @Autowired
-  private RoleRepository roleRepository;
+  private final WalletRepository walletRepository;
 
-  @Autowired
-  private WalletRepository walletRepository;
+  private final AuthenticationManager authenticationManager;
 
-  @Autowired
-  private AuthenticationManager authenticationManager;
+  private final JwtProvider jwtProvider;
 
-  @Autowired
-  private JwtProvider jwtProvider;
+  private final RefreshTokenService refreshTokenService;
 
-  @Autowired
-  private RefreshTokenService refreshTokenService;
+  private final UserHistoryService userHistoryService;
 
-  @Autowired
-  private UserHistoryService userHistoryService;
+  private final WalletService walletService;
 
-  @Autowired
-  private WalletService walletService;
+  private final PasswordEncoder encoder;
 
-  @Autowired
-  private UserService userService;
+  private final RedisProvider redisProvider;
 
-  @Autowired
-  private PasswordEncoder encoder;
+  private static final UserMapper userMapper = UserMapper.INSTANCE;
 
-  private UserMapper userMapper = UserMapper.INSTANCE;
-
-  private WalletMapper walletMapper = WalletMapper.INSTANCE;
-
-  private static final String TOKEN_TYPE = "Bearer";
-
-  @Override
-  public void blacklistJwt(String token, String username) {
-    if (!isTokenBlacklisted(token)) {
-      redisTemplate.opsForValue().set(RedisConstant.JWT + token, username);
-    }
-  }
-
-  @Override
-  public boolean isTokenBlacklisted(String token) {
-    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {
-      throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
-    }
-    return redisTemplate.opsForValue().get(RedisConstant.JWT + token) != null;
-  }
+  private static final WalletMapper walletMapper = WalletMapper.INSTANCE;
 
   @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
       IgnoreRollbackException.class})
@@ -126,9 +95,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String stakeAddress = signInRequest.getStakeAddress();
     String nonceFromSign = NonceUtils.getNonceFromSignature(signature);
     UserEntity user = userRepository.findByStakeAddress(stakeAddress)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(stakeAddress)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+    WalletEntity wallet = walletRepository.findByStakeAddress(stakeAddress)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.WALLET_IS_NOT_EXIST));
     if (wallet.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
       log.error("error: nonce value is expired");
       walletService.updateNewNonce(wallet);
@@ -155,24 +124,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return ResponseEntity.ok(
         SignInResponse.builder().token(accessToken).walletId(userDetails.getId())
             .username(user.getUsername()).email(userDetails.getEmail()).role(roles)
-            .tokenType(TOKEN_TYPE).refreshToken(refreshToken.getToken()).build());
+            .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build());
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public ResponseEntity<SignUpResponse> signUp(SignUpRequest signUpRequest) {
     String username = signUpRequest.getUsername();
-    if (Boolean.TRUE.equals(userRepository.existsByUsernameAndIsDeletedFalse(username))) {
-      return ResponseEntity.badRequest().body(new SignUpResponse("Username is already exist"));
+    if (Boolean.TRUE.equals(userRepository.existsByUsername(username))) {
+      throw new BusinessException(CommonErrorCode.USERNAME_IS_ALREADY_EXIST);
     }
     WalletRequest walletRequest = signUpRequest.getWallet();
     if (Boolean.TRUE.equals(
-        walletRepository.existsByStakeAddressAndIsDeletedFalse(walletRequest.getStakeAddress()))) {
-      return ResponseEntity.badRequest().body(new SignUpResponse("Wallet is already in exist"));
+        walletRepository.existsByStakeAddress(walletRequest.getStakeAddress()))) {
+      throw new BusinessException(CommonErrorCode.WALLET_IS_ALREADY_EXIST);
     }
     String nonce = NonceUtils.createNonce();
     UserEntity user = userMapper.requestToEntity(signUpRequest);
-    user.setRoles(addRoleForUser(signUpRequest.getIRoles()));
+    user.setRoles(addRoleForUser(ERole.ROLE_USER));
     UserEntity userSave = userRepository.save(user);
     WalletEntity wallet = walletMapper.requestToEntity(walletRequest);
     wallet.setNonce(nonce);
@@ -182,7 +151,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     walletRepository.save(wallet);
     userHistoryService.saveUserHistory(EUserAction.CREATED, signUpRequest.getIpAddress(),
         Instant.now(), true, userSave);
-    return ResponseEntity.ok(new SignUpResponse("Success", nonce));
+    return ResponseEntity.ok(new SignUpResponse(CommonConstant.RESPONSE_SUCCESS, nonce));
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
@@ -194,15 +163,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .orElseThrow(() -> new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_IS_NOT_EXIST));
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
     final String username = refreshToken.getUser().getUsername();
-    blacklistJwt(accessToken, username);
+    redisProvider.blacklistJwt(accessToken, username);
     refreshTokenService.verifyExpiration(refreshToken);
-    WalletEntity wallet = walletRepository.findByStakeAddressAndIsDeletedFalse(
-            refreshToken.getStakeAddress())
+    WalletEntity wallet = walletRepository.findByStakeAddress(refreshToken.getStakeAddress())
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     String token = jwtProvider.generateJwtTokenFromUsername(username, wallet.getId());
     return ResponseEntity.ok(
         RefreshTokenResponse.builder().accessToken(token).refreshToken(tokenOfRefreshToken)
-            .tokenType(TOKEN_TYPE).build());
+            .tokenType(CommonConstant.TOKEN_TYPE).build());
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
@@ -212,12 +180,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String username = signOutRequest.getUsername();
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
     refreshTokenService.revokeRefreshToken(signOutRequest.getRefreshToken());
-    UserEntity user = userRepository.findByUsernameAndIsDeletedFalse(username)
+    UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     userHistoryService.saveUserHistory(EUserAction.LOGOUT, signOutRequest.getIpAddress(),
         Instant.now(), true, user);
-    blacklistJwt(accessToken, username);
-    return ResponseEntity.ok("Success");
+    redisProvider.blacklistJwt(accessToken, username);
+    return ResponseEntity.ok(CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
@@ -229,9 +197,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Long walletId = null;
     String username = transfersWalletRequest.getUsername();
     WalletRequest walletRequest = transfersWalletRequest.getWallet();
-    UserEntity user = userRepository.findByUsernameAndIsDeletedFalse(username)
+    UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddressAndIsDeletedFalse(
+    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddress(
         walletRequest.getStakeAddress());
     if (walletOpt.isEmpty()) {
       String nonce = NonceUtils.createNonce();
@@ -254,34 +222,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         accessToken, walletRequest.getStakeAddress());
     userHistoryService.saveUserHistory(EUserAction.TRANSFERS_WALLET,
         transfersWalletRequest.getIpAddress(), Instant.now(), true, user);
-    blacklistJwt(accessToken, username);
+    redisProvider.blacklistJwt(accessToken, username);
     return ResponseEntity.ok(SignInResponse.builder().token(newAccessToken).walletId(walletId)
-        .username(user.getUsername()).email(user.getEmail()).role(roles).tokenType(TOKEN_TYPE)
-        .refreshToken(refreshToken.getToken()).build());
+        .username(user.getUsername()).email(user.getEmail()).role(roles)
+        .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build());
   }
 
-  private Set<RoleEntity> addRoleForUser(Set<Integer> iRoles) {
+  private Set<RoleEntity> addRoleForUser(ERole eRole) {
     Set<RoleEntity> roles = new HashSet<>();
-    if (iRoles == null || iRoles.isEmpty()) {
-      RoleEntity rUser = roleRepository.findByName(ERole.ROLE_USER)
-          .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
-      roles.add(rUser);
-    } else {
-      iRoles.forEach(role -> {
-        switch (role) {
-          case 1:
-            RoleEntity rAdmin = roleRepository.findByName(ERole.ROLE_ADMIN).orElseThrow(
-                () -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
-            roles.add(rAdmin);
-            break;
-          case 2:
-            RoleEntity rUser = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(
-                () -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
-            roles.add(rUser);
-            break;
-          default:
-        }
-      });
+    switch (eRole) {
+      case ROLE_ADMIN:
+        RoleEntity rAdmin = roleRepository.findByName(ERole.ROLE_ADMIN)
+            .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
+        roles.add(rAdmin);
+        break;
+      case ROLE_USER:
+        RoleEntity rUser = roleRepository.findByName(ERole.ROLE_USER)
+            .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
+        roles.add(rUser);
+        break;
+      default:
     }
     return roles;
   }

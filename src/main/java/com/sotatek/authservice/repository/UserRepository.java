@@ -13,34 +13,26 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   /*
    * @author: phuc.nguyen5
    * @since: 26/10/2022
-   * description: find user by username with deleted is false
-   * @update:
-   */
-  Optional<UserEntity> findByUsernameAndIsDeletedFalse(String username);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 26/10/2022
    * description: find user by username
-   * @update:
+   * @update: 05/12/2022
    */
   Optional<UserEntity> findByUsername(String username);
 
   /*
    * @author: phuc.nguyen5
    * @since: 26/10/2022
-   * description: check exist user by username with deleted is false
-   * @update:
+   * description: check exist user by username
+   * @update: 05/12/2022
    */
-  Boolean existsByUsernameAndIsDeletedFalse(String username);
+  Boolean existsByUsername(String username);
 
   /*
    * @author: phuc.nguyen5
    * @since: 26/10/2022
-   * description: find user by stake address wallet with deleted is false
-   * @update:
+   * description: find user by stake address wallet
+   * @update: 05/12/2022
    */
-  @Query("SELECT ue FROM UserEntity ue INNER JOIN WalletEntity we ON ue.id = we.user.id WHERE we.stakeAddress = :stakeAddress AND ue.isDeleted = false AND we.isDeleted = false")
+  @Query("SELECT ue FROM UserEntity ue JOIN WalletEntity we ON ue.id = we.user.id WHERE we.stakeAddress = :stakeAddress")
   Optional<UserEntity> findByStakeAddress(@Param("stakeAddress") String stakeAddress);
 
 }

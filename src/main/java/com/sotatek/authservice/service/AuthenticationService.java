@@ -15,22 +15,6 @@ public interface AuthenticationService {
 
   /*
    * @author: phuc.nguyen5
-   * @since: 20/10/2022
-   * description: Add access token + username to redis after logout or refresh token
-   * @update:
-   */
-  void blacklistJwt(String token, String username);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 20/10/2022
-   * description: Check exist access token + username from redis
-   * @update:
-   */
-  boolean isTokenBlacklisted(String token);
-
-  /*
-   * @author: phuc.nguyen5
    * @since: 21/10/2022
    * description: process login with signature
    * @update:
@@ -41,7 +25,7 @@ public interface AuthenticationService {
    * @author: phuc.nguyen5
    * @since: 21/10/2022
    * description: process register account with ipaddress from ada wallet
-   * @update:
+   * @update: 6/12/2022
    */
   ResponseEntity<SignUpResponse> signUp(SignUpRequest signUpRequest);
 
