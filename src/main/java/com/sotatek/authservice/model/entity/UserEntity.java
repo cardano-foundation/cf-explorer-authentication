@@ -28,7 +28,7 @@ import lombok.Setter;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class UserEntity extends BaseEntity {
 
-  @Column(name = "username", length = 64, nullable = false)
+  @Column(name = "username", length = 64, nullable = false, unique = true)
   @NotNull
   private String username;
 

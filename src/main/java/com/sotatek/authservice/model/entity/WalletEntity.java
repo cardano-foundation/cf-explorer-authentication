@@ -28,7 +28,7 @@ import lombok.Setter;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class WalletEntity extends BaseEntity {
 
-  @Column(name = "stake_address", nullable = false)
+  @Column(name = "stake_address", nullable = false, unique = true)
   private String stakeAddress;
 
   @Enumerated(EnumType.STRING)
