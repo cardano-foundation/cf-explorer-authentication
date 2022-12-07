@@ -41,7 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -86,7 +85,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
       IgnoreRollbackException.class})
   @Override
-  public ResponseEntity<SignInResponse> signIn(SignInRequest signInRequest) {
+  public SignInResponse signIn(SignInRequest signInRequest) {
     log.info("login with cardano wallet is running...");
     String signature = signInRequest.getSignature();
     String stakeAddress = signInRequest.getStakeAddress();
@@ -116,15 +115,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     userHistoryService.saveUserHistory(EUserAction.LOGIN, signInRequest.getIpAddress(),
         Instant.now(), true, stakeAddress, user);
     walletService.updateNewNonce(wallet);
-    return ResponseEntity.ok(
-        SignInResponse.builder().token(accessToken).walletId(userDetails.getId())
-            .username(user.getUsername()).email(userDetails.getEmail())
-            .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build());
+    return SignInResponse.builder().token(accessToken).walletId(userDetails.getId())
+        .username(user.getUsername()).email(userDetails.getEmail())
+        .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build();
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
   @Override
-  public ResponseEntity<SignUpResponse> signUp(SignUpRequest signUpRequest) {
+  public SignUpResponse signUp(SignUpRequest signUpRequest) {
     String username = signUpRequest.getUsername();
     if (Boolean.TRUE.equals(userRepository.existsByUsername(username))) {
       throw new BusinessException(CommonErrorCode.USERNAME_IS_ALREADY_EXIST);
@@ -146,12 +144,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     walletRepository.save(wallet);
     userHistoryService.saveUserHistory(EUserAction.CREATED, null, Instant.now(), true,
         walletRequest.getStakeAddress(), userSave);
-    return ResponseEntity.ok(new SignUpResponse(CommonConstant.RESPONSE_SUCCESS, nonce));
+    return new SignUpResponse(CommonConstant.RESPONSE_SUCCESS, nonce);
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
   @Override
-  public ResponseEntity<RefreshTokenResponse> refreshToken(RefreshTokenRequest refreshTokenRequest,
+  public RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest,
       HttpServletRequest httpServletRequest) {
     String tokenOfRefreshToken = refreshTokenRequest.getRefreshToken();
     RefreshTokenEntity refreshToken = refreshTokenService.findByToken(tokenOfRefreshToken)
@@ -163,15 +161,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     WalletEntity wallet = walletRepository.findByStakeAddress(refreshToken.getStakeAddress())
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     String token = jwtProvider.generateJwtTokenFromUsername(username, wallet.getId());
-    return ResponseEntity.ok(
-        RefreshTokenResponse.builder().accessToken(token).refreshToken(tokenOfRefreshToken)
-            .tokenType(CommonConstant.TOKEN_TYPE).build());
+    return RefreshTokenResponse.builder().accessToken(token).refreshToken(tokenOfRefreshToken)
+        .tokenType(CommonConstant.TOKEN_TYPE).build();
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
   @Override
-  public ResponseEntity<String> signOut(SignOutRequest signOutRequest,
-      HttpServletRequest httpServletRequest) {
+  public String signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest) {
     String username = signOutRequest.getUsername();
     String refreshToken = signOutRequest.getRefreshToken();
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
@@ -180,13 +176,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     userHistoryService.saveUserHistory(EUserAction.LOGOUT, null, Instant.now(), true, null, user);
     redisProvider.blacklistJwt(accessToken, username);
-    return ResponseEntity.ok(CommonConstant.RESPONSE_SUCCESS);
+    return CommonConstant.RESPONSE_SUCCESS;
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
   @Override
-  public ResponseEntity<SignInResponse> transfersWallet(
-      TransfersWalletRequest transfersWalletRequest, HttpServletRequest httpServletRequest) {
+  public SignInResponse transfersWallet(TransfersWalletRequest transfersWalletRequest,
+      HttpServletRequest httpServletRequest) {
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
     jwtProvider.validateJwtToken(accessToken);
     Long walletId = null;
@@ -216,9 +212,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     userHistoryService.saveUserHistory(EUserAction.TRANSFERS_WALLET, null, Instant.now(), true,
         stakeAddress, user);
     redisProvider.blacklistJwt(accessToken, username);
-    return ResponseEntity.ok(SignInResponse.builder().token(newAccessToken).walletId(walletId)
+    return SignInResponse.builder().token(newAccessToken).walletId(walletId)
         .username(user.getUsername()).email(user.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
-        .refreshToken(refreshToken.getToken()).build());
+        .refreshToken(refreshToken.getToken()).build();
   }
 
   private Set<RoleEntity> addRoleForUser(ERole eRole) {

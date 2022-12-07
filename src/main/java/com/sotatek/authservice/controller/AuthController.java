@@ -29,31 +29,33 @@ public class AuthController {
 
   @PostMapping("/sign-in")
   public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
-    return authenticationService.signIn(signInRequest);
+    return ResponseEntity.ok(authenticationService.signIn(signInRequest));
   }
 
   @PostMapping("/sign-up")
   public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-    return authenticationService.signUp(signUpRequest);
+    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));
   }
 
   @PostMapping("/refresh-token")
   public ResponseEntity<RefreshTokenResponse> refreshToken(
       @Valid @RequestBody RefreshTokenRequest refreshTokenRequest,
       HttpServletRequest httpServletRequest) {
-    return authenticationService.refreshToken(refreshTokenRequest, httpServletRequest);
+    return ResponseEntity.ok(
+        authenticationService.refreshToken(refreshTokenRequest, httpServletRequest));
   }
 
   @PostMapping("/sign-out")
   public ResponseEntity<String> signOut(@Valid @RequestBody SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
-    return authenticationService.signOut(signOutRequest, httpServletRequest);
+    return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));
   }
 
   @PostMapping("/transfers-wallet")
   public ResponseEntity<SignInResponse> transfersWallet(
       @Valid @RequestBody TransfersWalletRequest transfersWalletRequest,
       HttpServletRequest httpServletRequest) {
-    return authenticationService.transfersWallet(transfersWalletRequest, httpServletRequest);
+    return ResponseEntity.ok(
+        authenticationService.transfersWallet(transfersWalletRequest, httpServletRequest));
   }
 }
