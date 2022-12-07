@@ -9,7 +9,6 @@ import com.sotatek.authservice.model.response.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.SignInResponse;
 import com.sotatek.authservice.model.response.SignUpResponse;
 import javax.servlet.http.HttpServletRequest;
-import org.springframework.http.ResponseEntity;
 
 public interface AuthenticationService {
 
@@ -19,7 +18,7 @@ public interface AuthenticationService {
    * description: process login with signature
    * @update:
    */
-  ResponseEntity<SignInResponse> signIn(SignInRequest signInRequest);
+  SignInResponse signIn(SignInRequest signInRequest);
 
   /*
    * @author: phuc.nguyen5
@@ -27,7 +26,7 @@ public interface AuthenticationService {
    * description: process register account with ipaddress from ada wallet
    * @update: 6/12/2022
    */
-  ResponseEntity<SignUpResponse> signUp(SignUpRequest signUpRequest);
+  SignUpResponse signUp(SignUpRequest signUpRequest);
 
   /*
    * @author: phuc.nguyen5
@@ -35,7 +34,7 @@ public interface AuthenticationService {
    * description: process gen new access token by refresh token
    * @update:
    */
-  ResponseEntity<RefreshTokenResponse> refreshToken(RefreshTokenRequest refreshTokenRequest,
+  RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest,
       HttpServletRequest httpServletRequest);
 
   /*
@@ -44,8 +43,7 @@ public interface AuthenticationService {
    * description: process logout account
    * @update: 8/11/2022
    */
-  ResponseEntity<String> signOut(SignOutRequest signOutRequest,
-      HttpServletRequest httpServletRequest);
+  String signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
@@ -53,6 +51,6 @@ public interface AuthenticationService {
    * description: process transfers wallet in account
    * @update:
    */
-  ResponseEntity<SignInResponse> transfersWallet(TransfersWalletRequest transfersWalletRequest,
+  SignInResponse transfersWallet(TransfersWalletRequest transfersWalletRequest,
       HttpServletRequest httpServletRequest);
 }
