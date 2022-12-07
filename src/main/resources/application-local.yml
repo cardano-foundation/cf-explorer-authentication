@@ -24,6 +24,10 @@ spring:
         default_schema: authentication
         show_sql: true
         format_sql: true
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 3000ms
 
   ## Flyway config
   flyway:
