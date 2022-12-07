@@ -37,6 +37,6 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
    */
   @Query(value = "SELECT pn FROM PrivateNoteEntity pn "
       + "JOIN UserEntity ue ON pn.user.id = ue.id "
-      + "WHERE ue.username = :username AND be.type = :type")
+      + "WHERE ue.username = :username")
   Page<PrivateNoteEntity> findAllNote(@Param("username") String username, Pageable pageable);
 }

@@ -41,6 +41,9 @@ public class UserHistoryEntity implements Serializable {
   @Column(name = "action_time")
   private Instant actionTime;
 
+  @Column(name = "description")
+  private String description;
+
   @Column(name = "is_success")
   private Boolean isSuccess;
 

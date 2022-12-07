@@ -4,6 +4,7 @@ import com.sotatek.authservice.model.request.note.PrivateNoteRequest;
 import com.sotatek.authservice.model.response.PrivateNoteResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.service.PrivateNoteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/note")
 @RequiredArgsConstructor
+@Tag(name = "Private Note Controller", description = "")
 public class NoteController {
 
   private final PrivateNoteService privateNoteService;

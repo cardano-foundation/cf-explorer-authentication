@@ -33,7 +33,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public RefreshTokenEntity createRefreshToken(Long userId, String jwt, String stakeAddress) {
+  public RefreshTokenEntity createRefreshToken(Long userId, String stakeAddress) {
     Optional<UserEntity> userOpt = userRepository.findById(userId);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(userOpt.orElse(null))
         .expiryDate(Instant.now().plusMillis(refreshExpirationMs))

@@ -1,12 +1,14 @@
 package com.sotatek.authservice.service.impl;
 
+import com.sotatek.authservice.constant.CommonConstant;
+import com.sotatek.authservice.mapper.UserHistoryMapper;
 import com.sotatek.authservice.mapper.UserMapper;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.model.enums.EUserAction;
-import com.sotatek.authservice.model.request.user.EditUserRequest;
+import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
 import com.sotatek.authservice.provider.JwtProvider;
@@ -19,7 +21,11 @@ import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
+import com.sotatek.cardanocommonapi.utils.StringUtils;
+import java.io.IOException;
 import java.time.Instant;
+import java.util.Base64;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +33,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +55,8 @@ public class UserServiceImpl implements UserService {
   private final UserHistoryRepository userHistoryRepository;
 
   private static final UserMapper userMapper = UserMapper.INSTANCE;
+
+  private static final UserHistoryMapper userHistoryMapper = UserHistoryMapper.INSTANCE;
 
   @Override
   public UserDetails loadUserByUsername(String stakeAddress) throws UsernameNotFoundException {
@@ -71,18 +80,28 @@ public class UserServiceImpl implements UserService {
 
   @Transactional(rollbackFor = {RuntimeException.class})
   @Override
-  public UserResponse editUser(EditUserRequest editUserRequest,
+  public UserResponse editUser(String email, MultipartFile avatar,
       HttpServletRequest httpServletRequest) {
     log.info("edit user is running...");
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
     UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    user.setEmail(editUserRequest.getEmail());
-    user.setAvatar(editUserRequest.getAvatar());
+    if (StringUtils.isNotBlank(email)) {
+      user.setEmail(email);
+    }
+    if (avatar != null) {
+      StringBuilder base64Image = new StringBuilder(CommonConstant.BASE64_PREFIX);
+      try {
+        base64Image.append(Base64.getEncoder().encodeToString(avatar.getBytes()));
+        user.setAvatar(base64Image.toString());
+      } catch (IOException e) {
+        log.error("error: convert image file to byte[]");
+      }
+    }
     UserEntity userEdit = userRepository.save(user);
-    userHistoryService.saveUserHistory(EUserAction.UPDATED, editUserRequest.getIpAddress(),
-        Instant.now(), true, userEdit);
+    userHistoryService.saveUserHistory(EUserAction.UPDATED, null, Instant.now(), true, null,
+        userEdit);
     return userMapper.entityToResponse(userEdit);
   }
 
@@ -100,7 +119,21 @@ public class UserServiceImpl implements UserService {
         user, EUserAction.LOGIN);
     return UserInfoResponse.builder().username(username).email(user.getEmail())
         .avatar(user.getAvatar()).sizeBookmark(sizeBookMark).sizeNote(sizeNote).wallet(address)
-        .lastLogin(userHistory.getActionTime())
-        .build();
+        .lastLogin(userHistory.getActionTime()).build();
+  }
+
+  @Override
+  public List<ActivityLogResponse> getLog(HttpServletRequest httpServletRequest) {
+    String token = jwtProvider.parseJwt(httpServletRequest);
+    String username = jwtProvider.getUserNameFromJwtToken(token);
+    UserEntity user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+    List<UserHistoryEntity> historyList = userHistoryRepository.findTop10ByUserOrderByActionTimeDesc(
+        user);
+    List<ActivityLogResponse> logList = userHistoryMapper.listEntityToResponse(historyList);
+    logList.forEach(log -> {
+      log.setStrAction(log.getUserAction().getAction());
+    });
+    return logList;
   }
 }

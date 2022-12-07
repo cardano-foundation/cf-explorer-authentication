@@ -5,6 +5,7 @@ import com.sotatek.authservice.mapper.BookMarkMapper;
 import com.sotatek.authservice.model.entity.BookMarkEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.enums.EBookMarkType;
+import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
@@ -12,8 +13,10 @@ import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.repository.BookMarkRepository;
 import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.BookMarkService;
+import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
+import java.time.Instant;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -31,6 +34,8 @@ public class BookMarkServiceImpl implements BookMarkService {
   private final JwtProvider jwtProvider;
 
   private final BookMarkRepository bookMarkRepository;
+
+  private final UserHistoryService userHistoryService;
 
   private static final BookMarkMapper bookMarkMapper = BookMarkMapper.INSTANCE;
 
@@ -51,13 +56,14 @@ public class BookMarkServiceImpl implements BookMarkService {
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
     bookMark.setUser(user);
     BookMarkEntity bookMarkSave = bookMarkRepository.save(bookMark);
+    userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(), true,
+        bookMarkRequest.getType() + "/" + bookMarkRequest.getKeyword(), user);
     return bookMarkSave.getId();
   }
 
   @Override
   public BasePageResponse<BookMarkResponse> findBookMarkByType(
-      HttpServletRequest httpServletRequest,
-      EBookMarkType bookMarkType, Pageable pageable) {
+      HttpServletRequest httpServletRequest, EBookMarkType bookMarkType, Pageable pageable) {
     BasePageResponse<BookMarkResponse> response = new BasePageResponse<>();
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
@@ -74,6 +80,8 @@ public class BookMarkServiceImpl implements BookMarkService {
   public Boolean deleteById(Long bookMarkId) {
     BookMarkEntity bookMark = bookMarkRepository.findById(bookMarkId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    userHistoryService.saveUserHistory(EUserAction.REMOVE_BOOKMARK, null, Instant.now(), true,
+        bookMark.getType() + "/" + bookMark.getKeyword(), bookMark.getUser());
     bookMarkRepository.delete(bookMark);
     return true;
   }

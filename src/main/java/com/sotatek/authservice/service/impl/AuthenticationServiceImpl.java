@@ -35,10 +35,8 @@ import com.sotatek.cardanocommonapi.exceptions.TokenRefreshException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -48,7 +46,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -114,16 +111,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String accessToken = jwtProvider.generateJwtToken(authentication, user.getUsername());
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-        .collect(Collectors.toList());
     RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getId(),
-        accessToken, stakeAddress);
+        stakeAddress);
     userHistoryService.saveUserHistory(EUserAction.LOGIN, signInRequest.getIpAddress(),
-        Instant.now(), true, user);
+        Instant.now(), true, stakeAddress, user);
     walletService.updateNewNonce(wallet);
     return ResponseEntity.ok(
         SignInResponse.builder().token(accessToken).walletId(userDetails.getId())
-            .username(user.getUsername()).email(userDetails.getEmail()).role(roles)
+            .username(user.getUsername()).email(userDetails.getEmail())
             .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build());
   }
 
@@ -149,8 +144,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     wallet.setExpiryDateNonce(Instant.now().plusMillis(nonceExpirationMs));
     wallet.setUser(userSave);
     walletRepository.save(wallet);
-    userHistoryService.saveUserHistory(EUserAction.CREATED, signUpRequest.getIpAddress(),
-        Instant.now(), true, userSave);
+    userHistoryService.saveUserHistory(EUserAction.CREATED, null, Instant.now(), true,
+        walletRequest.getStakeAddress(), userSave);
     return ResponseEntity.ok(new SignUpResponse(CommonConstant.RESPONSE_SUCCESS, nonce));
   }
 
@@ -178,12 +173,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public ResponseEntity<String> signOut(SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
     String username = signOutRequest.getUsername();
+    String refreshToken = signOutRequest.getRefreshToken();
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    refreshTokenService.revokeRefreshToken(signOutRequest.getRefreshToken());
+    refreshTokenService.revokeRefreshToken(refreshToken);
     UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    userHistoryService.saveUserHistory(EUserAction.LOGOUT, signOutRequest.getIpAddress(),
-        Instant.now(), true, user);
+    userHistoryService.saveUserHistory(EUserAction.LOGOUT, null, Instant.now(), true, null, user);
     redisProvider.blacklistJwt(accessToken, username);
     return ResponseEntity.ok(CommonConstant.RESPONSE_SUCCESS);
   }
@@ -197,10 +192,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Long walletId = null;
     String username = transfersWalletRequest.getUsername();
     WalletRequest walletRequest = transfersWalletRequest.getWallet();
+    String stakeAddress = walletRequest.getStakeAddress();
     UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddress(
-        walletRequest.getStakeAddress());
+    Optional<WalletEntity> walletOpt = walletRepository.findByStakeAddress(stakeAddress);
     if (walletOpt.isEmpty()) {
       String nonce = NonceUtils.createNonce();
       WalletEntity wallet = walletMapper.requestToEntity(walletRequest);
@@ -215,17 +210,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       walletId = walletOpt.get().getId();
     }
     String newAccessToken = jwtProvider.generateJwtTokenFromUsername(username, walletId);
-    List<String> roles = user.getRoles().stream().map(role -> role.getName().name())
-        .collect(Collectors.toList());
     refreshTokenService.revokeRefreshToken(transfersWalletRequest.getRefreshToken());
     RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getId(),
-        accessToken, walletRequest.getStakeAddress());
-    userHistoryService.saveUserHistory(EUserAction.TRANSFERS_WALLET,
-        transfersWalletRequest.getIpAddress(), Instant.now(), true, user);
+        stakeAddress);
+    userHistoryService.saveUserHistory(EUserAction.TRANSFERS_WALLET, null, Instant.now(), true,
+        stakeAddress, user);
     redisProvider.blacklistJwt(accessToken, username);
     return ResponseEntity.ok(SignInResponse.builder().token(newAccessToken).walletId(walletId)
-        .username(user.getUsername()).email(user.getEmail()).role(roles)
-        .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build());
+        .username(user.getUsername()).email(user.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
+        .refreshToken(refreshToken.getToken()).build());
   }
 
   private Set<RoleEntity> addRoleForUser(ERole eRole) {
