@@ -18,9 +18,14 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: dev
+        default_schema: ${SPRING_PROFILES_ACTIVE}
         show_sql: true
         format_sql: true
+  redis:
+    host: ${HOST}
+    port: 26379
+    password: Y2FyZGFuby1yZWRpcy1zZW50aW5lbA==
+    timeout: 3000ms
 
   ## Flyway config
   flyway:
