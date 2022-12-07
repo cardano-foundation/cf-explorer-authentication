@@ -11,10 +11,6 @@ public class SignUpResponse {
 
   private String nonce;
 
-  public SignUpResponse(String message) {
-    this.message = message;
-  }
-
   public SignUpResponse(String message, String nonce) {
     this.message = message;
     this.nonce = nonce;

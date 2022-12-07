@@ -12,5 +12,5 @@ public interface UserHistoryService {
    * description: save authentication history after login, logout
    * @update:
    */
-  void saveUserHistory(EUserAction action, String ipAddress, Instant actionTime, Boolean isSuccess, UserEntity user);
+  void saveUserHistory(EUserAction action, String ipAddress, Instant actionTime, Boolean isSuccess, String description, UserEntity user);
 }

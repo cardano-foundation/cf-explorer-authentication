@@ -4,6 +4,7 @@ import com.sotatek.authservice.constant.CommonConstant;
 import com.sotatek.authservice.mapper.NoteMapper;
 import com.sotatek.authservice.model.entity.PrivateNoteEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.request.note.PrivateNoteRequest;
 import com.sotatek.authservice.model.response.PrivateNoteResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
@@ -11,8 +12,10 @@ import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.repository.PrivateNoteRepository;
 import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.PrivateNoteService;
+import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
+import java.time.Instant;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,6 +33,8 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
   private final UserRepository userRepository;
 
   private final JwtProvider jwtProvider;
+
+  private final UserHistoryService userHistoryService;
 
   private static final NoteMapper noteMapper = NoteMapper.INSTANCE;
 
@@ -50,6 +55,8 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
     PrivateNoteEntity privateNote = noteMapper.requestToEntity(privateNoteRequest);
     privateNote.setUser(user);
     PrivateNoteEntity privateNoteSave = noteRepository.save(privateNote);
+    userHistoryService.saveUserHistory(EUserAction.ADD_PRIVATE_NOTE, null, Instant.now(), true,
+        privateNoteRequest.getTxHash(), user);
     return privateNoteSave.getId();
   }
 
@@ -71,6 +78,8 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
   public Boolean deleteById(Long noteId) {
     PrivateNoteEntity privateNote = noteRepository.findById(noteId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    userHistoryService.saveUserHistory(EUserAction.REMOVE_PRIVATE_NOTE, null, Instant.now(), true,
+        privateNote.getTxHash(), privateNote.getUser());
     noteRepository.delete(privateNote);
     return true;
   }
@@ -81,6 +90,8 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     privateNote.setNote(note);
     PrivateNoteEntity privateNoteEdit = noteRepository.save(privateNote);
+    userHistoryService.saveUserHistory(EUserAction.EDIT_PRIVATE_NOTE, null, Instant.now(), true,
+        privateNote.getTxHash(), privateNote.getUser());
     return noteMapper.entityToResponse(privateNoteEdit);
   }
 }

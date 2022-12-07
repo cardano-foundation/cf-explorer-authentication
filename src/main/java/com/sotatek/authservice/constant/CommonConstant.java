@@ -13,4 +13,6 @@ public class CommonConstant {
   public static final String TOKEN_TYPE = "Bearer";
 
   public static final String RESPONSE_SUCCESS = "Success";
+
+  public static final String BASE64_PREFIX = "data:image/png;base64,";
 }

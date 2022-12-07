@@ -6,8 +6,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum EUserAction {
-  CREATED("created"), UPDATED("updated"), DELETED("deleted"), LOGIN("login"), LOGOUT(
-      "logout"), TRANSFERS_WALLET("transfers_wallet");
+  CREATED("Created"), UPDATED("Updated"), LOGIN("Login"), LOGOUT("Logout"), TRANSFERS_WALLET(
+      "Transfers wallet"), ADD_BOOKMARK("Add bookmark"), REMOVE_BOOKMARK(
+      "Remove bookmark"), ADD_PRIVATE_NOTE("Add private note"), EDIT_PRIVATE_NOTE(
+      "Edit private note"), REMOVE_PRIVATE_NOTE("Remove private note");
 
   private final String action;
   private static final Map<String, EUserAction> userActionMap = Arrays.stream(values())

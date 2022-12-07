@@ -1,10 +1,12 @@
 package com.sotatek.authservice.service;
 
-import com.sotatek.authservice.model.request.user.EditUserRequest;
+import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService extends UserDetailsService {
 
@@ -30,13 +32,22 @@ public interface UserService extends UserDetailsService {
    * description: edit user
    * @update: 05/12/2022
    */
-  UserResponse editUser(EditUserRequest editUserRequest, HttpServletRequest httpServletRequest);
+  UserResponse editUser(String email, MultipartFile avatar,
+      HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
-   * @since: 05/11/2022
+   * @since: 06/12/2022
    * description: get user info
    * @update:
    */
   UserInfoResponse infoUser(HttpServletRequest httpServletRequest);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 07/12/2022
+   * description: get log activity user
+   * @update:
+   */
+  List<ActivityLogResponse> getLog(HttpServletRequest httpServletRequest);
 }
