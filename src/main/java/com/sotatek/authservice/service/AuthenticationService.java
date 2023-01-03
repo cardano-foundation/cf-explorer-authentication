@@ -1,6 +1,5 @@
 package com.sotatek.authservice.service;
 
-import com.sotatek.authservice.model.request.auth.RefreshTokenRequest;
 import com.sotatek.authservice.model.request.auth.SignInRequest;
 import com.sotatek.authservice.model.request.auth.SignOutRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
@@ -32,9 +31,9 @@ public interface AuthenticationService {
    * @author: phuc.nguyen5
    * @since: 24/10/2022
    * description: process gen new access token by refresh token
-   * @update:
+   * @update: 13/12/2022
    */
-  RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest,
+  RefreshTokenResponse refreshToken(String refreshJwt,
       HttpServletRequest httpServletRequest);
 
   /*

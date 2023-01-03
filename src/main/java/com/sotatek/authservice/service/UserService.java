@@ -1,5 +1,7 @@
 package com.sotatek.authservice.service;
 
+import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
@@ -50,4 +52,29 @@ public interface UserService extends UserDetailsService {
    * @update:
    */
   List<ActivityLogResponse> getLog(HttpServletRequest httpServletRequest);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 22/12/2022
+   * description: save user
+   * @update:
+   */
+  UserEntity saveUser(SignUpRequest signUpRequest);
+
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 22/12/2022
+   * description: find user by stake address wallet
+   * @update:
+   */
+  UserEntity findUserByStakeAddress(String stakeAddress);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 22/12/2022
+   * description: find user by username
+   * @update:
+   */
+  UserEntity findByUsername(String username);
 }

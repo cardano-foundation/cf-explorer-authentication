@@ -19,8 +19,8 @@ rsa:
     public-key-file: /key/public_key
 
 jwt:
-  expirationMs: 86400000 #24 hours
-  refreshExpirationMs: 172800000 #48 hours
+  expirationMs: 86400000 #1 day
+  refreshExpirationMs: 172800000 #2 days
 
 nonce:
-  expirationMs: 172800000 #48 hours
+  expirationMs: 345600000 #4 days

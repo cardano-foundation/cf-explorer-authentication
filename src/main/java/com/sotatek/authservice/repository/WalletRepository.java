@@ -16,7 +16,10 @@ public interface WalletRepository extends JpaRepository<WalletEntity, Long> {
    * description: find wallet by stake address
    * @update: 05/12/2022
    */
-  Optional<WalletEntity> findByStakeAddress(String stakeAddress);
+  @Query(value = "SELECT we FROM UserEntity ue "
+      + "JOIN WalletEntity we ON ue.id = we.user.id "
+      + "WHERE we.stakeAddress = :stakeAddress")
+  Optional<WalletEntity> findWalletByStakeAddress(String stakeAddress);
 
   /*
    * @author: phuc.nguyen5

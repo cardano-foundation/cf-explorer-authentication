@@ -28,7 +28,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   private final UserRepository userRepository;
 
   @Override
-  public Optional<RefreshTokenEntity> findByToken(String token) {
+  public Optional<RefreshTokenEntity> findByRefToken(String token) {
     return refreshTokenRepository.findByToken(token);
   }
 

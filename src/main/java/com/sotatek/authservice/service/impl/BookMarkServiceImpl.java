@@ -11,12 +11,13 @@ import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.repository.BookMarkRepository;
-import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.BookMarkService;
 import com.sotatek.authservice.service.UserHistoryService;
+import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class BookMarkServiceImpl implements BookMarkService {
 
-  private final UserRepository userRepository;
+  private final UserService userService;
 
   private final JwtProvider jwtProvider;
 
@@ -43,10 +44,10 @@ public class BookMarkServiceImpl implements BookMarkService {
   public Long addBookMark(BookMarkRequest bookMarkRequest, HttpServletRequest httpServletRequest) {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
-    UserEntity user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    if (bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
-        bookMarkRequest.getType()) != null) {
+    UserEntity user = userService.findByUsername(username);
+    if (Objects.nonNull(
+        bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
+            bookMarkRequest.getType()))) {
       throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);
     }
     Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId());
@@ -56,7 +57,7 @@ public class BookMarkServiceImpl implements BookMarkService {
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
     bookMark.setUser(user);
     BookMarkEntity bookMarkSave = bookMarkRepository.save(bookMark);
-    userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(), true,
+    userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(),
         bookMarkRequest.getType() + "/" + bookMarkRequest.getKeyword(), user);
     return bookMarkSave.getId();
   }
@@ -80,7 +81,7 @@ public class BookMarkServiceImpl implements BookMarkService {
   public Boolean deleteById(Long bookMarkId) {
     BookMarkEntity bookMark = bookMarkRepository.findById(bookMarkId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    userHistoryService.saveUserHistory(EUserAction.REMOVE_BOOKMARK, null, Instant.now(), true,
+    userHistoryService.saveUserHistory(EUserAction.REMOVE_BOOKMARK, null, Instant.now(),
         bookMark.getType() + "/" + bookMark.getKeyword(), bookMark.getUser());
     bookMarkRepository.delete(bookMark);
     return true;
