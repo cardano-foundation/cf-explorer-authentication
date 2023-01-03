@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,10 +39,9 @@ public class NoteController {
 
   @GetMapping("/find-all")
   public ResponseEntity<BasePageResponse<PrivateNoteResponse>> findAllNote(
-      @RequestParam("page") Integer page,
-      @RequestParam("size") Integer size, HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(
-        privateNoteService.findAllNote(httpServletRequest, PageRequest.of(page - 1, size)));
+      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(privateNoteService.findAllNote(httpServletRequest, pageable));
   }
 
   @DeleteMapping("/delete/{noteId}")

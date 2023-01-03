@@ -32,7 +32,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
    * description: find user by stake address wallet
    * @update: 05/12/2022
    */
-  @Query("SELECT ue FROM UserEntity ue JOIN WalletEntity we ON ue.id = we.user.id WHERE we.stakeAddress = :stakeAddress")
-  Optional<UserEntity> findByStakeAddress(@Param("stakeAddress") String stakeAddress);
+  @Query("SELECT ue FROM UserEntity ue "
+      + "JOIN WalletEntity we ON ue.id = we.user.id "
+      + "WHERE we.stakeAddress = :stakeAddress")
+  Optional<UserEntity> findUserByStakeAddress(@Param("stakeAddress") String stakeAddress);
 
 }

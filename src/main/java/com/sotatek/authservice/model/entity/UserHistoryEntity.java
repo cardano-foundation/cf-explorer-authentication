@@ -44,9 +44,6 @@ public class UserHistoryEntity implements Serializable {
   @Column(name = "description")
   private String description;
 
-  @Column(name = "is_success")
-  private Boolean isSuccess;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   @EqualsAndHashCode.Exclude

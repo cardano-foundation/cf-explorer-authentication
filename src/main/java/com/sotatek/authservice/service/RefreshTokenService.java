@@ -11,7 +11,7 @@ public interface RefreshTokenService {
    * description: get refresh token record by token from db
    * @update:
    */
-  Optional<RefreshTokenEntity> findByToken(String token);
+  Optional<RefreshTokenEntity> findByRefToken(String token);
 
   /*
    * @author: phuc.nguyen5
