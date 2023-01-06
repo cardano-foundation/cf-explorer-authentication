@@ -28,7 +28,7 @@ public interface WalletService {
    * description: find wallet by stake address
    * @update:
    */
-  WalletEntity findWalletByStakeAddress(String stakeAddress);
+  WalletEntity findWalletByAddress(String address);
 
   /*
    * @author: phuc.nguyen5
@@ -36,7 +36,7 @@ public interface WalletService {
    * description: check exist wallet by stake address
    * @update:
    */
-  Boolean existsByStakeAddress(String stakeAddress);
+  Boolean existsByStakeAddress(String address);
 
   /*
    * @author: phuc.nguyen5
@@ -44,5 +44,5 @@ public interface WalletService {
    * description: find wallet by stake address
    * @update:
    */
-  WalletEntity checkTransferWallet(String stakeAddress);
+  WalletEntity checkTransferWallet(String address);
 }

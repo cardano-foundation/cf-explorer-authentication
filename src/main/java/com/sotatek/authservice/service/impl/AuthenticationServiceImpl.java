@@ -63,10 +63,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public SignInResponse signIn(SignInRequest signInRequest) {
     log.info("login with cardano wallet is running...");
     String signature = signInRequest.getSignature();
-    String stakeAddress = signInRequest.getStakeAddress();
+    String address = signInRequest.getAddress();
     String nonceFromSign = NonceUtils.getNonceFromSignature(signature);
-    UserEntity user = userService.findUserByStakeAddress(stakeAddress);
-    WalletEntity wallet = walletService.findWalletByStakeAddress(stakeAddress);
+    UserEntity user = userService.findUserByWalletAddress(address);
+    WalletEntity wallet = walletService.findWalletByAddress(address);
     if (wallet.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
       log.error("error: nonce value is expired");
       walletService.updateNonce(wallet);
@@ -75,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Authentication authentication;
     try {
       authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(stakeAddress, nonceFromSign));
+          new UsernamePasswordAuthenticationToken(address, nonceFromSign));
     } catch (AuthenticationException e) {
       log.error("Exception authentication: " + e.getMessage());
       throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);
@@ -83,8 +83,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String accessToken = jwtProvider.generateJwtToken(authentication, user.getUsername());
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getId(),
-        stakeAddress);
+    RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(wallet);
     walletService.updateNonce(wallet);
     return SignInResponse.builder().token(accessToken).walletId(userDetails.getId())
         .username(user.getUsername()).email(userDetails.getEmail())
@@ -99,7 +98,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       throw new BusinessException(CommonErrorCode.USERNAME_IS_ALREADY_EXIST);
     }
     WalletRequest walletRequest = signUpRequest.getWallet();
-    if (Boolean.TRUE.equals(walletService.existsByStakeAddress(walletRequest.getStakeAddress()))) {
+    if (Boolean.TRUE.equals(walletService.existsByStakeAddress(walletRequest.getAddress()))) {
       throw new BusinessException(CommonErrorCode.WALLET_IS_ALREADY_EXIST);
     }
     UserEntity user = userService.saveUser(signUpRequest);
@@ -115,10 +114,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
     return refreshTokenService.findByRefToken(refreshJwt).map(refreshTokenService::verifyExpiration)
         .map(refToken -> {
-          String username = refToken.getUser().getUsername();
-          WalletEntity wallet = walletService.findWalletByStakeAddress(refToken.getStakeAddress());
-          redisProvider.blacklistJwt(accessToken, username);
-          return jwtProvider.generateJwtTokenFromUsername(username, wallet.getId());
+          WalletEntity wallet = refToken.getWallet();
+          UserEntity user = userService.findUserByWalletAddress(wallet.getAddress());
+          redisProvider.blacklistJwt(accessToken, user.getUsername());
+          return jwtProvider.generateJwtTokenFromUsername(user.getUsername(), wallet.getId());
         }).map(newAccessToken -> RefreshTokenResponse.builder().accessToken(newAccessToken)
             .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
@@ -143,17 +142,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     jwtProvider.validateJwtToken(accessToken);
     String username = transfersWalletRequest.getUsername();
     WalletRequest walletRequest = transfersWalletRequest.getWallet();
-    String stakeAddress = walletRequest.getStakeAddress();
     UserEntity user = userService.findByUsername(username);
-    WalletEntity currentWallet = walletService.checkTransferWallet(stakeAddress);
+    WalletEntity currentWallet = walletService.checkTransferWallet(walletRequest.getAddress());
     WalletEntity wallet =
         Objects.isNull(currentWallet) ? walletService.savaWallet(walletRequest, user)
             : walletService.updateNonce(currentWallet);
     Long walletId = wallet.getId();
     String newAccessToken = jwtProvider.generateJwtTokenFromUsername(username, walletId);
     refreshTokenService.revokeRefreshToken(transfersWalletRequest.getRefreshToken());
-    RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getId(),
-        stakeAddress);
+    RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(wallet);
     redisProvider.blacklistJwt(accessToken, username);
     return SignInResponse.builder().token(newAccessToken).walletId(walletId)
         .username(user.getUsername()).email(user.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)

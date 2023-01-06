@@ -13,7 +13,7 @@ public class WalletRequest {
 
   @NotNull
   @NotBlank
-  private String stakeAddress;
+  private String address;
 
   @NotNull
   @NotBlank
