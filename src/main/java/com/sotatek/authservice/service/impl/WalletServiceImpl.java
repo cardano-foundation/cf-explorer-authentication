@@ -53,19 +53,19 @@ public class WalletServiceImpl implements WalletService {
   }
 
   @Override
-  public WalletEntity findWalletByStakeAddress(String stakeAddress) {
-    return walletRepository.findWalletByStakeAddress(stakeAddress)
+  public WalletEntity findWalletByAddress(String address) {
+    return walletRepository.findWalletByAddress(address)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.WALLET_IS_NOT_EXIST));
   }
 
   @Override
-  public Boolean existsByStakeAddress(String stakeAddress) {
-    return walletRepository.existsByStakeAddress(stakeAddress);
+  public Boolean existsByStakeAddress(String address) {
+    return walletRepository.existsByAddress(address);
   }
 
   @Override
-  public WalletEntity checkTransferWallet(String stakeAddress) {
-    Optional<WalletEntity> walletOpt = walletRepository.findWalletByStakeAddress(stakeAddress);
+  public WalletEntity checkTransferWallet(String address) {
+    Optional<WalletEntity> walletOpt = walletRepository.findWalletByAddress(address);
     return walletOpt.orElse(null);
   }
 }

@@ -29,26 +29,26 @@ public class UserAspect {
 
   @AfterReturning("execution(* com.sotatek.authservice.service.impl.AuthenticationServiceImpl.signIn(*)) && args(signInRequest)")
   public void signInLog(SignInRequest signInRequest) {
-    String stakeAddress = signInRequest.getStakeAddress();
-    UserEntity user = userService.findUserByStakeAddress(stakeAddress);
+    String address = signInRequest.getAddress();
+    UserEntity user = userService.findUserByWalletAddress(address);
     userHistoryService.saveUserHistory(EUserAction.LOGIN, signInRequest.getIpAddress(),
-        Instant.now(), stakeAddress, user);
+        Instant.now(), address, user);
   }
 
   @AfterReturning("execution(* com.sotatek.authservice.service.impl.AuthenticationServiceImpl.signUp(*)) && args(signUpRequest)")
   public void signUpLog(SignUpRequest signUpRequest) {
-    String stakeAddress = signUpRequest.getWallet().getStakeAddress();
-    UserEntity user = userService.findUserByStakeAddress(stakeAddress);
-    userHistoryService.saveUserHistory(EUserAction.LOGIN, null, Instant.now(), stakeAddress, user);
+    String address = signUpRequest.getWallet().getAddress();
+    UserEntity user = userService.findUserByWalletAddress(address);
+    userHistoryService.saveUserHistory(EUserAction.CREATED, null, Instant.now(), address, user);
   }
 
   @AfterReturning("execution(* com.sotatek.authservice.service.impl.AuthenticationServiceImpl.transfersWallet(com.sotatek.authservice.model.request.auth.TransfersWalletRequest,..)) && args(transfersWalletRequest,..)")
   public void transfersWalletLog(TransfersWalletRequest transfersWalletRequest) {
     String username = transfersWalletRequest.getUsername();
-    String stakeAddress = transfersWalletRequest.getWallet().getStakeAddress();
+    String address = transfersWalletRequest.getWallet().getAddress();
     UserEntity user = userService.findByUsername(username);
     userHistoryService.saveUserHistory(EUserAction.TRANSFERS_WALLET, null, Instant.now(),
-        stakeAddress, user);
+        address, user);
   }
 
   @AfterReturning("execution(* com.sotatek.authservice.service.impl.AuthenticationServiceImpl.signOut(com.sotatek.authservice.model.request.auth.SignOutRequest,..)) && args(signOutRequest,..)")

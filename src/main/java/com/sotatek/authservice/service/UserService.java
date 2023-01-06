@@ -68,7 +68,7 @@ public interface UserService extends UserDetailsService {
    * description: find user by stake address wallet
    * @update:
    */
-  UserEntity findUserByStakeAddress(String stakeAddress);
+  UserEntity findUserByWalletAddress(String address);
 
   /*
    * @author: phuc.nguyen5

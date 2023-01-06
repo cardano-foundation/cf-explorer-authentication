@@ -1,7 +1,7 @@
 package com.sotatek.authservice.service.impl;
 
 import com.sotatek.authservice.model.entity.RefreshTokenEntity;
-import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.repository.RefreshTokenRepository;
 import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.RefreshTokenService;
@@ -33,13 +33,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public RefreshTokenEntity createRefreshToken(Long userId, String stakeAddress) {
-    Optional<UserEntity> userOpt = userRepository.findById(userId);
-    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(userOpt.orElse(null))
+  public RefreshTokenEntity createRefreshToken(WalletEntity wallet) {
+    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().wallet(wallet)
         .expiryDate(Instant.now().plusMillis(refreshExpirationMs))
-        .token(UUID.randomUUID().toString()).stakeAddress(stakeAddress).build();
-    refreshToken = refreshTokenRepository.save(refreshToken);
-    return refreshToken;
+        .token(UUID.randomUUID().toString()).build();
+    return refreshTokenRepository.save(refreshToken);
   }
 
   @Override

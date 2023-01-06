@@ -29,11 +29,8 @@ public class RefreshTokenEntity extends BaseEntity {
   @Column(name = "expiry_date", nullable = false)
   private Instant expiryDate;
 
-  @Column(name = "stake_address", nullable = false)
-  private String stakeAddress;
-
   @OneToOne
-  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  @JoinColumn(name = "wallet_id", referencedColumnName = "id")
   @EqualsAndHashCode.Exclude
-  private UserEntity user;
+  private WalletEntity wallet;
 }

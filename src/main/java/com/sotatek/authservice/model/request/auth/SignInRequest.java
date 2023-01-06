@@ -11,7 +11,7 @@ public class SignInRequest {
 
   @NotBlank
   @NotNull
-  private String stakeAddress;
+  private String address;
 
   @NotBlank
   @NotNull

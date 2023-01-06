@@ -68,8 +68,8 @@ public class UserServiceImpl implements UserService {
   private static final UserHistoryMapper userHistoryMapper = UserHistoryMapper.INSTANCE;
 
   @Override
-  public UserDetails loadUserByUsername(String stakeAddress) throws UsernameNotFoundException {
-    WalletEntity wallet = walletRepository.findWalletByStakeAddress(stakeAddress)
+  public UserDetails loadUserByUsername(String address) throws UsernameNotFoundException {
+    WalletEntity wallet = walletRepository.findWalletByAddress(address)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     UserEntity user = wallet.getUser();
     return UserDetailsImpl.build(user, wallet);
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public String findNonceByAddress(String address) {
-    WalletEntity wallet = walletRepository.findWalletByStakeAddress(address)
+    WalletEntity wallet = walletRepository.findWalletByAddress(address)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     return wallet.getNonce();
   }
@@ -139,9 +139,7 @@ public class UserServiceImpl implements UserService {
     List<UserHistoryEntity> historyList = userHistoryRepository.findTop10ByUserOrderByActionTimeDesc(
         user);
     List<ActivityLogResponse> logList = userHistoryMapper.listEntityToResponse(historyList);
-    logList.forEach(log -> {
-      log.setStrAction(log.getUserAction().getAction());
-    });
+    logList.forEach(log -> log.setStrAction(log.getUserAction().getAction()));
     return logList;
   }
 
@@ -153,8 +151,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserEntity findUserByStakeAddress(String stakeAddress) {
-    return userRepository.findUserByStakeAddress(stakeAddress)
+  public UserEntity findUserByWalletAddress(String address) {
+    return userRepository.findUserByWalletAddress(address)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
   }
 

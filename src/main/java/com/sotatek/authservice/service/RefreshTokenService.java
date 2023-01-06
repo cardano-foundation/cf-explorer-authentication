@@ -1,6 +1,7 @@
 package com.sotatek.authservice.service;
 
 import com.sotatek.authservice.model.entity.RefreshTokenEntity;
+import com.sotatek.authservice.model.entity.WalletEntity;
 import java.util.Optional;
 
 public interface RefreshTokenService {
@@ -19,7 +20,7 @@ public interface RefreshTokenService {
    * description: create refresh token record
    * @update:
    */
-  RefreshTokenEntity createRefreshToken(Long userId, String stakeAddress);
+  RefreshTokenEntity createRefreshToken(WalletEntity wallet);
 
   /*
    * @author: phuc.nguyen5

@@ -18,8 +18,8 @@ public interface WalletRepository extends JpaRepository<WalletEntity, Long> {
    */
   @Query(value = "SELECT we FROM UserEntity ue "
       + "JOIN WalletEntity we ON ue.id = we.user.id "
-      + "WHERE we.stakeAddress = :stakeAddress")
-  Optional<WalletEntity> findWalletByStakeAddress(String stakeAddress);
+      + "WHERE we.address = :address")
+  Optional<WalletEntity> findWalletByAddress(String address);
 
   /*
    * @author: phuc.nguyen5
@@ -27,7 +27,7 @@ public interface WalletRepository extends JpaRepository<WalletEntity, Long> {
    * description: check exist wallet by stake address
    * @update: 05/12/2022
    */
-  Boolean existsByStakeAddress(String stakeAddress);
+  Boolean existsByAddress(String address);
 
   /*
    * @author: phuc.nguyen5
@@ -35,6 +35,6 @@ public interface WalletRepository extends JpaRepository<WalletEntity, Long> {
    * description: get address wallet by id
    * @update:
    */
-  @Query(value = "SELECT we.stakeAddress FROM WalletEntity we WHERE we.id = :walletId")
+  @Query(value = "SELECT we.address FROM WalletEntity we WHERE we.id = :walletId")
   String getAddressWalletById(@Param("walletId") Long walletId);
 }

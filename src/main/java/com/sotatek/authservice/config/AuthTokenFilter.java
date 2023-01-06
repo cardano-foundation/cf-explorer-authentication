@@ -50,10 +50,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     String walletId = jwtProvider.getWalletIdFromJwtToken(token);
     if (Boolean.TRUE.equals(StringUtils.isNotBlank(walletId))) {
-      String stakeAddress = walletRepository.getAddressWalletById(Long.valueOf(walletId));
-      UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(stakeAddress);
+      String address = walletRepository.getAddressWalletById(Long.valueOf(walletId));
+      UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(address);
       UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-          stakeAddress, null, userDetails.getAuthorities());
+          address, null, userDetails.getAuthorities());
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }
