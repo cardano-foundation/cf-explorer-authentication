@@ -8,6 +8,20 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: phuc.nguyen5@sotatek.com
+    password: anhphuc1996
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:
@@ -15,8 +29,10 @@ logging:
 
 rsa:
   key:
-    private-key-file: /key/private_key
-    public-key-file: /key/public_key
+    private-key-auth-path: /key/auth/private_key
+    public-key-auth-path: /key/auth/public_key
+    private-key-mail-path: /key/mail/private_key
+    public-key-mail-path: /key/mail/public_key
 
 jwt:
   expirationMs: 86400000 #1 day
@@ -24,3 +40,17 @@ jwt:
 
 nonce:
   expirationMs: 345600000 #4 days
+
+mail:
+  from: 'phuc.nguyen5@sotatek.com'
+  sender: 'Sotatek'
+  subject-registration: 'Please verify your registration'
+  subject-reset-password: 'Do you want change password?'
+  footer: 'The Sotatek company'
+  expirationMs: 86400000 #1 day
+
+thread:
+  core-size: 5
+  max-size: 20
+  queue-size: 100
+  timeout: 10
