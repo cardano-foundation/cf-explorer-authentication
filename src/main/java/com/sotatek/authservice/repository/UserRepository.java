@@ -37,4 +37,11 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
       + "WHERE we.address = :address")
   Optional<UserEntity> findUserByWalletAddress(@Param("address") String address);
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 7/1/2023
+   * description: check exist user by email
+   * @update:
+   */
+  Boolean existsByEmail(String email);
 }

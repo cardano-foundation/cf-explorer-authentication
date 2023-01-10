@@ -1,10 +1,14 @@
 package com.sotatek.authservice.model.entity;
 
 
+import com.sotatek.authservice.model.enums.EStatus;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -37,6 +41,13 @@ public class UserEntity extends BaseEntity {
 
   @Column(name = "avatar")
   private String avatar;
+
+  @Column(name = "password", length = 256)
+  private String password;
+
+  @Column(name = "status")
+  @Enumerated(EnumType.STRING)
+  private EStatus status;
 
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))

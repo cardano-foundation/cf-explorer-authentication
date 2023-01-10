@@ -1,6 +1,7 @@
 package com.sotatek.authservice.service;
 
 import com.sotatek.authservice.model.request.note.PrivateNoteRequest;
+import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.PrivateNoteResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +15,8 @@ public interface PrivateNoteService {
    * description: add note
    * @update:
    */
-  Long addPrivateNote(PrivateNoteRequest privateNoteRequest, HttpServletRequest httpServletRequest);
+  MessageResponse addPrivateNote(PrivateNoteRequest privateNoteRequest,
+      HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
@@ -31,7 +33,7 @@ public interface PrivateNoteService {
    * description: delete note by id
    * @update:
    */
-  Boolean deleteById(Long noteId);
+  MessageResponse deleteById(Long noteId);
 
   /*
    * @author: phuc.nguyen5

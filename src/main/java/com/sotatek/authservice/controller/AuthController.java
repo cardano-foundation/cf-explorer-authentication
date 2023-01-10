@@ -4,9 +4,10 @@ import com.sotatek.authservice.model.request.auth.SignInRequest;
 import com.sotatek.authservice.model.request.auth.SignOutRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.request.auth.TransfersWalletRequest;
-import com.sotatek.authservice.model.response.RefreshTokenResponse;
-import com.sotatek.authservice.model.response.SignInResponse;
-import com.sotatek.authservice.model.response.SignUpResponse;
+import com.sotatek.authservice.model.response.MessageResponse;
+import com.sotatek.authservice.model.response.auth.RefreshTokenResponse;
+import com.sotatek.authservice.model.response.auth.SignInResponse;
+import com.sotatek.authservice.model.response.auth.SignUpResponse;
 import com.sotatek.authservice.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication Controller", description = "")
 public class AuthController {
@@ -48,7 +49,7 @@ public class AuthController {
   }
 
   @PostMapping(value = "/sign-out", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> signOut(@Valid @RequestBody SignOutRequest signOutRequest,
+  public ResponseEntity<MessageResponse> signOut(@Valid @RequestBody SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));
   }

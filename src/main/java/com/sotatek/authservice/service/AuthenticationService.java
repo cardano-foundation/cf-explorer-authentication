@@ -4,9 +4,10 @@ import com.sotatek.authservice.model.request.auth.SignInRequest;
 import com.sotatek.authservice.model.request.auth.SignOutRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.request.auth.TransfersWalletRequest;
-import com.sotatek.authservice.model.response.RefreshTokenResponse;
-import com.sotatek.authservice.model.response.SignInResponse;
-import com.sotatek.authservice.model.response.SignUpResponse;
+import com.sotatek.authservice.model.response.MessageResponse;
+import com.sotatek.authservice.model.response.auth.RefreshTokenResponse;
+import com.sotatek.authservice.model.response.auth.SignInResponse;
+import com.sotatek.authservice.model.response.auth.SignUpResponse;
 import javax.servlet.http.HttpServletRequest;
 
 public interface AuthenticationService {
@@ -42,7 +43,7 @@ public interface AuthenticationService {
    * description: process logout account
    * @update: 8/11/2022
    */
-  String signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest);
+  MessageResponse signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
