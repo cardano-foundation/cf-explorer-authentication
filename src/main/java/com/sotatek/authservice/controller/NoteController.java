@@ -1,6 +1,7 @@
 package com.sotatek.authservice.controller;
 
 import com.sotatek.authservice.model.request.note.PrivateNoteRequest;
+import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.PrivateNoteResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.service.PrivateNoteService;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/note")
+@RequestMapping("/api/v1/note")
 @RequiredArgsConstructor
 @Tag(name = "Private Note Controller", description = "")
 public class NoteController {
@@ -31,7 +32,8 @@ public class NoteController {
   private final PrivateNoteService privateNoteService;
 
   @PostMapping("/add")
-  public ResponseEntity<Long> addNote(@Valid @RequestBody PrivateNoteRequest privateNoteRequest,
+  public ResponseEntity<MessageResponse> addNote(
+      @Valid @RequestBody PrivateNoteRequest privateNoteRequest,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(
         privateNoteService.addPrivateNote(privateNoteRequest, httpServletRequest));
@@ -45,7 +47,7 @@ public class NoteController {
   }
 
   @DeleteMapping("/delete/{noteId}")
-  public ResponseEntity<Boolean> deleteById(@PathVariable Long noteId) {
+  public ResponseEntity<MessageResponse> deleteById(@PathVariable Long noteId) {
     return ResponseEntity.ok(privateNoteService.deleteById(noteId));
   }
 

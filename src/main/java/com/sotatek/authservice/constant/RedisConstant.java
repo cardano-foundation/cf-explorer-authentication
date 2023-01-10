@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 public class RedisConstant {
 
   public static final String JWT = "jwt:blacklist:";
-  public static final String FAILED_ATTEMPT = "login:attempt:";
-  public static final String RESET_PW = "reset:pw:";
+  public static final String SIGN_UP_CODE = "SignUp";
+  public static final String RESET_PASSWORD_CODE = "Password";
 }

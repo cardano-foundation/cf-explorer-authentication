@@ -10,9 +10,10 @@ import com.sotatek.authservice.model.request.auth.SignOutRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.request.auth.TransfersWalletRequest;
 import com.sotatek.authservice.model.request.auth.WalletRequest;
-import com.sotatek.authservice.model.response.RefreshTokenResponse;
-import com.sotatek.authservice.model.response.SignInResponse;
-import com.sotatek.authservice.model.response.SignUpResponse;
+import com.sotatek.authservice.model.response.MessageResponse;
+import com.sotatek.authservice.model.response.auth.RefreshTokenResponse;
+import com.sotatek.authservice.model.response.auth.SignInResponse;
+import com.sotatek.authservice.model.response.auth.SignUpResponse;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.provider.RedisProvider;
 import com.sotatek.authservice.service.AuthenticationService;
@@ -125,13 +126,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Transactional(rollbackFor = {RuntimeException.class})
   @Override
-  public String signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest) {
+  public MessageResponse signOut(SignOutRequest signOutRequest,
+      HttpServletRequest httpServletRequest) {
     String username = signOutRequest.getUsername();
     String refreshToken = signOutRequest.getRefreshToken();
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
     refreshTokenService.revokeRefreshToken(refreshToken);
     redisProvider.blacklistJwt(accessToken, username);
-    return CommonConstant.RESPONSE_SUCCESS;
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})

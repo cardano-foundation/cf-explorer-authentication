@@ -3,6 +3,7 @@ package com.sotatek.authservice.controller;
 import com.sotatek.authservice.model.enums.EBookMarkType;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
 import com.sotatek.authservice.model.response.BookMarkResponse;
+import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.service.BookMarkService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/bookmark")
+@RequestMapping("/api/v1/bookmark")
 @RequiredArgsConstructor
 @Tag(name = "BookMark Controller", description = "")
 public class BookMarkController {
@@ -31,7 +32,8 @@ public class BookMarkController {
   private final BookMarkService bookMarkService;
 
   @PostMapping("/add")
-  public ResponseEntity<Long> addBookMark(@Valid @RequestBody BookMarkRequest bookMarkRequest,
+  public ResponseEntity<MessageResponse> addBookMark(
+      @Valid @RequestBody BookMarkRequest bookMarkRequest,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));
   }
@@ -46,7 +48,7 @@ public class BookMarkController {
   }
 
   @DeleteMapping("/delete/{bookMarkId}")
-  public ResponseEntity<Boolean> deleteById(@PathVariable Long bookMarkId) {
+  public ResponseEntity<MessageResponse> deleteById(@PathVariable Long bookMarkId) {
     return ResponseEntity.ok(bookMarkService.deleteById(bookMarkId));
   }
 }

@@ -8,6 +8,7 @@ import com.sotatek.authservice.model.enums.EBookMarkType;
 import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
 import com.sotatek.authservice.model.response.BookMarkResponse;
+import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.repository.BookMarkRepository;
@@ -41,7 +42,8 @@ public class BookMarkServiceImpl implements BookMarkService {
   private static final BookMarkMapper bookMarkMapper = BookMarkMapper.INSTANCE;
 
   @Override
-  public Long addBookMark(BookMarkRequest bookMarkRequest, HttpServletRequest httpServletRequest) {
+  public MessageResponse addBookMark(BookMarkRequest bookMarkRequest,
+      HttpServletRequest httpServletRequest) {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
     UserEntity user = userService.findByUsername(username);
@@ -56,10 +58,10 @@ public class BookMarkServiceImpl implements BookMarkService {
     }
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
     bookMark.setUser(user);
-    BookMarkEntity bookMarkSave = bookMarkRepository.save(bookMark);
+    bookMarkRepository.save(bookMark);
     userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(),
         bookMarkRequest.getType() + "/" + bookMarkRequest.getKeyword(), user);
-    return bookMarkSave.getId();
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Override
@@ -78,12 +80,12 @@ public class BookMarkServiceImpl implements BookMarkService {
   }
 
   @Override
-  public Boolean deleteById(Long bookMarkId) {
+  public MessageResponse deleteById(Long bookMarkId) {
     BookMarkEntity bookMark = bookMarkRepository.findById(bookMarkId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     userHistoryService.saveUserHistory(EUserAction.REMOVE_BOOKMARK, null, Instant.now(),
         bookMark.getType() + "/" + bookMark.getKeyword(), bookMark.getUser());
     bookMarkRepository.delete(bookMark);
-    return true;
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 }

@@ -9,7 +9,9 @@ import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.model.enums.ERole;
+import com.sotatek.authservice.model.enums.EStatus;
 import com.sotatek.authservice.model.enums.EUserAction;
+import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
@@ -162,6 +164,27 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
   }
 
+  @Override
+  public Boolean checkExistEmail(String email) {
+    return userRepository.existsByEmail(email);
+  }
+
+  @Override
+  public UserEntity saveUserAdmin(SignUpAdminRequest signUpAdmin) {
+    UserEntity user = userMapper.requestAdminToEntity(signUpAdmin);
+    user.setRoles(addRoleForUser(signUpAdmin.getRole()));
+    user.setStatus(EStatus.PENDING);
+    return userRepository.save(user);
+  }
+
+  @Override
+  public UserEntity activeUserAdmin(String username) {
+    UserEntity user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+    user.setStatus(EStatus.ACTIVE);
+    return userRepository.save(user);
+  }
+
   /*
    * @author: phuc.nguyen5
    * @since: 22/12/2022
@@ -180,6 +203,11 @@ public class UserServiceImpl implements UserService {
         RoleEntity rUser = roleRepository.findByName(ERole.ROLE_USER)
             .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
         roles.add(rUser);
+        break;
+      case ROLE_MODERATOR:
+        RoleEntity rMode = roleRepository.findByName(ERole.ROLE_MODERATOR)
+            .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
+        roles.add(rMode);
         break;
       default:
     }

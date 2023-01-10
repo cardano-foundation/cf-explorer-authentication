@@ -6,6 +6,7 @@ import com.sotatek.authservice.model.entity.PrivateNoteEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.request.note.PrivateNoteRequest;
+import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.PrivateNoteResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.provider.JwtProvider;
@@ -40,7 +41,7 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
   private static final NoteMapper noteMapper = NoteMapper.INSTANCE;
 
   @Override
-  public Long addPrivateNote(PrivateNoteRequest privateNoteRequest,
+  public MessageResponse addPrivateNote(PrivateNoteRequest privateNoteRequest,
       HttpServletRequest httpServletRequest) {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
@@ -55,10 +56,10 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
     }
     PrivateNoteEntity privateNote = noteMapper.requestToEntity(privateNoteRequest);
     privateNote.setUser(user);
-    PrivateNoteEntity privateNoteSave = noteRepository.save(privateNote);
+    noteRepository.save(privateNote);
     userHistoryService.saveUserHistory(EUserAction.ADD_PRIVATE_NOTE, null, Instant.now(),
         privateNoteRequest.getTxHash(), user);
-    return privateNoteSave.getId();
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Override
@@ -76,13 +77,13 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
   }
 
   @Override
-  public Boolean deleteById(Long noteId) {
+  public MessageResponse deleteById(Long noteId) {
     PrivateNoteEntity privateNote = noteRepository.findById(noteId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
     userHistoryService.saveUserHistory(EUserAction.REMOVE_PRIVATE_NOTE, null, Instant.now(),
         privateNote.getTxHash(), privateNote.getUser());
     noteRepository.delete(privateNote);
-    return true;
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Override

@@ -1,4 +1,4 @@
-package com.sotatek.authservice.model.response;
+package com.sotatek.authservice.model.response.auth;
 
 import lombok.Builder;
 import lombok.Data;
