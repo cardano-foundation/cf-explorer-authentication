@@ -41,7 +41,7 @@ domain:
 redis:
   databaseIndex: 1
   master: ${REDIS_MASTER_NAME:mymaster}
-  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
+  password: ${REDIS_SENTINEL_PASS:Y2FyZGFuby1yZWRpcy1zZW50aW5lbA==}
   testOnBorrow: false
   maxTotal: 10
   maxIdle: 5
