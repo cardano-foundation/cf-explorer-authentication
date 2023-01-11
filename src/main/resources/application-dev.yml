@@ -49,5 +49,5 @@ redis:
   testOnReturn: false
   testWhileIdle: false
   sentinels:
-    - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
+    - host: ${HOST:127.0.0.1}
       port: 26379
