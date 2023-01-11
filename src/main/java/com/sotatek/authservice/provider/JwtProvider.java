@@ -2,6 +2,8 @@ package com.sotatek.authservice.provider;
 
 import com.sotatek.authservice.config.RsaConfig;
 import com.sotatek.authservice.config.properties.MailProperties;
+import com.sotatek.authservice.constant.CommonConstant;
+import com.sotatek.authservice.model.entity.RoleEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
@@ -13,11 +15,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -37,33 +41,35 @@ public class JwtProvider {
   public String generateJwtToken(Authentication authentication, String username) {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
     return Jwts.builder().setSubject(username).setId(String.valueOf(userPrincipal.getId()))
-        .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
+        .claim(CommonConstant.AUTHORITIES_KEY,
+            userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList())).setIssuedAt(new Date())
+        .setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }
 
-  public String generateJwtTokenFromUsername(String username, Long walletId) {
-    return Jwts.builder().setSubject(username).setId(String.valueOf(walletId))
+  public String generateJwtTokenFromUsername(UserEntity user, Long walletId) {
+    return Jwts.builder().setSubject(user.getUsername()).setId(String.valueOf(walletId))
+        .claim(CommonConstant.AUTHORITIES_KEY,
+            user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }
 
   public String generateJwtForVerifyAdmin(String username) {
-    return Jwts.builder().setSubject(username)
-        .setIssuedAt(new Date())
+    return Jwts.builder().setSubject(username).setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + mail.getExpirationMs()))
         .signWith(rsaConfig.getPrivateKeyMail(), SignatureAlgorithm.RS256).compact();
   }
 
   public String getUserNameFromJwtToken(String token) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
-        .parseClaimsJws(token)
-        .getBody().getSubject();
+        .parseClaimsJws(token).getBody().getSubject();
   }
 
   public String getWalletIdFromJwtToken(String token) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
-        .parseClaimsJws(token)
-        .getBody().getId();
+        .parseClaimsJws(token).getBody().getId();
   }
 
   public String parseJwt(HttpServletRequest request) {
@@ -109,12 +115,13 @@ public class JwtProvider {
 
   public String getUserNameFromVerifyCode(String code) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyMail()).build()
-        .parseClaimsJws(code)
-        .getBody().getSubject();
+        .parseClaimsJws(code).getBody().getSubject();
   }
 
   public String generateJwtTokenFromUser(UserEntity user) {
     return Jwts.builder().setSubject(user.getUsername()).setId(String.valueOf(user.getId()))
+        .claim(CommonConstant.AUTHORITIES_KEY,
+            user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }

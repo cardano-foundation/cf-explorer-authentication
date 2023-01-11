@@ -86,9 +86,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(wallet);
     walletService.updateNonce(wallet);
-    return SignInResponse.builder().token(accessToken)
-        .username(user.getUsername()).email(userDetails.getEmail())
-        .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build();
+    return SignInResponse.builder().token(accessToken).username(user.getUsername())
+        .email(userDetails.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
+        .refreshToken(refreshToken.getToken()).build();
   }
 
   @Transactional(rollbackFor = {RuntimeException.class})
@@ -118,7 +118,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
           WalletEntity wallet = refToken.getWallet();
           UserEntity user = userService.findUserByWalletAddress(wallet.getAddress());
           redisProvider.blacklistJwt(accessToken, user.getUsername());
-          return jwtProvider.generateJwtTokenFromUsername(user.getUsername(), wallet.getId());
+          return jwtProvider.generateJwtTokenFromUsername(user, wallet.getId());
         }).map(newAccessToken -> RefreshTokenResponse.builder().accessToken(newAccessToken)
             .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
@@ -150,12 +150,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Objects.isNull(currentWallet) ? walletService.savaWallet(walletRequest, user)
             : walletService.updateNonce(currentWallet);
     Long walletId = wallet.getId();
-    String newAccessToken = jwtProvider.generateJwtTokenFromUsername(username, walletId);
+    String newAccessToken = jwtProvider.generateJwtTokenFromUsername(user, walletId);
     refreshTokenService.revokeRefreshToken(transfersWalletRequest.getRefreshToken());
     RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(wallet);
     redisProvider.blacklistJwt(accessToken, username);
-    return SignInResponse.builder().token(newAccessToken)
-        .username(user.getUsername()).email(user.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
+    return SignInResponse.builder().token(newAccessToken).username(user.getUsername())
+        .email(user.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(refreshToken.getToken()).build();
   }
 }
