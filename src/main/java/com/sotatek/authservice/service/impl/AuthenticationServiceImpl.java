@@ -84,9 +84,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String accessToken = jwtProvider.generateJwtToken(authentication, user.getUsername());
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(wallet);
+    RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(wallet);
     walletService.updateNonce(wallet);
-    return SignInResponse.builder().token(accessToken).walletId(userDetails.getId())
+    return SignInResponse.builder().token(accessToken)
         .username(user.getUsername()).email(userDetails.getEmail())
         .tokenType(CommonConstant.TOKEN_TYPE).refreshToken(refreshToken.getToken()).build();
   }
@@ -152,9 +152,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Long walletId = wallet.getId();
     String newAccessToken = jwtProvider.generateJwtTokenFromUsername(username, walletId);
     refreshTokenService.revokeRefreshToken(transfersWalletRequest.getRefreshToken());
-    RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(wallet);
+    RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(wallet);
     redisProvider.blacklistJwt(accessToken, username);
-    return SignInResponse.builder().token(newAccessToken).walletId(walletId)
+    return SignInResponse.builder().token(newAccessToken)
         .username(user.getUsername()).email(user.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(refreshToken.getToken()).build();
   }

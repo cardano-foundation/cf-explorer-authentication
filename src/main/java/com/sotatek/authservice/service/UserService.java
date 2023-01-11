@@ -1,6 +1,7 @@
 package com.sotatek.authservice.service;
 
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.enums.EStatus;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.response.ActivityLogResponse;
@@ -102,4 +103,20 @@ public interface UserService extends UserDetailsService {
    * @update:
    */
   UserEntity activeUserAdmin(String username);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 10/1/2023
+   * description: find user by email
+   * @update:
+   */
+  UserEntity findByEmailAndStatus(String email, EStatus status);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 22/12/2022
+   * description: find user by username
+   * @update:
+   */
+  UserEntity findByUsernameAndStatus(String username, EStatus status);
 }

@@ -43,6 +43,15 @@ public class UserDetailsImpl implements UserDetails {
         wallet.getNonceEncode(), authorities);
   }
 
+  public static UserDetailsImpl build(UserEntity user) {
+    List<GrantedAuthority> authorities =
+        user.getRoles().stream()
+            .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+            .collect(Collectors.toList());
+    return new UserDetailsImpl(
+        user.getId(), user.getEmail(), user.getEmail(), user.getPassword(), authorities);
+  }
+
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

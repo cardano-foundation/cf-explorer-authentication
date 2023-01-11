@@ -1,6 +1,7 @@
 package com.sotatek.authservice.repository;
 
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.enums.EStatus;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -44,4 +45,21 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
    * @update:
    */
   Boolean existsByEmail(String email);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 10/01/2023
+   * description: find user by email
+   * @update:
+   */
+  Optional<UserEntity> findByEmailAndStatus(String email, EStatus status);
+
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 11/01/2023
+   * description: find user by username
+   * @update:
+   */
+  Optional<UserEntity> findByUsernameAndStatus(String username, EStatus status);
 }

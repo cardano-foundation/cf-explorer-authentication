@@ -38,6 +38,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -70,11 +71,17 @@ public class UserServiceImpl implements UserService {
   private static final UserHistoryMapper userHistoryMapper = UserHistoryMapper.INSTANCE;
 
   @Override
-  public UserDetails loadUserByUsername(String address) throws UsernameNotFoundException {
-    WalletEntity wallet = walletRepository.findWalletByAddress(address)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    UserEntity user = wallet.getUser();
-    return UserDetailsImpl.build(user, wallet);
+  public UserDetails loadUserByUsername(String param) throws UsernameNotFoundException {
+    if (EmailValidator.getInstance().isValid(param)) {
+      UserEntity user = userRepository.findByEmailAndStatus(param, EStatus.ACTIVE)
+          .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+      return UserDetailsImpl.build(user);
+    } else {
+      WalletEntity wallet = walletRepository.findWalletByAddress(param)
+          .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+      UserEntity user = wallet.getUser();
+      return UserDetailsImpl.build(user, wallet);
+    }
   }
 
   @Override
@@ -183,6 +190,17 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     user.setStatus(EStatus.ACTIVE);
     return userRepository.save(user);
+  }
+
+  @Override
+  public UserEntity findByEmailAndStatus(String email, EStatus status) {
+    return userRepository.findByEmailAndStatus(email, status)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+  }
+
+  @Override
+  public UserEntity findByUsernameAndStatus(String username, EStatus status) {
+    return userRepository.findByUsernameAndStatus(username, status).orElse(null);
   }
 
   /*
