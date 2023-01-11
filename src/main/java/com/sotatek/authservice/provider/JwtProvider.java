@@ -2,6 +2,7 @@ package com.sotatek.authservice.provider;
 
 import com.sotatek.authservice.config.RsaConfig;
 import com.sotatek.authservice.config.properties.MailProperties;
+import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
@@ -110,5 +111,11 @@ public class JwtProvider {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyMail()).build()
         .parseClaimsJws(code)
         .getBody().getSubject();
+  }
+
+  public String generateJwtTokenFromUser(UserEntity user) {
+    return Jwts.builder().setSubject(user.getUsername()).setId(String.valueOf(user.getId()))
+        .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
+        .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }
 }

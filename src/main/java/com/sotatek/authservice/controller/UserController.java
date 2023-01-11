@@ -50,4 +50,9 @@ public class UserController {
   public ResponseEntity<List<ActivityLogResponse>> getLog(HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(userService.getLog(httpServletRequest));
   }
+
+  @GetMapping("/exist-email")
+  public ResponseEntity<Boolean> checkExistEmail(@RequestParam("email") String email) {
+    return ResponseEntity.ok(userService.checkExistEmail(email));
+  }
 }
