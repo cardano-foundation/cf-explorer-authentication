@@ -24,10 +24,6 @@ spring:
         default_schema: authentication
         show_sql: true
         format_sql: true
-  redis:
-    host: localhost
-    port: 6379
-    timeout: 3000ms
 
   ## Flyway config
   flyway:
@@ -47,3 +43,17 @@ domain:
 
 server:
   port: 8021
+
+redis:
+  databaseIndex: 1
+  master: mymaster
+  password: Y2FyZGFuby1yZWRpcy1zZW50aW5lbA==
+  testOnBorrow: false
+  maxTotal: 10
+  maxIdle: 5
+  minIdle: 3
+  testOnReturn: false
+  testWhileIdle: false
+  sentinels:
+    - host: 172.16.1.230
+      port: 26379
