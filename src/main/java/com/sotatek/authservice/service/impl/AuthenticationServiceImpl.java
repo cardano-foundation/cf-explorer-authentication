@@ -108,7 +108,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .nonce(wallet.getNonce()).build();
   }
 
-  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public RefreshTokenResponse refreshToken(String refreshJwt,
       HttpServletRequest httpServletRequest) {
@@ -118,20 +117,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
           WalletEntity wallet = refToken.getWallet();
           UserEntity user = userService.findUserByWalletAddress(wallet.getAddress());
           redisProvider.blacklistJwt(accessToken, user.getUsername());
-          return jwtProvider.generateJwtTokenFromUsername(user, wallet.getId());
+          return jwtProvider.generateJwtTokenFromUsername(user, wallet.getAddress());
         }).map(newAccessToken -> RefreshTokenResponse.builder().accessToken(newAccessToken)
             .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
   }
 
-  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
   public MessageResponse signOut(SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
     String username = signOutRequest.getUsername();
-    String refreshToken = signOutRequest.getRefreshToken();
+    String refreshJwt = signOutRequest.getRefreshJwt();
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    refreshTokenService.revokeRefreshToken(refreshToken);
+    refreshTokenService.revokeRefreshToken(refreshJwt);
     redisProvider.blacklistJwt(accessToken, username);
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
@@ -149,8 +147,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     WalletEntity wallet =
         Objects.isNull(currentWallet) ? walletService.savaWallet(walletRequest, user)
             : walletService.updateNonce(currentWallet);
-    Long walletId = wallet.getId();
-    String newAccessToken = jwtProvider.generateJwtTokenFromUsername(user, walletId);
+    String newAccessToken = jwtProvider.generateJwtTokenFromUsername(user, wallet.getAddress());
     refreshTokenService.revokeRefreshToken(transfersWalletRequest.getRefreshToken());
     RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(wallet);
     redisProvider.blacklistJwt(accessToken, username);

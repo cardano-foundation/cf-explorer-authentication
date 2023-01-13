@@ -7,7 +7,6 @@ import com.sotatek.authservice.provider.RedisProvider;
 import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
-import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.io.IOException;
 import java.util.stream.Stream;
 import javax.servlet.FilterChain;
@@ -48,15 +47,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       throw new InvalidAccessTokenException();
     }
 
-    String walletId = jwtProvider.getWalletIdFromJwtToken(token);
-    if (Boolean.TRUE.equals(StringUtils.isNotBlank(walletId))) {
-      String address = walletRepository.getAddressWalletById(Long.valueOf(walletId));
-      UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(address);
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-          address, null, userDetails.getAuthorities());
-      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
+    String param = jwtProvider.getIdFromJwtToken(token);
+    UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(param);
+    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+        userDetails.getUsername(), null, userDetails.getAuthorities());
+    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
     filterChain.doFilter(request, response);
   }
 

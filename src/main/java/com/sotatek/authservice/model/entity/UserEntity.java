@@ -2,8 +2,8 @@ package com.sotatek.authservice.model.entity;
 
 
 import com.sotatek.authservice.model.enums.EStatus;
-import java.time.Instant;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +21,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "user")
@@ -29,7 +31,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
+@Where(clause = "is_deleted = false")
 public class UserEntity extends BaseEntity {
 
   @Column(name = "username", length = 64, nullable = false, unique = true)
@@ -49,8 +51,29 @@ public class UserEntity extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private EStatus status;
 
+  @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+  @NotNull
+  private boolean isDeleted;
+
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
   @EqualsAndHashCode.Exclude
   private Set<RoleEntity> roles = new HashSet<>();
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
+    }
+    UserEntity user = (UserEntity) o;
+    return getId() != null && Objects.equals(getId(), user.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

@@ -126,12 +126,11 @@ public class UserServiceImpl implements UserService {
   public UserInfoResponse infoUser(HttpServletRequest httpServletRequest) {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
-    String walletId = jwtProvider.getWalletIdFromJwtToken(token);
+    String address = jwtProvider.getIdFromJwtToken(token);
     UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     Integer sizeBookMark = bookMarkRepository.getCountBookMarkByUser(user.getId());
     Integer sizeNote = noteRepository.getCountNoteByUser(user.getId());
-    String address = walletRepository.getAddressWalletById(Long.valueOf(walletId));
     UserHistoryEntity userHistory = userHistoryRepository.findFirstByUserAndUserActionOrderByActionTimeDesc(
         user, EUserAction.LOGIN);
     return UserInfoResponse.builder().username(username).email(user.getEmail())

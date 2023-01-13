@@ -34,7 +34,7 @@ public interface RefreshTokenService {
   /*
    * @author: phuc.nguyen5
    * @since: 24/10/2022
-   * description: delete refresh token record by username
+   * description: delete refresh token
    * @update:
    */
   void revokeRefreshToken(String token);
@@ -46,4 +46,12 @@ public interface RefreshTokenService {
    * @update:
    */
   RefreshTokenEntity addRefreshToken(UserEntity user);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 24/10/2022
+   * description: delete refresh token record by username
+   * @update:
+   */
+  void revokeRefreshTokenByUsername(String username);
 }

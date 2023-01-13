@@ -6,19 +6,24 @@ import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.model.enums.EStatus;
 import com.sotatek.authservice.model.enums.EUserAction;
+import com.sotatek.authservice.model.request.admin.RemoveUserRequest;
+import com.sotatek.authservice.model.request.admin.ResetPasswordRequest;
 import com.sotatek.authservice.model.request.admin.SignInAdminRequest;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
+import com.sotatek.authservice.model.request.auth.SignOutRequest;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.auth.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.auth.SignInResponse;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.provider.MailProvider;
 import com.sotatek.authservice.provider.RedisProvider;
+import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.AuthenticationAdminService;
 import com.sotatek.authservice.service.RefreshTokenService;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.authservice.thread.MailHandler;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,6 +42,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Log4j2
 public class AuthenticationAdminServiceImpl implements AuthenticationAdminService {
+
+  private final UserRepository userRepository;
 
   private final UserService userService;
 
@@ -125,5 +132,68 @@ public class AuthenticationAdminServiceImpl implements AuthenticationAdminServic
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
   }
 
+  @Override
+  public MessageResponse signOut(SignOutRequest signOutRequest,
+      HttpServletRequest httpServletRequest) {
+    String username = signOutRequest.getUsername();
+    String refreshJwt = signOutRequest.getRefreshJwt();
+    String accessToken = jwtProvider.parseJwt(httpServletRequest);
+    refreshTokenService.revokeRefreshToken(refreshJwt);
+    redisProvider.blacklistJwt(accessToken, username);
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
+  }
 
+  @Override
+  public MessageResponse resetPassword(HttpServletRequest httpServletRequest) {
+    final String accessToken = jwtProvider.parseJwt(httpServletRequest);
+    jwtProvider.validateJwtToken(accessToken);
+    if (redisProvider.isTokenBlacklisted(accessToken)) {
+      throw new InvalidAccessTokenException();
+    }
+    String username = jwtProvider.getUserNameFromJwtToken(accessToken);
+    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.ACTIVE);
+    if (Objects.isNull(user)) {
+      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
+    }
+    String code = jwtProvider.generateJwtForVerifyAdmin(username);
+    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
+  }
+
+  @Override
+  public MessageResponse newPassword(ResetPasswordRequest resetPasswordRequest) {
+    String code = resetPasswordRequest.getCode();
+    Boolean validateCode = jwtProvider.validateVerifyCode(code);
+    if (validateCode.equals(Boolean.FALSE)) {
+      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+    }
+    String username = jwtProvider.getUserNameFromVerifyCode(code);
+    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.ACTIVE);
+    if (Objects.isNull(user)) {
+      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
+    }
+    user.setPassword(encoder.encode(resetPasswordRequest.getPassword()));
+    userRepository.save(user);
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
+  }
+
+  @Override
+  public MessageResponse remove(RemoveUserRequest removeUserRequest,
+      HttpServletRequest httpServletRequest) {
+    final String accessToken = jwtProvider.parseJwt(httpServletRequest);
+    if (redisProvider.isTokenBlacklisted(accessToken)) {
+      throw new InvalidAccessTokenException();
+    }
+    String username = jwtProvider.getUserNameFromJwtToken(accessToken);
+    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.ACTIVE);
+    if (Objects.isNull(user) || !encoder.matches(removeUserRequest.getPassword(),
+        user.getPassword())) {
+      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
+    }
+    refreshTokenService.revokeRefreshTokenByUsername(username);
+    redisProvider.blacklistJwt(accessToken, username);
+    user.setDeleted(Boolean.TRUE);
+    userRepository.save(user);
+    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
+  }
 }
