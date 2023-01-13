@@ -1,4 +1,4 @@
-package com.sotatek.authservice.model.request.auth;
+package com.sotatek.authservice.model.request.admin;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -7,13 +7,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SignOutRequest {
+public class ResetPasswordRequest {
 
   @NotNull
   @NotBlank
-  private String refreshJwt;
+  private String code;
 
   @NotNull
   @NotBlank
-  private String username;
+  private String password;
 }

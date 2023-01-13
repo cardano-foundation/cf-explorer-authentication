@@ -17,7 +17,7 @@ public final class AuthConstant {
   public static final String[] AUTH_WHITELIST = {BASE_AUTH_PATH + "sign-in",
       BASE_AUTH_PATH + "sign-up", BASE_AUTH_PATH + "refresh-token", BASE_AUTH_PATH + "sign-out",
       BASE_AUTH_PATH + "transfers-wallet", BASE_ADMIN_PATH + "sign-up", BASE_ADMIN_PATH + "verify",
-      BASE_ADMIN_PATH + "sign-in", BASE_ADMIN_PATH + "refresh-token"};
+      BASE_ADMIN_PATH + "sign-in", BASE_ADMIN_PATH + "refresh-token", BASE_ADMIN_PATH + "sign-out"};
 
   public static final String[] USER_WHITELIST = {BASE_USER_PATH + "get-nonce",
       BASE_USER_PATH + "exist-username", BASE_USER_PATH + "exist-email"};

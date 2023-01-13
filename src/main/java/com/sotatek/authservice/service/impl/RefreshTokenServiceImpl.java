@@ -4,11 +4,12 @@ import com.sotatek.authservice.model.entity.RefreshTokenEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.repository.RefreshTokenRepository;
-import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.service.RefreshTokenService;
 import com.sotatek.cardanocommonapi.exceptions.TokenRefreshException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   private Long refreshExpirationMs;
 
   private final RefreshTokenRepository refreshTokenRepository;
-
-  private final UserRepository userRepository;
 
   @Override
   public Optional<RefreshTokenEntity> findByRefToken(String token) {
@@ -63,5 +62,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         .expiryDate(Instant.now().plusMillis(refreshExpirationMs))
         .token(UUID.randomUUID().toString()).build();
     return refreshTokenRepository.save(refreshToken);
+  }
+
+  @Override
+  public void revokeRefreshTokenByUsername(String username) {
+    List<RefreshTokenEntity> refreshTokenList = refreshTokenRepository.findALlByUsername(username);
+    if (Objects.nonNull(refreshTokenList) && !refreshTokenList.isEmpty()) {
+      refreshTokenList.forEach(refreshTokenRepository::delete);
+    }
   }
 }

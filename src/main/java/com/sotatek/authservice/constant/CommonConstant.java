@@ -16,6 +16,8 @@ public class CommonConstant {
 
   public static final String CODE_SUCCESS = "SS_0";
 
+  public static final String CODE_FAILURE = "SS_1";
+
   public static final String RESPONSE_FAILURE = "Failure";
 
   public static final String BASE64_PREFIX = "data:image/png;base64,";

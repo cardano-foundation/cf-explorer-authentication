@@ -49,7 +49,7 @@ mail:
   footer: 'The Sotatek company'
   expirationMs: 86400000 #1 day
 
-thread:
+thread-pool:
   core-size: 5
   max-size: 20
   queue-size: 100

@@ -1,6 +1,7 @@
 package com.sotatek.authservice.model.entity;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,6 +16,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "bookmark")
@@ -22,7 +24,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @Builder
 public class BookMarkEntity extends BaseEntity {
 
@@ -40,4 +41,21 @@ public class BookMarkEntity extends BaseEntity {
   @JoinColumn(name = "user_id")
   @EqualsAndHashCode.Exclude
   private UserEntity user;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
+    }
+    BookMarkEntity that = (BookMarkEntity) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

@@ -3,6 +3,7 @@ package com.sotatek.authservice.model.entity;
 import com.sotatek.authservice.model.enums.EUserAction;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,13 +19,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = "user_history")
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserHistoryEntity implements Serializable {
 
   @Id
@@ -48,4 +49,21 @@ public class UserHistoryEntity implements Serializable {
   @JoinColumn(name = "user_id")
   @EqualsAndHashCode.Exclude
   private UserEntity user;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+      return false;
+    }
+    UserHistoryEntity that = (UserHistoryEntity) o;
+    return id != null && Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

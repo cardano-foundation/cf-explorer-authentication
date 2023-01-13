@@ -40,7 +40,7 @@ public class JwtProvider {
 
   public String generateJwtToken(Authentication authentication, String username) {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-    return Jwts.builder().setSubject(username).setId(String.valueOf(userPrincipal.getId()))
+    return Jwts.builder().setSubject(username).setId(userPrincipal.getUsername())
         .claim(CommonConstant.AUTHORITIES_KEY,
             userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList())).setIssuedAt(new Date())
@@ -48,8 +48,8 @@ public class JwtProvider {
         .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }
 
-  public String generateJwtTokenFromUsername(UserEntity user, Long walletId) {
-    return Jwts.builder().setSubject(user.getUsername()).setId(String.valueOf(walletId))
+  public String generateJwtTokenFromUsername(UserEntity user, String id) {
+    return Jwts.builder().setSubject(user.getUsername()).setId(id)
         .claim(CommonConstant.AUTHORITIES_KEY,
             user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
@@ -67,7 +67,7 @@ public class JwtProvider {
         .parseClaimsJws(token).getBody().getSubject();
   }
 
-  public String getWalletIdFromJwtToken(String token) {
+  public String getIdFromJwtToken(String token) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
         .parseClaimsJws(token).getBody().getId();
   }
@@ -119,7 +119,7 @@ public class JwtProvider {
   }
 
   public String generateJwtTokenFromUser(UserEntity user) {
-    return Jwts.builder().setSubject(user.getUsername()).setId(String.valueOf(user.getId()))
+    return Jwts.builder().setSubject(user.getUsername()).setId(user.getEmail())
         .claim(CommonConstant.AUTHORITIES_KEY,
             user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
