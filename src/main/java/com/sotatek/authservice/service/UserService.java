@@ -2,6 +2,7 @@ package com.sotatek.authservice.service;
 
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.enums.EStatus;
+import com.sotatek.authservice.model.request.EditUserRequest;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.response.ActivityLogResponse;
@@ -36,8 +37,7 @@ public interface UserService extends UserDetailsService {
    * description: edit user
    * @update: 05/12/2022
    */
-  UserResponse editUser(String email, MultipartFile avatar,
-      HttpServletRequest httpServletRequest);
+  UserResponse editAvatar(MultipartFile avatar, HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
@@ -119,4 +119,13 @@ public interface UserService extends UserDetailsService {
    * @update:
    */
   UserEntity findByUsernameAndStatus(String username, EStatus status);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 16/1/2023
+   * description: edit user
+   * @update:
+   */
+  UserResponse editUser(EditUserRequest editUserRequest, HttpServletRequest httpServletRequest);
+
 }

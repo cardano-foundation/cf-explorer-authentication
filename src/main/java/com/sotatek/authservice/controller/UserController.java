@@ -1,5 +1,6 @@
 package com.sotatek.authservice.controller;
 
+import com.sotatek.authservice.model.request.EditUserRequest;
 import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
@@ -7,11 +8,11 @@ import com.sotatek.authservice.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,10 +36,16 @@ public class UserController {
     return ResponseEntity.ok(userService.checkExistUsername(username));
   }
 
+  @PutMapping("/edit-avatar")
+  public ResponseEntity<UserResponse> edit(@RequestParam("avatar") MultipartFile avatar,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(userService.editAvatar(avatar, httpServletRequest));
+  }
+
   @PutMapping("/edit")
-  public ResponseEntity<UserResponse> edit(@Email @RequestParam("email") String email,
-      @RequestParam("avatar") MultipartFile avatar, HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(userService.editUser(email, avatar, httpServletRequest));
+  public ResponseEntity<UserResponse> edit(@RequestBody EditUserRequest editUserRequest,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(userService.editUser(editUserRequest, httpServletRequest));
   }
 
   @GetMapping("/info")
