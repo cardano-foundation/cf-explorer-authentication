@@ -11,6 +11,7 @@ import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.model.enums.ERole;
 import com.sotatek.authservice.model.enums.EStatus;
 import com.sotatek.authservice.model.enums.EUserAction;
+import com.sotatek.authservice.model.request.EditUserRequest;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
 import com.sotatek.authservice.model.response.ActivityLogResponse;
@@ -27,7 +28,6 @@ import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
-import com.sotatek.cardanocommonapi.utils.StringUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Base64;
@@ -42,7 +42,6 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -96,18 +95,13 @@ public class UserServiceImpl implements UserService {
     return userRepository.existsByUsername(username);
   }
 
-  @Transactional(rollbackFor = {RuntimeException.class})
   @Override
-  public UserResponse editUser(String email, MultipartFile avatar,
-      HttpServletRequest httpServletRequest) {
+  public UserResponse editAvatar(MultipartFile avatar, HttpServletRequest httpServletRequest) {
     log.info("edit user is running...");
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
     UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    if (Boolean.TRUE.equals(StringUtils.isNotBlank(email))) {
-      user.setEmail(email);
-    }
     if (Objects.nonNull(avatar)) {
       StringBuilder base64Image = new StringBuilder(CommonConstant.BASE64_PREFIX);
       try {
@@ -200,6 +194,27 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserEntity findByUsernameAndStatus(String username, EStatus status) {
     return userRepository.findByUsernameAndStatus(username, status).orElse(null);
+  }
+
+  @Override
+  public UserResponse editUser(EditUserRequest editUserRequest,
+      HttpServletRequest httpServletRequest) {
+    log.info("edit user is running...");
+    String usernameReq = editUserRequest.getUsername();
+    String emailReq = editUserRequest.getEmail();
+    String token = jwtProvider.parseJwt(httpServletRequest);
+    String username = jwtProvider.getUserNameFromJwtToken(token);
+    UserEntity user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+    if (Objects.nonNull(emailReq) && Boolean.FALSE.equals(checkExistEmail(emailReq))) {
+      user.setEmail(emailReq);
+    }
+    if (Objects.nonNull(usernameReq) && Boolean.FALSE.equals(checkExistUsername(usernameReq))) {
+      user.setUsername(usernameReq);
+    }
+    UserEntity userEdit = userRepository.save(user);
+    userHistoryService.saveUserHistory(EUserAction.UPDATED, null, Instant.now(), null, userEdit);
+    return userMapper.entityToResponse(userEdit);
   }
 
   /*
