@@ -37,7 +37,7 @@ public class UserController {
   }
 
   @PutMapping("/edit-avatar")
-  public ResponseEntity<UserResponse> edit(@RequestParam("avatar") MultipartFile avatar,
+  public ResponseEntity<UserResponse> editAvatar(@RequestParam("avatar") MultipartFile avatar,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(userService.editAvatar(avatar, httpServletRequest));
   }

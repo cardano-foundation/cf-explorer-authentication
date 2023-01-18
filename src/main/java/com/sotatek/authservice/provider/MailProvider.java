@@ -35,15 +35,16 @@ public class MailProvider {
       MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);
       helper.setFrom(mail.getFrom(), mail.getSender());
       helper.setTo(user.getEmail());
-      helper.setSubject(mail.getSubjectRegistration());
       StringBuilder verifyURL = new StringBuilder(domainClient);
       //Todo set page link
       switch (emailType) {
         case CREATED:
           verifyURL.append("/login?code=").append(code);
+          helper.setSubject(mail.getSubjectRegistration());
           break;
         case RESET_PASSWORD:
           verifyURL.append("/reset-password?code=").append(code);
+          helper.setSubject(mail.getSubjectResetPassword());
           break;
         default:
           break;
