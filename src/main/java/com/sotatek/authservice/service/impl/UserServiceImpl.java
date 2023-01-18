@@ -18,6 +18,7 @@ import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
 import com.sotatek.authservice.provider.JwtProvider;
+import com.sotatek.authservice.provider.RedisProvider;
 import com.sotatek.authservice.repository.BookMarkRepository;
 import com.sotatek.authservice.repository.PrivateNoteRepository;
 import com.sotatek.authservice.repository.RoleRepository;
@@ -56,6 +57,8 @@ public class UserServiceImpl implements UserService {
   private final UserHistoryService userHistoryService;
 
   private final JwtProvider jwtProvider;
+
+  private final RedisProvider redisProvider;
 
   private final BookMarkRepository bookMarkRepository;
 
@@ -97,11 +100,10 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserResponse editAvatar(MultipartFile avatar, HttpServletRequest httpServletRequest) {
-    log.info("edit user is running...");
+    log.info("edit user image is running...");
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
-    UserEntity user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+    UserEntity user = findByUsername(username);
     if (Objects.nonNull(avatar)) {
       StringBuilder base64Image = new StringBuilder(CommonConstant.BASE64_PREFIX);
       try {
@@ -204,17 +206,30 @@ public class UserServiceImpl implements UserService {
     String emailReq = editUserRequest.getEmail();
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
-    UserEntity user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    if (Objects.nonNull(emailReq) && Boolean.FALSE.equals(checkExistEmail(emailReq))) {
+    String id = null;
+    UserEntity user = findByUsername(username);
+    if (Objects.nonNull(emailReq)) {
+      if (Boolean.TRUE.equals(checkExistEmail(emailReq))) {
+        throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
+      }
       user.setEmail(emailReq);
     }
-    if (Objects.nonNull(usernameReq) && Boolean.FALSE.equals(checkExistUsername(usernameReq))) {
+    if (Objects.nonNull(usernameReq)) {
+      if (Boolean.TRUE.equals(checkExistUsername(usernameReq))) {
+        throw new BusinessException(CommonErrorCode.USERNAME_IS_ALREADY_EXIST);
+      }
       user.setUsername(usernameReq);
+      id = jwtProvider.getIdFromJwtToken(token);
     }
     UserEntity userEdit = userRepository.save(user);
+    UserResponse response = userMapper.entityToResponse(userEdit);
+    if (Objects.nonNull(id)) {
+      String jwtToken = jwtProvider.generateJwtTokenFromUsername(userEdit, id);
+      response.setJwtToken(jwtToken);
+      redisProvider.blacklistJwt(token, username);
+    }
     userHistoryService.saveUserHistory(EUserAction.UPDATED, null, Instant.now(), null, userEdit);
-    return userMapper.entityToResponse(userEdit);
+    return response;
   }
 
   /*

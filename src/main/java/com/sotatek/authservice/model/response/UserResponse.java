@@ -14,4 +14,6 @@ public class UserResponse {
   private String email;
 
   private String avatar;
+
+  private String jwtToken;
 }
