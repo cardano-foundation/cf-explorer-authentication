@@ -18,6 +18,7 @@ import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -87,5 +88,12 @@ public class BookMarkServiceImpl implements BookMarkService {
         bookMark.getType() + "/" + bookMark.getKeyword(), bookMark.getUser());
     bookMarkRepository.delete(bookMark);
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
+  }
+
+  @Override
+  public List<String> findKeyBookMark(HttpServletRequest httpServletRequest) {
+    String token = jwtProvider.parseJwt(httpServletRequest);
+    String username = jwtProvider.getUserNameFromJwtToken(token);
+    return bookMarkRepository.findAllKeyBookMarkByUser(username);
   }
 }

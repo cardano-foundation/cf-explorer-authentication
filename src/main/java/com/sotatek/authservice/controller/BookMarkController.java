@@ -7,6 +7,7 @@ import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.service.BookMarkService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,7 @@ public class BookMarkController {
 
   @PostMapping("/add")
   public ResponseEntity<MessageResponse> addBookMark(
-      @Valid @RequestBody BookMarkRequest bookMarkRequest,
-      HttpServletRequest httpServletRequest) {
+      @Valid @RequestBody BookMarkRequest bookMarkRequest, HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));
   }
 
@@ -50,5 +50,10 @@ public class BookMarkController {
   @DeleteMapping("/delete/{bookMarkId}")
   public ResponseEntity<MessageResponse> deleteById(@PathVariable Long bookMarkId) {
     return ResponseEntity.ok(bookMarkService.deleteById(bookMarkId));
+  }
+
+  @GetMapping("/find-all-key")
+  public ResponseEntity<List<String>> findKeyBookMark(HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest));
   }
 }
