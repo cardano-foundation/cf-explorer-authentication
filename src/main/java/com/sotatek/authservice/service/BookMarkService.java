@@ -5,6 +5,7 @@ import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -16,7 +17,8 @@ public interface BookMarkService {
    * description: add bookmark
    * @update: 10/1/2023
    */
-  MessageResponse addBookMark(BookMarkRequest bookMarkRequest, HttpServletRequest httpServletRequest);
+  MessageResponse addBookMark(BookMarkRequest bookMarkRequest,
+      HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5
@@ -34,4 +36,12 @@ public interface BookMarkService {
    * @update: 10/1/2023
    */
   MessageResponse deleteById(Long bookMarkId);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 30/01/2023
+   * description: find all bookmark key
+   * @update:
+   */
+  List<String> findKeyBookMark(HttpServletRequest httpServletRequest);
 }

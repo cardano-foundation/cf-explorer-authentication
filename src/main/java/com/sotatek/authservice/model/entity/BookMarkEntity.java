@@ -27,10 +27,10 @@ import org.hibernate.Hibernate;
 @Builder
 public class BookMarkEntity extends BaseEntity {
 
-  @Column(name = "url_page", nullable = false)
+  @Column(name = "url_page")
   private String urlPage;
 
-  @Column(name = "keyword")
+  @Column(name = "keyword", nullable = false)
   private String keyword;
 
   @Enumerated(EnumType.STRING)
