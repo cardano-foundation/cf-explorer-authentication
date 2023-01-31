@@ -2,6 +2,7 @@ package com.sotatek.authservice.controller;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
+import com.sotatek.authservice.model.request.bookmark.BookMarksRequest;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
@@ -55,5 +56,12 @@ public class BookMarkController {
   @GetMapping("/find-all-key")
   public ResponseEntity<List<String>> findKeyBookMark(HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest));
+  }
+
+  @PostMapping("/add-list")
+  public ResponseEntity<List<String>> addBookMark(
+      @Valid @RequestBody BookMarksRequest bookMarksRequest,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(bookMarkService.addBookMarks(bookMarksRequest, httpServletRequest));
   }
 }

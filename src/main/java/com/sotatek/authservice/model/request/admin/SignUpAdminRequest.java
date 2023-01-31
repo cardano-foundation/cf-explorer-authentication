@@ -24,6 +24,7 @@ public class SignUpAdminRequest {
   @NonNull
   @NotBlank
   private String password;
+
   @NonNull
   private ERole role;
 }
