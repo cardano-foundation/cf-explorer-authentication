@@ -7,6 +7,7 @@ import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.enums.EBookMarkType;
 import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
+import com.sotatek.authservice.model.request.bookmark.BookMarksRequest;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
@@ -18,6 +19,7 @@ import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
@@ -54,7 +56,7 @@ public class BookMarkServiceImpl implements BookMarkService {
       throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);
     }
     Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId());
-    if (countCurrent > CommonConstant.LIMIT_BOOKMARK) {
+    if (countCurrent >= CommonConstant.LIMIT_BOOKMARK) {
       throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);
     }
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
@@ -95,5 +97,31 @@ public class BookMarkServiceImpl implements BookMarkService {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
     return bookMarkRepository.findAllKeyBookMarkByUser(username);
+  }
+
+  @Override
+  public List<String> addBookMarks(BookMarksRequest bookMarksRequest,
+      HttpServletRequest httpServletRequest) {
+    List<String> keyLimits = new ArrayList<>();
+    String token = jwtProvider.parseJwt(httpServletRequest);
+    String username = jwtProvider.getUserNameFromJwtToken(token);
+    UserEntity user = userService.findByUsername(username);
+    bookMarksRequest.getBookMarks().forEach(bookMarkRequest -> {
+      if (Objects.isNull(
+          bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
+              bookMarkRequest.getType()))) {
+        Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId());
+        if (countCurrent < CommonConstant.LIMIT_BOOKMARK) {
+          BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
+          bookMark.setUser(user);
+          bookMarkRepository.save(bookMark);
+          userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(),
+              bookMarkRequest.getType() + "/" + bookMarkRequest.getKeyword(), user);
+        } else {
+          keyLimits.add(bookMarkRequest.getKeyword());
+        }
+      }
+    });
+    return keyLimits;
   }
 }

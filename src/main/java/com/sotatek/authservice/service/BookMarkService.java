@@ -2,6 +2,7 @@ package com.sotatek.authservice.service;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
+import com.sotatek.authservice.model.request.bookmark.BookMarksRequest;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
@@ -44,4 +45,13 @@ public interface BookMarkService {
    * @update:
    */
   List<String> findKeyBookMark(HttpServletRequest httpServletRequest);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 31/01/2023
+   * description: add bookmark list
+   * @update:
+   */
+  List<String> addBookMarks(BookMarksRequest bookMarksRequest,
+      HttpServletRequest httpServletRequest);
 }

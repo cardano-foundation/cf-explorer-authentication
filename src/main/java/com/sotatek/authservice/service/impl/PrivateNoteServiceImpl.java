@@ -51,7 +51,7 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
       throw new BusinessException(CommonErrorCode.PRIVATE_NOTE_IS_EXIST);
     }
     Integer countCurrent = noteRepository.getCountNoteByUser(user.getId());
-    if (countCurrent > CommonConstant.LIMIT_NOTE) {
+    if (countCurrent >= CommonConstant.LIMIT_NOTE) {
       throw new BusinessException(CommonErrorCode.LIMIT_NOTE_IS_2000);
     }
     PrivateNoteEntity privateNote = noteMapper.requestToEntity(privateNoteRequest);
