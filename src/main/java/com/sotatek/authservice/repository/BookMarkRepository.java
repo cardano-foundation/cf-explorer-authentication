@@ -45,8 +45,8 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
    * description: find all bookmark key by username
    * @update:
    */
-  @Query(value = "SELECT be.keyword FROM BookMarkEntity be "
+  @Query(value = "SELECT be FROM BookMarkEntity be "
       + "JOIN UserEntity ue ON be.user.id = ue.id "
       + "WHERE ue.username = :username")
-  List<String> findAllKeyBookMarkByUser(@Param("username") String username);
+  List<BookMarkEntity> findAllKeyBookMarkByUser(@Param("username") String username);
 }
