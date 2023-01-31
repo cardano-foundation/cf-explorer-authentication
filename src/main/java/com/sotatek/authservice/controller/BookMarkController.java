@@ -54,7 +54,7 @@ public class BookMarkController {
   }
 
   @GetMapping("/find-all-key")
-  public ResponseEntity<List<String>> findKeyBookMark(HttpServletRequest httpServletRequest) {
+  public ResponseEntity<List<BookMarkResponse>> findKeyBookMark(HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest));
   }
 

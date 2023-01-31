@@ -44,7 +44,7 @@ public interface BookMarkService {
    * description: find all bookmark key
    * @update:
    */
-  List<String> findKeyBookMark(HttpServletRequest httpServletRequest);
+  List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest);
 
   /*
    * @author: phuc.nguyen5

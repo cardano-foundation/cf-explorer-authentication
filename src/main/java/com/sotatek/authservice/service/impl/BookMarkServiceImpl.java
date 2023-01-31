@@ -93,10 +93,11 @@ public class BookMarkServiceImpl implements BookMarkService {
   }
 
   @Override
-  public List<String> findKeyBookMark(HttpServletRequest httpServletRequest) {
+  public List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest) {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
-    return bookMarkRepository.findAllKeyBookMarkByUser(username);
+    List<BookMarkEntity> bookMarks = bookMarkRepository.findAllKeyBookMarkByUser(username);
+    return bookMarkMapper.listEntityToResponse(bookMarks);
   }
 
   @Override
