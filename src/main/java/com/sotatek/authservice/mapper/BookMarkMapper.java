@@ -15,4 +15,6 @@ public interface BookMarkMapper {
   BookMarkEntity requestToEntity(BookMarkRequest request);
 
   List<BookMarkResponse> listEntityToResponse(List<BookMarkEntity> bookMarks);
+
+  BookMarkResponse entityToResponse(BookMarkEntity bookMark);
 }

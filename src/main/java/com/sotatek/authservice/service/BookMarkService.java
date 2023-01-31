@@ -18,7 +18,7 @@ public interface BookMarkService {
    * description: add bookmark
    * @update: 10/1/2023
    */
-  MessageResponse addBookMark(BookMarkRequest bookMarkRequest,
+  BookMarkResponse addBookMark(BookMarkRequest bookMarkRequest,
       HttpServletRequest httpServletRequest);
 
   /*
