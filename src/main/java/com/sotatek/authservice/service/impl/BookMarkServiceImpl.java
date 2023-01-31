@@ -45,7 +45,7 @@ public class BookMarkServiceImpl implements BookMarkService {
   private static final BookMarkMapper bookMarkMapper = BookMarkMapper.INSTANCE;
 
   @Override
-  public MessageResponse addBookMark(BookMarkRequest bookMarkRequest,
+  public BookMarkResponse addBookMark(BookMarkRequest bookMarkRequest,
       HttpServletRequest httpServletRequest) {
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
@@ -61,10 +61,10 @@ public class BookMarkServiceImpl implements BookMarkService {
     }
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
     bookMark.setUser(user);
-    bookMarkRepository.save(bookMark);
+    BookMarkEntity bookMarkRes = bookMarkRepository.save(bookMark);
     userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(),
         bookMarkRequest.getType() + "/" + bookMarkRequest.getKeyword(), user);
-    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
+    return bookMarkMapper.entityToResponse(bookMarkRes);
   }
 
   @Override

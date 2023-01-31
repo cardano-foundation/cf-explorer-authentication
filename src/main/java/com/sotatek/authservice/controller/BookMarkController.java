@@ -34,7 +34,7 @@ public class BookMarkController {
   private final BookMarkService bookMarkService;
 
   @PostMapping("/add")
-  public ResponseEntity<MessageResponse> addBookMark(
+  public ResponseEntity<BookMarkResponse> addBookMark(
       @Valid @RequestBody BookMarkRequest bookMarkRequest, HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));
   }
