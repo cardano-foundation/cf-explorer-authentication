@@ -15,6 +15,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +28,8 @@ import org.hibernate.Hibernate;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserHistoryEntity implements Serializable {
 
   @Id
@@ -36,14 +40,8 @@ public class UserHistoryEntity implements Serializable {
   @Enumerated(EnumType.STRING)
   private EUserAction userAction;
 
-  @Column(name = "ip_address")
-  private String ipAddress;
-
   @Column(name = "action_time")
   private Instant actionTime;
-
-  @Column(name = "description")
-  private String description;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")

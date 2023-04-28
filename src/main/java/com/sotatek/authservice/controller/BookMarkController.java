@@ -1,8 +1,10 @@
 package com.sotatek.authservice.controller;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
 import com.sotatek.authservice.model.request.bookmark.BookMarksRequest;
+import com.sotatek.authservice.model.response.AddBookMarkResponse;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
@@ -41,11 +43,11 @@ public class BookMarkController {
 
   @GetMapping("/find-all")
   public ResponseEntity<BasePageResponse<BookMarkResponse>> findBookMarkByType(
-      @RequestParam("type") EBookMarkType type,
+      @RequestParam("type") EBookMarkType type, @RequestParam("network") ENetworkType network,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(
-        bookMarkService.findBookMarkByType(httpServletRequest, type, pageable));
+        bookMarkService.findBookMarkByType(httpServletRequest, type, network, pageable));
   }
 
   @DeleteMapping("/delete/{bookMarkId}")
@@ -54,12 +56,14 @@ public class BookMarkController {
   }
 
   @GetMapping("/find-all-key")
-  public ResponseEntity<List<BookMarkResponse>> findKeyBookMark(HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest));
+  public ResponseEntity<List<BookMarkResponse>> findKeyBookMark(
+      @RequestParam("network") ENetworkType network,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest, network));
   }
 
   @PostMapping("/add-list")
-  public ResponseEntity<List<String>> addBookMark(
+  public ResponseEntity<AddBookMarkResponse> addBookMarks(
       @Valid @RequestBody BookMarksRequest bookMarksRequest,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(bookMarkService.addBookMarks(bookMarksRequest, httpServletRequest));

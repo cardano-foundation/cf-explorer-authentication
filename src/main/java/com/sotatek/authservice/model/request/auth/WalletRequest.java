@@ -22,4 +22,7 @@ public class WalletRequest {
   private String networkId;
 
   private ENetworkType networkType;
+
+  @NotNull
+  private String signature;
 }

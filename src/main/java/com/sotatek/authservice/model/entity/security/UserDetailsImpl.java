@@ -2,7 +2,6 @@ package com.sotatek.authservice.model.entity.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sotatek.authservice.model.entity.UserEntity;
-import com.sotatek.authservice.model.entity.WalletEntity;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -35,21 +34,14 @@ public class UserDetailsImpl implements UserDetails {
     this.authorities = authorities;
   }
 
-  public static UserDetailsImpl build(UserEntity user, WalletEntity wallet) {
-    List<GrantedAuthority> authorities = user.getRoles().stream()
-        .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-        .collect(Collectors.toList());
-    return new UserDetailsImpl(wallet.getId(), wallet.getAddress(), user.getEmail(),
-        wallet.getNonceEncode(), authorities);
-  }
-
-  public static UserDetailsImpl build(UserEntity user) {
+  public static UserDetailsImpl build(UserEntity user, String password) {
     List<GrantedAuthority> authorities =
         user.getRoles().stream()
             .map(role -> new SimpleGrantedAuthority(role.getName().name()))
             .collect(Collectors.toList());
+
     return new UserDetailsImpl(
-        user.getId(), user.getEmail(), user.getEmail(), user.getPassword(), authorities);
+        user.getId(), user.getUsername(), user.getEmail(), password, authorities);
   }
 
 

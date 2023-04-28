@@ -32,11 +32,6 @@ public class RefreshTokenEntity extends BaseEntity {
   private Instant expiryDate;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "wallet_id")
-  @EqualsAndHashCode.Exclude
-  private WalletEntity wallet;
-
-  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")
   @EqualsAndHashCode.Exclude
   private UserEntity user;

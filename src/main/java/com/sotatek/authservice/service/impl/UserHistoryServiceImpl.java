@@ -18,14 +18,9 @@ public class UserHistoryServiceImpl implements UserHistoryService {
   private final UserHistoryRepository userHistoryRepository;
 
   @Override
-  public void saveUserHistory(EUserAction action, String ipAddress, Instant actionTime,
-      String description, UserEntity user) {
-    UserHistoryEntity authenticationHistory = new UserHistoryEntity();
-    authenticationHistory.setUser(user);
-    authenticationHistory.setActionTime(actionTime);
-    authenticationHistory.setIpAddress(ipAddress);
-    authenticationHistory.setUserAction(action);
-    authenticationHistory.setDescription(description);
-    userHistoryRepository.save(authenticationHistory);
+  public void saveUserHistory(EUserAction action, Instant actionTime, UserEntity user) {
+    UserHistoryEntity userHistory = UserHistoryEntity.builder().user(user).actionTime(actionTime)
+        .userAction(action).build();
+    userHistoryRepository.save(userHistory);
   }
 }

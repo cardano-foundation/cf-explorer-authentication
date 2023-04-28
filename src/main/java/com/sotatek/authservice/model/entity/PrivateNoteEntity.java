@@ -1,8 +1,11 @@
 package com.sotatek.authservice.model.entity;
 
+import com.sotatek.authservice.model.enums.ENetworkType;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -25,8 +28,12 @@ public class PrivateNoteEntity extends BaseEntity {
   @Column(name = "note")
   private String note;
 
-  @Column(name = "tx_hash", unique = true)
+  @Column(name = "tx_hash", nullable = false)
   private String txHash;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "network", nullable = false)
+  private ENetworkType network;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")

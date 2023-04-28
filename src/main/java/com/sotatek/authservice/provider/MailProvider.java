@@ -36,10 +36,9 @@ public class MailProvider {
       helper.setFrom(mail.getFrom(), mail.getSender());
       helper.setTo(user.getEmail());
       StringBuilder verifyURL = new StringBuilder(domainClient);
-      //Todo set page link
       switch (emailType) {
         case CREATED:
-          verifyURL.append("/login?code=").append(code);
+          verifyURL.append("/verify-email?code=").append(code);
           helper.setSubject(mail.getSubjectRegistration());
           break;
         case RESET_PASSWORD:

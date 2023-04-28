@@ -1,27 +1,18 @@
 package com.sotatek.authservice.service;
 
 import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.enums.EStatus;
 import com.sotatek.authservice.model.request.EditUserRequest;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
-import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService extends UserDetailsService {
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 19/10/2022
-   * description: get nonce value by public address from user table
-   * @update:
-   */
-  String findNonceByAddress(String address);
 
   /*
    * @author: phuc.nguyen5
@@ -45,15 +36,7 @@ public interface UserService extends UserDetailsService {
    * description: get user info
    * @update:
    */
-  UserInfoResponse infoUser(HttpServletRequest httpServletRequest);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 07/12/2022
-   * description: get log activity user
-   * @update:
-   */
-  List<ActivityLogResponse> getLog(HttpServletRequest httpServletRequest);
+  UserInfoResponse infoUser(HttpServletRequest httpServletRequest, ENetworkType network);
 
   /*
    * @author: phuc.nguyen5
@@ -62,15 +45,6 @@ public interface UserService extends UserDetailsService {
    * @update:
    */
   UserEntity saveUser(SignUpRequest signUpRequest);
-
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 22/12/2022
-   * description: find user by stake address wallet
-   * @update:
-   */
-  UserEntity findUserByWalletAddress(String address);
 
   /*
    * @author: phuc.nguyen5
@@ -102,7 +76,7 @@ public interface UserService extends UserDetailsService {
    * description: active user admin
    * @update:
    */
-  UserEntity activeUserAdmin(String username);
+  void activeUser(String username);
 
   /*
    * @author: phuc.nguyen5
@@ -128,4 +102,11 @@ public interface UserService extends UserDetailsService {
    */
   UserResponse editUser(EditUserRequest editUserRequest, HttpServletRequest httpServletRequest);
 
+  /*
+   * @author: phuc.nguyen5
+   * @since: 24/02/2023
+   * description: save empty user
+   * @update:
+   */
+  UserEntity saveUser(String address);
 }

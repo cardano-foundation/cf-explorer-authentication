@@ -5,23 +5,22 @@ import com.sotatek.authservice.mapper.BookMarkMapper;
 import com.sotatek.authservice.model.entity.BookMarkEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.enums.EBookMarkType;
-import com.sotatek.authservice.model.enums.EUserAction;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
 import com.sotatek.authservice.model.request.bookmark.BookMarksRequest;
+import com.sotatek.authservice.model.response.AddBookMarkResponse;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.repository.BookMarkRepository;
 import com.sotatek.authservice.service.BookMarkService;
-import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -40,41 +39,37 @@ public class BookMarkServiceImpl implements BookMarkService {
 
   private final BookMarkRepository bookMarkRepository;
 
-  private final UserHistoryService userHistoryService;
-
   private static final BookMarkMapper bookMarkMapper = BookMarkMapper.INSTANCE;
 
   @Override
   public BookMarkResponse addBookMark(BookMarkRequest bookMarkRequest,
       HttpServletRequest httpServletRequest) {
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
+    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
     UserEntity user = userService.findByUsername(username);
     if (Objects.nonNull(
         bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
-            bookMarkRequest.getType()))) {
+            bookMarkRequest.getType(), bookMarkRequest.getNetwork()))) {
       throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);
     }
-    Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId());
+    Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId(),
+        bookMarkRequest.getNetwork());
     if (countCurrent >= CommonConstant.LIMIT_BOOKMARK) {
       throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);
     }
     BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
     bookMark.setUser(user);
     BookMarkEntity bookMarkRes = bookMarkRepository.save(bookMark);
-    userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(),
-        bookMarkRequest.getType() + "/" + bookMarkRequest.getKeyword(), user);
     return bookMarkMapper.entityToResponse(bookMarkRes);
   }
 
   @Override
   public BasePageResponse<BookMarkResponse> findBookMarkByType(
-      HttpServletRequest httpServletRequest, EBookMarkType bookMarkType, Pageable pageable) {
+      HttpServletRequest httpServletRequest, EBookMarkType bookMarkType, ENetworkType network,
+      Pageable pageable) {
     BasePageResponse<BookMarkResponse> response = new BasePageResponse<>();
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
+    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
     Page<BookMarkEntity> bookMarkPage = bookMarkRepository.findAllBookMarkByUserAndType(username,
-        bookMarkType, pageable);
+        bookMarkType, network, pageable);
     if (!bookMarkPage.isEmpty()) {
       response.setData(bookMarkMapper.listEntityToResponse(bookMarkPage.getContent()));
     }
@@ -86,43 +81,41 @@ public class BookMarkServiceImpl implements BookMarkService {
   public MessageResponse deleteById(Long bookMarkId) {
     BookMarkEntity bookMark = bookMarkRepository.findById(bookMarkId)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    userHistoryService.saveUserHistory(EUserAction.REMOVE_BOOKMARK, null, Instant.now(),
-        bookMark.getType() + "/" + bookMark.getKeyword(), bookMark.getUser());
     bookMarkRepository.delete(bookMark);
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Override
-  public List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest) {
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
-    List<BookMarkEntity> bookMarks = bookMarkRepository.findAllKeyBookMarkByUser(username);
+  public List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest,
+      ENetworkType network) {
+    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
+    List<BookMarkEntity> bookMarks = bookMarkRepository.findAllKeyBookMarkByUser(username, network);
     return bookMarkMapper.listEntityToResponse(bookMarks);
   }
 
   @Override
-  public List<String> addBookMarks(BookMarksRequest bookMarksRequest,
+  public AddBookMarkResponse addBookMarks(BookMarksRequest bookMarksRequest,
       HttpServletRequest httpServletRequest) {
-    List<String> keyLimits = new ArrayList<>();
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
+    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
     UserEntity user = userService.findByUsername(username);
+    AtomicReference<Integer> pass = new AtomicReference<>(0);
+    AtomicReference<Integer> fail = new AtomicReference<>(0);
     bookMarksRequest.getBookMarks().forEach(bookMarkRequest -> {
       if (Objects.isNull(
           bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
-              bookMarkRequest.getType()))) {
-        Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId());
+              bookMarkRequest.getType(), bookMarkRequest.getNetwork()))) {
+        Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId(),
+            bookMarkRequest.getNetwork());
         if (countCurrent < CommonConstant.LIMIT_BOOKMARK) {
           BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
           bookMark.setUser(user);
           bookMarkRepository.save(bookMark);
-          userHistoryService.saveUserHistory(EUserAction.ADD_BOOKMARK, null, Instant.now(),
-              bookMarkRequest.getType() + "/" + bookMarkRequest.getKeyword(), user);
+          pass.getAndSet(pass.get() + 1);
         } else {
-          keyLimits.add(bookMarkRequest.getKeyword());
+          fail.getAndSet(fail.get() + 1);
         }
       }
     });
-    return keyLimits;
+    return AddBookMarkResponse.builder().passNumber(pass.get()).failNumber(fail.get()).build();
   }
 }

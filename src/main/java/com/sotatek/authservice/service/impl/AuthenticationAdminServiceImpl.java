@@ -7,7 +7,6 @@ import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.model.enums.EStatus;
 import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.request.admin.RemoveUserRequest;
-import com.sotatek.authservice.model.request.admin.ResetPasswordRequest;
 import com.sotatek.authservice.model.request.admin.SignInAdminRequest;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignOutRequest;
@@ -73,24 +72,8 @@ public class AuthenticationAdminServiceImpl implements AuthenticationAdminServic
     }
     signUpAdmin.setPassword(encoder.encode(signUpAdmin.getPassword()));
     UserEntity user = userService.saveUserAdmin(signUpAdmin);
-    String code = jwtProvider.generateJwtForVerifyAdmin(user.getUsername());
-    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, code));
-    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
-  }
-
-  @Override
-  public MessageResponse checkVerifySignUpByEmail(String code) {
-    Boolean validateCode = jwtProvider.validateVerifyCode(code);
-    if (validateCode.equals(Boolean.FALSE)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
-    }
-    String username = jwtProvider.getUserNameFromVerifyCode(code);
-    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.PENDING);
-    if (Objects.nonNull(user)) {
-      userService.activeUserAdmin(username);
-    } else {
-      return new MessageResponse(CommonErrorCode.VERIFY_CODE_NOT_PENDING);
-    }
+    String verifyCode = jwtProvider.generateCodeForVerify(user.getUsername());
+    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
@@ -140,40 +123,6 @@ public class AuthenticationAdminServiceImpl implements AuthenticationAdminServic
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
     refreshTokenService.revokeRefreshToken(refreshJwt);
     redisProvider.blacklistJwt(accessToken, username);
-    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
-  }
-
-  @Override
-  public MessageResponse resetPassword(HttpServletRequest httpServletRequest) {
-    final String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    jwtProvider.validateJwtToken(accessToken);
-    if (redisProvider.isTokenBlacklisted(accessToken)) {
-      throw new InvalidAccessTokenException();
-    }
-    String username = jwtProvider.getUserNameFromJwtToken(accessToken);
-    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.ACTIVE);
-    if (Objects.isNull(user)) {
-      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
-    }
-    String code = jwtProvider.generateJwtForVerifyAdmin(username);
-    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));
-    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
-  }
-
-  @Override
-  public MessageResponse newPassword(ResetPasswordRequest resetPasswordRequest) {
-    String code = resetPasswordRequest.getCode();
-    Boolean validateCode = jwtProvider.validateVerifyCode(code);
-    if (validateCode.equals(Boolean.FALSE)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
-    }
-    String username = jwtProvider.getUserNameFromVerifyCode(code);
-    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.ACTIVE);
-    if (Objects.isNull(user)) {
-      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
-    }
-    user.setPassword(encoder.encode(resetPasswordRequest.getPassword()));
-    userRepository.save(user);
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 

@@ -33,14 +33,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public RefreshTokenEntity addRefreshToken(WalletEntity wallet) {
-    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().wallet(wallet)
-        .expiryDate(Instant.now().plusMillis(refreshExpirationMs))
-        .token(UUID.randomUUID().toString()).build();
-    return refreshTokenRepository.save(refreshToken);
-  }
-
-  @Override
   public RefreshTokenEntity verifyExpiration(RefreshTokenEntity token) {
     if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
       refreshTokenRepository.delete(token);

@@ -1,6 +1,7 @@
 package com.sotatek.authservice.repository;
 
 import com.sotatek.authservice.model.entity.PrivateNoteEntity;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,8 +18,9 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
    * description: get count note by user
    * @update:
    */
-  @Query(value = "SELECT count(pn.id) FROM PrivateNoteEntity pn WHERE pn.user.id = :userId")
-  Integer getCountNoteByUser(@Param("userId") Long userId);
+  @Query(value = "SELECT count(pn.id) FROM PrivateNoteEntity pn WHERE pn.user.id = :userId AND pn.network = :network")
+  Integer getCountNoteByUser(@Param("userId") Long userId, @Param("network")
+  ENetworkType network);
 
   /*
    * @author: phuc.nguyen5
@@ -26,8 +28,10 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
    * description: check exist note
    * @update:
    */
-  @Query(value = "SELECT pn.id FROM PrivateNoteEntity pn WHERE pn.user.id = :userId AND pn.txHash = :txHash")
-  Long checkExistNote(@Param("userId") Long userId, @Param("txHash") String txHash);
+  @Query(value = "SELECT pn.id FROM PrivateNoteEntity pn WHERE pn.user.id = :userId AND pn.txHash = :txHash AND pn.network = :network")
+  Long checkExistNote(@Param("userId") Long userId, @Param("txHash") String txHash,
+      @Param("network")
+      ENetworkType network);
 
   /*
    * @author: phuc.nguyen5
@@ -37,6 +41,8 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
    */
   @Query(value = "SELECT pn FROM PrivateNoteEntity pn "
       + "JOIN UserEntity ue ON pn.user.id = ue.id "
-      + "WHERE ue.username = :username")
-  Page<PrivateNoteEntity> findAllNote(@Param("username") String username, Pageable pageable);
+      + "WHERE ue.username = :username AND pn.network = :network "
+      + "ORDER BY pn.createdDate DESC")
+  Page<PrivateNoteEntity> findAllNote(@Param("username") String username, @Param("network")
+  ENetworkType network, Pageable pageable);
 }

@@ -1,12 +1,11 @@
 package com.sotatek.authservice.controller;
 
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.request.EditUserRequest;
-import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
 import com.sotatek.authservice.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +25,6 @@ public class UserController {
 
   private final UserService userService;
 
-  @GetMapping("/get-nonce")
-  public ResponseEntity<String> findNonceByAddress(@RequestParam("address") String address) {
-    return ResponseEntity.ok(userService.findNonceByAddress(address));
-  }
-
   @GetMapping("/exist-username")
   public ResponseEntity<Boolean> checkExistUsername(@RequestParam("username") String username) {
     return ResponseEntity.ok(userService.checkExistUsername(username));
@@ -49,13 +43,9 @@ public class UserController {
   }
 
   @GetMapping("/info")
-  public ResponseEntity<UserInfoResponse> info(HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(userService.infoUser(httpServletRequest));
-  }
-
-  @GetMapping("/activities-log")
-  public ResponseEntity<List<ActivityLogResponse>> getLog(HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(userService.getLog(httpServletRequest));
+  public ResponseEntity<UserInfoResponse> info(@RequestParam("network") ENetworkType network,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(userService.infoUser(httpServletRequest, network));
   }
 
   @GetMapping("/exist-email")

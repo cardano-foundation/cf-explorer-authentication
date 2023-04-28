@@ -1,13 +1,13 @@
 package com.sotatek.authservice.service;
 
+import com.sotatek.authservice.model.enums.EWalletName;
 import com.sotatek.authservice.model.request.auth.SignInRequest;
 import com.sotatek.authservice.model.request.auth.SignOutRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
-import com.sotatek.authservice.model.request.auth.TransfersWalletRequest;
 import com.sotatek.authservice.model.response.MessageResponse;
+import com.sotatek.authservice.model.response.auth.NonceResponse;
 import com.sotatek.authservice.model.response.auth.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.auth.SignInResponse;
-import com.sotatek.authservice.model.response.auth.SignUpResponse;
 import javax.servlet.http.HttpServletRequest;
 
 public interface AuthenticationService {
@@ -15,7 +15,7 @@ public interface AuthenticationService {
   /*
    * @author: phuc.nguyen5
    * @since: 21/10/2022
-   * description: process login with signature
+   * description: process login with wallet or username
    * @update:
    */
   SignInResponse signIn(SignInRequest signInRequest);
@@ -23,10 +23,10 @@ public interface AuthenticationService {
   /*
    * @author: phuc.nguyen5
    * @since: 21/10/2022
-   * description: process register account with ipaddress from ada wallet
+   * description: process register account
    * @update: 6/12/2022
    */
-  SignUpResponse signUp(SignUpRequest signUpRequest);
+  MessageResponse signUp(SignUpRequest signUpRequest);
 
   /*
    * @author: phuc.nguyen5
@@ -47,10 +47,9 @@ public interface AuthenticationService {
 
   /*
    * @author: phuc.nguyen5
-   * @since: 8/11/2022
-   * description: process transfers wallet in account
+   * @since: 24/02/2023
+   * description: get nonce value by public address from user table
    * @update:
    */
-  SignInResponse transfersWallet(TransfersWalletRequest transfersWalletRequest,
-      HttpServletRequest httpServletRequest);
+  NonceResponse findNonceByAddress(String address, EWalletName walletName);
 }

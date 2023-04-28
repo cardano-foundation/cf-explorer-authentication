@@ -1,13 +1,13 @@
 package com.sotatek.authservice.controller;
 
+import com.sotatek.authservice.model.enums.EWalletName;
 import com.sotatek.authservice.model.request.auth.SignInRequest;
 import com.sotatek.authservice.model.request.auth.SignOutRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
-import com.sotatek.authservice.model.request.auth.TransfersWalletRequest;
 import com.sotatek.authservice.model.response.MessageResponse;
+import com.sotatek.authservice.model.response.auth.NonceResponse;
 import com.sotatek.authservice.model.response.auth.RefreshTokenResponse;
 import com.sotatek.authservice.model.response.auth.SignInResponse;
-import com.sotatek.authservice.model.response.auth.SignUpResponse;
 import com.sotatek.authservice.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +36,7 @@ public class AuthController {
   }
 
   @PostMapping(value = "/sign-up", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+  public ResponseEntity<MessageResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
     return ResponseEntity.ok(authenticationService.signUp(signUpRequest));
   }
 
@@ -54,11 +54,10 @@ public class AuthController {
     return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));
   }
 
-  @PostMapping(value = "/transfers-wallet", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SignInResponse> transfersWallet(
-      @Valid @RequestBody TransfersWalletRequest transfersWalletRequest,
-      HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(
-        authenticationService.transfersWallet(transfersWalletRequest, httpServletRequest));
+  @GetMapping("/get-nonce")
+  public ResponseEntity<NonceResponse> findNonceByAddress(@RequestParam("address") String address,
+      @RequestParam("walletName")
+      EWalletName walletName) {
+    return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));
   }
 }

@@ -1,5 +1,6 @@
 package com.sotatek.authservice.model.request.note;
 
+import com.sotatek.authservice.model.enums.ENetworkType;
 import javax.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NonNull;
@@ -15,4 +16,8 @@ public class PrivateNoteRequest {
 
   @NonNull
   private String note;
+
+  @NonNull
+  @NotBlank
+  private ENetworkType network;
 }

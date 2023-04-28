@@ -7,7 +7,7 @@
 //import com.sotatek.authservice.model.request.auth.SignInRequest;
 //import com.sotatek.authservice.model.request.auth.SignOutRequest;
 //import com.sotatek.authservice.model.request.auth.SignUpRequest;
-//import com.sotatek.authservice.model.response.auth.SignUpResponse;
+//import com.sotatek.authservice.model.response.auth.NonceResponse;
 //import com.sotatek.authservice.repository.RoleRepository;
 //import com.sotatek.authservice.repository.UserRepository;
 //import com.sotatek.authservice.service.AuthenticationService;
@@ -113,7 +113,7 @@
 //    signUpRequest.setEmail("test1@gamil.com");
 //    signUpRequest.setPhone("0123456789");
 //    Mockito.when(userRepository.existsByUsername("test1")).thenReturn(true);
-//    ResponseEntity<SignUpResponse> response = authenticationService.signUp(signUpRequest);
+//    ResponseEntity<NonceResponse> response = authenticationService.signUp(signUpRequest);
 //    Assertions.assertEquals("Error: Username is already exist!", response.getBody().getMessage());
 //  }
 //
@@ -126,7 +126,7 @@
 //    signUpRequest.setPhone("0123456789");
 //    Mockito.when(userRepository.existsByPublicAddress(
 //        "e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909")).thenReturn(true);
-//    ResponseEntity<SignUpResponse> response = authenticationService.signUp(signUpRequest);
+//    ResponseEntity<NonceResponse> response = authenticationService.signUp(signUpRequest);
 //    Assertions.assertEquals("Error: Address is already in exist!", response.getBody().getMessage());
 //  }
 //

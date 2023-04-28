@@ -2,6 +2,7 @@ package com.sotatek.authservice.repository;
 
 import com.sotatek.authservice.model.entity.BookMarkEntity;
 import com.sotatek.authservice.model.enums.EBookMarkType;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +22,10 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
    */
   @Query(value = "SELECT be FROM BookMarkEntity be "
       + "JOIN UserEntity ue ON be.user.id = ue.id "
-      + "WHERE ue.username = :username AND be.type = :type")
+      + "WHERE ue.username = :username AND be.type = :type AND be.network = :network "
+      + "ORDER BY be.createdDate DESC")
   Page<BookMarkEntity> findAllBookMarkByUserAndType(@Param("username") String username,
-      @Param("type") EBookMarkType type, Pageable pageable);
+      @Param("type") EBookMarkType type, @Param("network") ENetworkType network, Pageable pageable);
 
   /*
    * @author: phuc.nguyen5
@@ -31,13 +33,14 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
    * description: get count bookmark
    * @update:
    */
-  @Query(value = "SELECT count(bm.id) FROM BookMarkEntity bm WHERE bm.user.id = :userId")
-  Integer getCountBookMarkByUser(@Param("userId") Long userId);
+  @Query(value = "SELECT count(bm.id) FROM BookMarkEntity bm WHERE bm.user.id = :userId AND bm.network = :network")
+  Integer getCountBookMarkByUser(@Param("userId") Long userId,
+      @Param("network") ENetworkType network);
 
   @Query(value = "SELECT bm.id FROM BookMarkEntity bm "
-      + "WHERE bm.user.id = :userId AND bm.keyword = :keyword AND bm.type = :type")
+      + "WHERE bm.user.id = :userId AND bm.keyword = :keyword AND bm.type = :type AND bm.network = :network")
   Long checkExistBookMark(@Param("userId") Long userId, @Param("keyword") String keyword,
-      @Param("type") EBookMarkType type);
+      @Param("type") EBookMarkType type, @Param("network") ENetworkType network);
 
   /*
    * @author: phuc.nguyen5
@@ -47,6 +50,7 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
    */
   @Query(value = "SELECT be FROM BookMarkEntity be "
       + "JOIN UserEntity ue ON be.user.id = ue.id "
-      + "WHERE ue.username = :username")
-  List<BookMarkEntity> findAllKeyBookMarkByUser(@Param("username") String username);
+      + "WHERE ue.username = :username AND be.network = :network")
+  List<BookMarkEntity> findAllKeyBookMarkByUser(@Param("username") String username,
+      @Param("network") ENetworkType network);
 }
