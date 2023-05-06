@@ -1,45 +1,39 @@
 package com.sotatek.authservice.service.impl;
 
 import com.sotatek.authservice.constant.CommonConstant;
-import com.sotatek.authservice.mapper.UserHistoryMapper;
 import com.sotatek.authservice.mapper.UserMapper;
 import com.sotatek.authservice.model.entity.RoleEntity;
 import com.sotatek.authservice.model.entity.UserEntity;
 import com.sotatek.authservice.model.entity.UserHistoryEntity;
 import com.sotatek.authservice.model.entity.WalletEntity;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.enums.ERole;
 import com.sotatek.authservice.model.enums.EStatus;
 import com.sotatek.authservice.model.enums.EUserAction;
 import com.sotatek.authservice.model.request.EditUserRequest;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignUpRequest;
-import com.sotatek.authservice.model.response.ActivityLogResponse;
 import com.sotatek.authservice.model.response.UserInfoResponse;
 import com.sotatek.authservice.model.response.UserResponse;
 import com.sotatek.authservice.provider.JwtProvider;
-import com.sotatek.authservice.provider.RedisProvider;
 import com.sotatek.authservice.repository.BookMarkRepository;
 import com.sotatek.authservice.repository.PrivateNoteRepository;
 import com.sotatek.authservice.repository.RoleRepository;
 import com.sotatek.authservice.repository.UserHistoryRepository;
 import com.sotatek.authservice.repository.UserRepository;
 import com.sotatek.authservice.repository.WalletRepository;
-import com.sotatek.authservice.service.UserHistoryService;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.BusinessException;
 import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Base64;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -54,11 +48,7 @@ public class UserServiceImpl implements UserService {
 
   private final WalletRepository walletRepository;
 
-  private final UserHistoryService userHistoryService;
-
   private final JwtProvider jwtProvider;
-
-  private final RedisProvider redisProvider;
 
   private final BookMarkRepository bookMarkRepository;
 
@@ -70,27 +60,16 @@ public class UserServiceImpl implements UserService {
 
   private static final UserMapper userMapper = UserMapper.INSTANCE;
 
-  private static final UserHistoryMapper userHistoryMapper = UserHistoryMapper.INSTANCE;
-
   @Override
-  public UserDetails loadUserByUsername(String param) throws UsernameNotFoundException {
-    if (EmailValidator.getInstance().isValid(param)) {
-      UserEntity user = userRepository.findByEmailAndStatus(param, EStatus.ACTIVE)
-          .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-      return UserDetailsImpl.build(user);
-    } else {
-      WalletEntity wallet = walletRepository.findWalletByAddress(param)
-          .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-      UserEntity user = wallet.getUser();
-      return UserDetailsImpl.build(user, wallet);
-    }
-  }
-
-  @Override
-  public String findNonceByAddress(String address) {
-    WalletEntity wallet = walletRepository.findWalletByAddress(address)
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    UserEntity user = userRepository.findByUsernameAndStatus(username, EStatus.ACTIVE)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    return wallet.getNonce();
+    String password = user.getPassword();
+    WalletEntity wallet = walletRepository.findWalletByAddress(username).orElse(null);
+    if (Objects.nonNull(wallet)) {
+      password = wallet.getNonceEncode();
+    }
+    return UserDetailsImpl.build(user, password);
   }
 
   @Override
@@ -101,8 +80,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponse editAvatar(MultipartFile avatar, HttpServletRequest httpServletRequest) {
     log.info("edit user image is running...");
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
+    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
     UserEntity user = findByUsername(username);
     if (Objects.nonNull(avatar)) {
       StringBuilder base64Image = new StringBuilder(CommonConstant.BASE64_PREFIX);
@@ -114,50 +92,32 @@ public class UserServiceImpl implements UserService {
       }
     }
     UserEntity userEdit = userRepository.save(user);
-    userHistoryService.saveUserHistory(EUserAction.UPDATED, null, Instant.now(), null, userEdit);
     return userMapper.entityToResponse(userEdit);
   }
 
   @Override
-  public UserInfoResponse infoUser(HttpServletRequest httpServletRequest) {
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
-    String address = jwtProvider.getIdFromJwtToken(token);
-    UserEntity user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    Integer sizeBookMark = bookMarkRepository.getCountBookMarkByUser(user.getId());
-    Integer sizeNote = noteRepository.getCountNoteByUser(user.getId());
+  public UserInfoResponse infoUser(HttpServletRequest httpServletRequest, ENetworkType network) {
+    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
+    UserEntity user = findByUsername(username);
+    Integer sizeBookMark = bookMarkRepository.getCountBookMarkByUser(user.getId(), network);
+    Integer sizeNote = noteRepository.getCountNoteByUser(user.getId(), network);
     UserHistoryEntity userHistory = userHistoryRepository.findFirstByUserAndUserActionOrderByActionTimeDesc(
         user, EUserAction.LOGIN);
+    if (Objects.isNull(userHistory)) {
+      userHistory = userHistoryRepository.findFirstByUserAndUserActionOrderByActionTimeDesc(user,
+          EUserAction.CREATED);
+    }
     return UserInfoResponse.builder().username(username).email(user.getEmail())
-        .avatar(user.getAvatar()).sizeBookmark(sizeBookMark).sizeNote(sizeNote).wallet(address)
+        .avatar(user.getAvatar()).sizeBookmark(sizeBookMark).sizeNote(sizeNote)
         .lastLogin(userHistory.getActionTime()).build();
-  }
-
-  @Override
-  public List<ActivityLogResponse> getLog(HttpServletRequest httpServletRequest) {
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
-    UserEntity user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    List<UserHistoryEntity> historyList = userHistoryRepository.findTop10ByUserOrderByActionTimeDesc(
-        user);
-    List<ActivityLogResponse> logList = userHistoryMapper.listEntityToResponse(historyList);
-    logList.forEach(log -> log.setStrAction(log.getUserAction().getAction()));
-    return logList;
   }
 
   @Override
   public UserEntity saveUser(SignUpRequest signUpRequest) {
     UserEntity user = userMapper.requestToEntity(signUpRequest);
+    user.setStatus(EStatus.PENDING);
     user.setRoles(addRoleForUser(ERole.ROLE_USER));
     return userRepository.save(user);
-  }
-
-  @Override
-  public UserEntity findUserByWalletAddress(String address) {
-    return userRepository.findUserByWalletAddress(address)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
   }
 
   @Override
@@ -180,11 +140,11 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserEntity activeUserAdmin(String username) {
+  public void activeUser(String username) {
     UserEntity user = userRepository.findByUsername(username)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     user.setStatus(EStatus.ACTIVE);
-    return userRepository.save(user);
+    userRepository.save(user);
   }
 
   @Override
@@ -202,11 +162,9 @@ public class UserServiceImpl implements UserService {
   public UserResponse editUser(EditUserRequest editUserRequest,
       HttpServletRequest httpServletRequest) {
     log.info("edit user is running...");
-    String usernameReq = editUserRequest.getUsername();
     String emailReq = editUserRequest.getEmail();
     String token = jwtProvider.parseJwt(httpServletRequest);
     String username = jwtProvider.getUserNameFromJwtToken(token);
-    String id = null;
     UserEntity user = findByUsername(username);
     if (Objects.nonNull(emailReq)) {
       if (Boolean.TRUE.equals(checkExistEmail(emailReq))) {
@@ -214,22 +172,18 @@ public class UserServiceImpl implements UserService {
       }
       user.setEmail(emailReq);
     }
-    if (Objects.nonNull(usernameReq)) {
-      if (Boolean.TRUE.equals(checkExistUsername(usernameReq))) {
-        throw new BusinessException(CommonErrorCode.USERNAME_IS_ALREADY_EXIST);
-      }
-      user.setUsername(usernameReq);
-      id = jwtProvider.getIdFromJwtToken(token);
-    }
     UserEntity userEdit = userRepository.save(user);
-    UserResponse response = userMapper.entityToResponse(userEdit);
-    if (Objects.nonNull(id)) {
-      String jwtToken = jwtProvider.generateJwtTokenFromUsername(userEdit, id);
-      response.setJwtToken(jwtToken);
-      redisProvider.blacklistJwt(token, username);
-    }
-    userHistoryService.saveUserHistory(EUserAction.UPDATED, null, Instant.now(), null, userEdit);
-    return response;
+    return userMapper.entityToResponse(userEdit);
+  }
+
+  @Override
+  public UserEntity saveUser(String address) {
+    UserEntity user = UserEntity.builder()
+        .username(address)
+        .status(EStatus.ACTIVE)
+        .roles(addRoleForUser(ERole.ROLE_USER))
+        .build();
+    return userRepository.save(user);
   }
 
   /*

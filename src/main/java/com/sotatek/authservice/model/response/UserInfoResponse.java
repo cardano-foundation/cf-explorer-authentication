@@ -21,6 +21,4 @@ public class UserInfoResponse {
   private Integer sizeBookmark;
 
   private Instant lastLogin;
-
-  private String wallet;
 }

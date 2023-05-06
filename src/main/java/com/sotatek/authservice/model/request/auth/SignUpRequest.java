@@ -1,6 +1,6 @@
 package com.sotatek.authservice.model.request.auth;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +10,12 @@ import lombok.Setter;
 public class SignUpRequest {
 
   @NotNull
-  @NotBlank
   private String username;
 
   @NotNull
-  private WalletRequest wallet;
+  @Email
+  private String email;
+
+  @NotNull
+  private String password;
 }

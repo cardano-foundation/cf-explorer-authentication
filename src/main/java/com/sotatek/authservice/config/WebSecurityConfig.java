@@ -41,15 +41,12 @@ public class WebSecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf().disable().cors()
-        //Todo confirm set csrf
-        //.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-        .and().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-        .authorizeRequests().antMatchers(AuthConstant.CLIENT_WHITELIST).permitAll()
+    http.csrf().disable().cors().and().exceptionHandling()
+        .authenticationEntryPoint(unauthorizedHandler).and().sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+        .antMatchers(AuthConstant.CLIENT_WHITELIST).permitAll()
         .antMatchers(AuthConstant.AUTH_WHITELIST).permitAll()
         .antMatchers(AuthConstant.USER_WHITELIST).permitAll()
-        .antMatchers(AuthConstant.CSRF_TOKEN_PATH).permitAll()
         .antMatchers(AuthConstant.DOCUMENT_WHITELIST).permitAll().anyRequest().authenticated();
     http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(exceptionHandlerFilter(), AuthTokenFilter.class);

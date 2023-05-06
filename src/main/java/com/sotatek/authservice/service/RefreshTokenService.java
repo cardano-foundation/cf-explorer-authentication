@@ -18,14 +18,6 @@ public interface RefreshTokenService {
   /*
    * @author: phuc.nguyen5
    * @since: 20/10/2022
-   * description: create refresh token record
-   * @update:
-   */
-  RefreshTokenEntity addRefreshToken(WalletEntity wallet);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 20/10/2022
    * description: check expiry time for refresh token record
    * @update:
    */

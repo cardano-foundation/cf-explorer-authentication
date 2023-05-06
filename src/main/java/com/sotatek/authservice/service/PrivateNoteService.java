@@ -1,5 +1,6 @@
 package com.sotatek.authservice.service;
 
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.request.note.PrivateNoteRequest;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.PrivateNoteResponse;
@@ -25,6 +26,7 @@ public interface PrivateNoteService {
    * @update:
    */
   BasePageResponse<PrivateNoteResponse> findAllNote(HttpServletRequest httpServletRequest,
+      ENetworkType network,
       Pageable pageable);
 
   /*

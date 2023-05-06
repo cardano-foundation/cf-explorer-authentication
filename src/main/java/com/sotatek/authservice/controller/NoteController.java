@@ -1,5 +1,6 @@
 package com.sotatek.authservice.controller;
 
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.request.note.PrivateNoteRequest;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.PrivateNoteResponse;
@@ -41,9 +42,10 @@ public class NoteController {
 
   @GetMapping("/find-all")
   public ResponseEntity<BasePageResponse<PrivateNoteResponse>> findAllNote(
+      @RequestParam("network") ENetworkType network,
       @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
       HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(privateNoteService.findAllNote(httpServletRequest, pageable));
+    return ResponseEntity.ok(privateNoteService.findAllNote(httpServletRequest, network, pageable));
   }
 
   @DeleteMapping("/delete/{noteId}")

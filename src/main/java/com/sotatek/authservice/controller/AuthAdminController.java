@@ -1,7 +1,6 @@
 package com.sotatek.authservice.controller;
 
 import com.sotatek.authservice.model.request.admin.RemoveUserRequest;
-import com.sotatek.authservice.model.request.admin.ResetPasswordRequest;
 import com.sotatek.authservice.model.request.admin.SignInAdminRequest;
 import com.sotatek.authservice.model.request.admin.SignUpAdminRequest;
 import com.sotatek.authservice.model.request.auth.SignOutRequest;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,12 +36,6 @@ public class AuthAdminController {
     return ResponseEntity.ok(authenticationAdminService.signUp(signUpAdmin));
   }
 
-  @GetMapping(value = "/verify")
-  public ResponseEntity<MessageResponse> checkVerifySignUpByEmail(
-      @RequestParam("code") String code) {
-    return ResponseEntity.ok(authenticationAdminService.checkVerifySignUpByEmail(code));
-  }
-
   @PostMapping(value = "/sign-in", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInAdminRequest signInAdmin) {
     return ResponseEntity.ok(authenticationAdminService.signIn(signInAdmin));
@@ -61,19 +53,6 @@ public class AuthAdminController {
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(
         authenticationAdminService.signOut(signOutRequest, httpServletRequest));
-  }
-
-  @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResponse> resetPassword(HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(
-        authenticationAdminService.resetPassword(httpServletRequest));
-  }
-
-  @PutMapping(value = "/new-password", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResponse> newPassword(
-      @RequestBody ResetPasswordRequest resetPasswordRequest) {
-    return ResponseEntity.ok(
-        authenticationAdminService.newPassword(resetPasswordRequest));
   }
 
   @DeleteMapping(value = "/remove")

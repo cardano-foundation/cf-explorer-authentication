@@ -1,8 +1,10 @@
 package com.sotatek.authservice.service;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import com.sotatek.authservice.model.request.bookmark.BookMarkRequest;
 import com.sotatek.authservice.model.request.bookmark.BookMarksRequest;
+import com.sotatek.authservice.model.response.AddBookMarkResponse;
 import com.sotatek.authservice.model.response.BookMarkResponse;
 import com.sotatek.authservice.model.response.MessageResponse;
 import com.sotatek.authservice.model.response.base.BasePageResponse;
@@ -28,7 +30,7 @@ public interface BookMarkService {
    * @update: 05/12/2022
    */
   BasePageResponse<BookMarkResponse> findBookMarkByType(HttpServletRequest httpServletRequest,
-      EBookMarkType bookMarkType, Pageable pageable);
+      EBookMarkType bookMarkType, ENetworkType network, Pageable pageable);
 
   /*
    * @author: phuc.nguyen5
@@ -44,7 +46,8 @@ public interface BookMarkService {
    * description: find all bookmark key
    * @update:
    */
-  List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest);
+  List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest,
+      ENetworkType network);
 
   /*
    * @author: phuc.nguyen5
@@ -52,6 +55,6 @@ public interface BookMarkService {
    * description: add bookmark list
    * @update:
    */
-  List<String> addBookMarks(BookMarksRequest bookMarksRequest,
+  AddBookMarkResponse addBookMarks(BookMarksRequest bookMarksRequest,
       HttpServletRequest httpServletRequest);
 }

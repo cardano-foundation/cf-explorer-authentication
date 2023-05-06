@@ -34,7 +34,7 @@ import org.hibernate.annotations.Where;
 @Where(clause = "is_deleted = false")
 public class UserEntity extends BaseEntity {
 
-  @Column(name = "username", length = 64, nullable = false, unique = true)
+  @Column(name = "username", length = 64, nullable = false)
   @NotNull
   private String username;
 

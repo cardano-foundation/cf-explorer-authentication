@@ -1,6 +1,5 @@
 package com.sotatek.authservice.signature;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import co.nstant.in.cbor.CborDecoder;
@@ -13,10 +12,8 @@ import co.nstant.in.cbor.model.UnsignedInteger;
 import com.bloxbean.cardano.client.crypto.CryptoException;
 import com.bloxbean.cardano.client.transaction.util.CborSerializationUtil;
 import com.bloxbean.cardano.client.util.HexUtil;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.Signature;
-import java.util.Arrays;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import net.i2p.crypto.eddsa.EdDSAEngine;
@@ -25,17 +22,9 @@ import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.web3j.crypto.ECDSASignature;
-import org.web3j.crypto.Hash;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
-import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.utils.Numeric;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
 @Log4j2
 public class VerifySignatureTest {
 
@@ -43,37 +32,6 @@ public class VerifySignatureTest {
 
   private static final EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName(
       EdDSANamedCurveTable.ED_25519);
-
-  @Test
-  public void testRecoverAddressFromSignatureMetaMaskWallet() {
-    String signature = "0x2c6401216c9031b9a6fb8cbfccab4fcec6c951cdf40e2320108d1856eb532250576865fbcd452bcdc4c57321b619ed7a9cfd38bd973c3e1e0243ac2777fe9d5b1b";
-    String address = "0x31b26e43651e9371c88af3d36c14cfd938baf4fd";
-    String message = "v0G9u7huK4mJb2K1";
-    String prefix = PERSONAL_MESSAGE_PREFIX + message.length();
-    byte[] msgHash = Hash.sha3((prefix + message).getBytes());
-    byte[] signatureBytes = Numeric.hexStringToByteArray(signature);
-    byte v = signatureBytes[64];
-    if (v < 27) {
-      v += 27;
-    }
-    SignatureData sd = new SignatureData(v, (byte[]) Arrays.copyOfRange(signatureBytes, 0, 32),
-        (byte[]) Arrays.copyOfRange(signatureBytes, 32, 64));
-    String addressRecovered = null;
-    boolean match = false;
-    for (int i = 0; i < 4; i++) {
-      BigInteger publicKey = Sign.recoverFromSignature((byte) i,
-          new ECDSASignature(new BigInteger(1, sd.getR()), new BigInteger(1, sd.getS())), msgHash);
-      if (publicKey != null) {
-        addressRecovered = "0x" + Keys.getAddress(publicKey);
-        if (addressRecovered.equals(address)) {
-          match = true;
-          break;
-        }
-      }
-    }
-    assertEquals(addressRecovered, (address));
-    assertTrue(match);
-  }
 
   @Test
   public void testRecoverMessageAndAddressFromSignatureCardanoWallet() throws Exception {

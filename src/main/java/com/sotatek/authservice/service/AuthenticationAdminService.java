@@ -22,14 +22,6 @@ public interface AuthenticationAdminService {
 
   /*
    * @author: phuc.nguyen5
-   * @since: 09/01/2023
-   * description: process verify email
-   * @update:
-   */
-  MessageResponse checkVerifySignUpByEmail(String code);
-
-  /*
-   * @author: phuc.nguyen5
    * @since: 10/01/2023
    * description: process sign in admin account
    * @update:
@@ -52,22 +44,6 @@ public interface AuthenticationAdminService {
    * @update:
    */
   MessageResponse signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 12/1/2023
-   * description: process confirm reset password
-   * @update:
-   */
-  MessageResponse resetPassword(HttpServletRequest httpServletRequest);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 12/1/2023
-   * description: process add new password
-   * @update:
-   */
-  MessageResponse newPassword(ResetPasswordRequest resetPasswordRequest);
 
   /*
    * @author: phuc.nguyen5

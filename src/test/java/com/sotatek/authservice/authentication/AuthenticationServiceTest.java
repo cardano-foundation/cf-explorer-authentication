@@ -1,211 +1,287 @@
-//package com.sotatek.authservice.authentication;
-//
-//import com.sotatek.authservice.model.entity.RefreshTokenEntity;
-//import com.sotatek.authservice.model.entity.UserEntity;
-//import com.sotatek.authservice.model.enums.ERole;
-//import com.sotatek.authservice.model.request.auth.RefreshTokenRequest;
-//import com.sotatek.authservice.model.request.auth.SignInRequest;
-//import com.sotatek.authservice.model.request.auth.SignOutRequest;
-//import com.sotatek.authservice.model.request.auth.SignUpRequest;
-//import com.sotatek.authservice.model.response.auth.SignUpResponse;
-//import com.sotatek.authservice.repository.RoleRepository;
-//import com.sotatek.authservice.repository.UserRepository;
-//import com.sotatek.authservice.service.AuthenticationService;
-//import com.sotatek.authservice.service.RefreshTokenService;
-//import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-//import com.sotatek.cardanocommonapi.exceptions.TokenRefreshException;
-//import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
-//import java.time.Instant;
-//import java.util.Optional;
-//import lombok.extern.log4j.Log4j2;
-//import org.junit.Test;
-//import org.junit.jupiter.api.Assertions;
-//import org.junit.runner.RunWith;
-//import org.mockito.Mockito;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.test.context.junit4.SpringRunner;
-//
-//@RunWith(SpringRunner.class)
-//@SpringBootTest
-//@Log4j2
-//public class AuthenticationServiceTest {
-//
-//  @Autowired
-//  private AuthenticationService authenticationService;
-//
-//  @MockBean
-//  private UserRepository userRepository;
-//
-//  @MockBean
-//  private RoleRepository roleRepository;
-//
-//  @MockBean
-//  private RefreshTokenService refreshTokenService;
-//
-//  private final String signature = "84582aa201276761646472657373581de18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909a166686173686564f453393534353735313438313233323636333232355840850ff657e23963414e7c1bf708928dc994ecafea29790089c810af1ac7486aae12a4ed736d16528051aeff1991ee8d2aef19fe3d375f3ad019925ff1530ed608";
-//
-//  @Test
-//  public void whenLogin_GetUserByAddress_UserIsNotExist_ThrowBusinessException() {
-//    SignInRequest signInRequest = new SignInRequest();
-//    signInRequest.setSignature(signature);
-//    Mockito.when(userRepository.findByPublicAddress(
-//        "e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909")).thenReturn(Optional.empty());
-//    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
-//      authenticationService.signIn(signInRequest);
-//    });
-//    String expectedErrorCode = CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode();
-//    String expectedDesc = CommonErrorCode.USER_IS_NOT_EXIST.getDesc();
-//    Assertions.assertEquals(expectedErrorCode, exception.getErrorCode());
-//    Assertions.assertEquals(expectedDesc, exception.getErrorMsg());
-//  }
-//
-//  @Test
-//  public void whenLogin_GetUserByAddress_NonceHasExpired_ThrowBusinessException() {
-//    SignInRequest signInRequest = new SignInRequest();
-//    signInRequest.setSignature(signature);
-//    UserEntity user = UserEntity.builder().username("test1")
-//        .publicAddress("e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909")
-//        .email("test@gmail.com").nonce("8890825581941064700")
-//        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-//        .expiryDateNonce(Instant.now().minusSeconds(60)).isDeleted(false).build();
-//    Mockito.when(userRepository.findByPublicAddress(
-//            "e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909"))
-//        .thenReturn(Optional.of(user));
-//    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
-//      authenticationService.signIn(signInRequest);
-//    });
-//    String expectedErrorCode = CommonErrorCode.NONCE_EXPIRED.getServiceErrorCode();
-//    String expectedDesc = CommonErrorCode.NONCE_EXPIRED.getDesc();
-//    Assertions.assertEquals(expectedErrorCode, exception.getErrorCode());
-//    Assertions.assertEquals(expectedDesc, exception.getErrorMsg());
-//  }
-//
-//  @Test
-//  public void whenLogin_Authenticate_SignatureInvalid_ThrowValidSignatureException() {
-//    SignInRequest signInRequest = new SignInRequest();
-//    signInRequest.setSignature(signature);
-//    UserEntity user = UserEntity.builder().username("test1")
-//        .publicAddress("e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909")
-//        .email("test@gmail.com").nonce("8890825581941064700")
-//        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-//        .expiryDateNonce(Instant.now().plusSeconds(180)).isDeleted(false).build();
-//    Mockito.when(userRepository.findByPublicAddress(
-//            "e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909"))
-//        .thenReturn(Optional.of(user));
-//    ValidSignatureException exception = Assertions.assertThrows(ValidSignatureException.class,
-//        () -> {
-//          authenticationService.signIn(signInRequest);
-//        });
-//    String expectedErrorCode = CommonErrorCode.SIGNATURE_INVALID.getServiceErrorCode();
-//    String expectedDesc = CommonErrorCode.SIGNATURE_INVALID.getDesc();
-//    Assertions.assertEquals(expectedErrorCode, exception.getErrCode());
-//    Assertions.assertEquals(expectedDesc, exception.getErrMessage());
-//  }
-//
-//  @Test
-//  public void whenSignUp_UserIsExistByUsername_ReturnResponse() {
-//    SignUpRequest signUpRequest = new SignUpRequest();
-//    signUpRequest.setUsername("test1");
-//    signUpRequest.setPublicAddress("e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909");
-//    signUpRequest.setEmail("test1@gamil.com");
-//    signUpRequest.setPhone("0123456789");
-//    Mockito.when(userRepository.existsByUsername("test1")).thenReturn(true);
-//    ResponseEntity<SignUpResponse> response = authenticationService.signUp(signUpRequest);
-//    Assertions.assertEquals("Error: Username is already exist!", response.getBody().getMessage());
-//  }
-//
-//  @Test
-//  public void whenSignUp_UserIsExistByPublicAddress_ReturnResponse() {
-//    SignUpRequest signUpRequest = new SignUpRequest();
-//    signUpRequest.setUsername("test1");
-//    signUpRequest.setPublicAddress("e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909");
-//    signUpRequest.setEmail("test1@gamil.com");
-//    signUpRequest.setPhone("0123456789");
-//    Mockito.when(userRepository.existsByPublicAddress(
-//        "e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909")).thenReturn(true);
-//    ResponseEntity<SignUpResponse> response = authenticationService.signUp(signUpRequest);
-//    Assertions.assertEquals("Error: Address is already in exist!", response.getBody().getMessage());
-//  }
-//
-//  @Test
-//  public void whenSignUp_RoleIsNotExist_ThrowRuntimeException() {
-//    SignUpRequest signUpRequest = new SignUpRequest();
-//    signUpRequest.setUsername("test1");
-//    signUpRequest.setPublicAddress("e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909");
-//    signUpRequest.setEmail("test1@gamil.com");
-//    signUpRequest.setPhone("0123456789");
-//    Mockito.when(userRepository.existsByPublicAddress(
-//        "e18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909")).thenReturn(false);
-//    Mockito.when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.empty());
-//    Mockito.when(roleRepository.findByName(ERole.ROLE_ADMIN)).thenReturn(Optional.empty());
-//    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
-//      authenticationService.signUp(signUpRequest);
-//    });
-//    Assertions.assertEquals(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc(), exception.getMessage());
-//  }
-//
-//  @Test
-//  public void whenRefreshToken_RefreshTokenIsNotExist_ThrowTokenRefreshException() {
-//    RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
-//    refreshTokenRequest.setRefreshToken("4055eb7c-f98f-4161-8f8a-10537264bb91");
-//    Mockito.when(refreshTokenService.findByToken("4055eb7c-f98f-4161-8f8a-10537264bb91"))
-//        .thenReturn(Optional.empty());
-//    TokenRefreshException exception = Assertions.assertThrows(TokenRefreshException.class, () -> {
-//      authenticationService.refreshToken(refreshTokenRequest);
-//    });
-//    Assertions.assertEquals(CommonErrorCode.REFRESH_TOKEN_IS_NOT_EXIST, exception.getErrorCode());
-//  }
-//
-//  @Test
-//  public void whenRefreshToken_AccessTokenIsNull_ThrowBusinessException() {
-//    RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
-//    refreshTokenRequest.setRefreshToken("4055eb7c-f98f-4161-8f8a-10537264bb91");
-//    RefreshTokenEntity refreshToken = new RefreshTokenEntity();
-//    refreshToken.setId(1L);
-//    refreshToken.setToken("055eb7c-f98f-4161-8f8a-10537264bb91");
-//    refreshToken.setAccessToken(null);
-//    refreshToken.setExpiryDate(Instant.now());
-//    refreshToken.setUser(UserEntity.builder().build());
-//    Mockito.when(refreshTokenService.findByToken("4055eb7c-f98f-4161-8f8a-10537264bb91"))
-//        .thenReturn(Optional.of(refreshToken));
-//    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
-//      authenticationService.refreshToken(refreshTokenRequest);
-//    });
-//    String expectedErrorCode = CommonErrorCode.INVALID_TOKEN.getServiceErrorCode();
-//    String expectedDesc = CommonErrorCode.INVALID_TOKEN.getDesc();
-//    Assertions.assertEquals(expectedErrorCode, exception.getErrorCode());
-//    Assertions.assertEquals(expectedDesc, exception.getErrorMsg());
-//  }
-//
-//  @Test
-//  public void whenLogout_AccessTokenIsNull_ThrowBusinessException() {
-//    SignOutRequest signOutRequest = new SignOutRequest();
-//    signOutRequest.setAccessToken(null);
-//    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
-//      authenticationService.signOut(signOutRequest);
-//    });
-//    String expectedErrorCode = CommonErrorCode.INVALID_TOKEN.getServiceErrorCode();
-//    String expectedDesc = CommonErrorCode.INVALID_TOKEN.getDesc();
-//    Assertions.assertEquals(expectedErrorCode, exception.getErrorCode());
-//    Assertions.assertEquals(expectedDesc, exception.getErrorMsg());
-//  }
-//
-//  @Test
-//  public void whenLogout_SaveHistoryUserIsNull_ThrowBusinessException() {
-//    SignOutRequest signOutRequest = new SignOutRequest();
-//    signOutRequest.setAccessToken("eyJhbG1234567890adam");
-//    signOutRequest.setRefreshToken("4055eb7c-f98f-4161-8f8a-1053726bb91");
-//    signOutRequest.setUsername("test1");
-//    Mockito.when(userRepository.findByUsername("test1")).thenReturn(Optional.empty());
-//    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
-//      authenticationService.signOut(signOutRequest);
-//    });
-//    String expectedErrorCode = CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode();
-//    String expectedDesc = CommonErrorCode.USER_IS_NOT_EXIST.getDesc();
-//    Assertions.assertEquals(expectedErrorCode, exception.getErrorCode());
-//    Assertions.assertEquals(expectedDesc, exception.getErrorMsg());
-//  }
-//}
+package com.sotatek.authservice.authentication;
+
+import static org.mockito.ArgumentMatchers.any;
+
+import com.sotatek.authservice.model.entity.RefreshTokenEntity;
+import com.sotatek.authservice.model.entity.RoleEntity;
+import com.sotatek.authservice.model.entity.UserEntity;
+import com.sotatek.authservice.model.entity.UserHistoryEntity;
+import com.sotatek.authservice.model.entity.WalletEntity;
+import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
+import com.sotatek.authservice.model.enums.ERole;
+import com.sotatek.authservice.model.request.auth.SignInRequest;
+import com.sotatek.authservice.model.request.auth.SignUpRequest;
+import com.sotatek.authservice.model.response.auth.SignInResponse;
+import com.sotatek.authservice.provider.JwtProvider;
+import com.sotatek.authservice.provider.RedisProvider;
+import com.sotatek.authservice.repository.UserHistoryRepository;
+import com.sotatek.authservice.repository.WalletRepository;
+import com.sotatek.authservice.service.RefreshTokenService;
+import com.sotatek.authservice.service.UserService;
+import com.sotatek.authservice.service.WalletService;
+import com.sotatek.authservice.service.impl.AuthenticationServiceImpl;
+import com.sotatek.cardanocommonapi.exceptions.BusinessException;
+import com.sotatek.cardanocommonapi.exceptions.IgnoreRollbackException;
+import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.Set;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+
+@ExtendWith(MockitoExtension.class)
+public class AuthenticationServiceTest {
+
+  @InjectMocks
+  private AuthenticationServiceImpl authenticationService;
+
+  @Mock
+  private UserService userService;
+
+  @Mock
+  private WalletService walletService;
+
+  @Mock
+  private UserHistoryRepository userHistoryRepository;
+
+  @Mock
+  private WalletRepository walletRepository;
+
+  @Mock
+  private RefreshTokenService refreshTokenService;
+
+  @Mock
+  private JwtProvider jwtProvider;
+
+  @Mock
+  private AuthenticationManager authenticationManager;
+
+  @Mock
+  private RedisProvider redisProvider;
+
+  @Before
+  public void setup() {
+    MockitoAnnotations.openMocks(this);
+  }
+
+  private final String SIGNATURE_TEST = "84582aa201276761646472657373581de18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909a166686173686564f453393534353735313438313233323636333232355840850ff657e23963414e7c1bf708928dc994ecafea29790089c810af1ac7486aae12a4ed736d16528051aeff1991ee8d2aef19fe3d375f3ad019925ff1530ed608";
+
+  private final String ADDRESS_WALLET = "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p";
+
+  private final String NONCE = "9545751481232663225";
+
+  private final String JWT = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzb3RhdGVrIiwianRpIjoiMiIsImlhdCI6MTY3Mjk5Nzc0MSwiZXhwIjoxNjczMDg0MTQxfQ.B62gXo6iqQfHMT62q17zdhwMF8I77-P6xblKcx7ZI3-gij6YckvFYVVuoIa_qXgTTFnEeRDBQEVo3o20D1w6pffBrgbvxvMbjhOG0ONS9Xs1UQChwQs7v3lxkqoKZ8dNf0Eib43HxLZhBEBIeXa1kln4sS8osWf5iEgno0od7z9KwWK1N2Coj0o-1HE453fFyRveDJgd0DvXohbHADMmjH9t0WkXJwUK26Lv1tkqPlkIzGBPgYnYEIygdayqqt4EtP6CtgI9QOzCYSZUUFzxo-VVDzA0J7DpQbYn8G2PAuAbCXCO6lTkvmXMiyZAoZshqRhBNb7uDI66dwOJLV3NzuunSa8QOO8eNUaDoHHvR_9_J-yHTFBicoM69JHQ7UzJVyFHGmh1M8lHsJ9y6DdAobtBSyJFBhFeDj7S8bgpIvIyNoHDsf24xdlqCngE1qBsxjfp0L_yMPBxsIhW3Juopwe1c6btWTEaRaVaxhKE5yKbRsTtAzDDkdEyg_--9eXH";
+
+  private final String REFRESH_TOKEN = "b2d4e520-4e07-43aa-9a09-f9667f52ce0e";
+
+  private final String USER_NAME = "Test";
+
+  private final String PASSWORD = "password";
+
+  @Test
+  public void whenLoginUsingWallet_SignatureInValid_ThrowException() {
+    String signatureInValid = "Test123456789";
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setSignature(signatureInValid);
+    signInRequest.setType(1);
+    Exception exception = Assertions.assertThrows(Exception.class, () -> {
+      authenticationService.signIn(signInRequest);
+    });
+    String expectedMessage = "Invalid hexadecimal";
+    String actualMessage = exception.getMessage();
+    Assertions.assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void whenLoginUsingWallet_AddressIsNotExist_ThrowException() {
+    String addressWallet = "Test123456789";
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setSignature(SIGNATURE_TEST);
+    signInRequest.setAddress(addressWallet);
+    signInRequest.setType(1);
+    Mockito.when(walletRepository.findWalletByAddress(addressWallet)).thenReturn(Optional.empty());
+    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
+      authenticationService.signIn(signInRequest);
+    });
+    String expectedCode = CommonErrorCode.WALLET_IS_NOT_EXIST.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  public void whenLoginUsingWallet_NonceIsExpired_ThrowException() {
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setSignature(SIGNATURE_TEST);
+    signInRequest.setAddress(ADDRESS_WALLET);
+    signInRequest.setType(1);
+    WalletEntity wallet = WalletEntity.builder().address(ADDRESS_WALLET)
+        .expiryDateNonce(Instant.now().minusSeconds(3600)).build();
+    Mockito.when(walletRepository.findWalletByAddress(ADDRESS_WALLET))
+        .thenReturn(Optional.of(wallet));
+    IgnoreRollbackException exception = Assertions.assertThrows(IgnoreRollbackException.class,
+        () -> {
+          authenticationService.signIn(signInRequest);
+        });
+    String expectedCode = CommonErrorCode.NONCE_EXPIRED.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  public void whenLoginUsingWallet_AuthenticateFail_ThrowException() {
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setSignature(SIGNATURE_TEST);
+    signInRequest.setAddress(ADDRESS_WALLET);
+    signInRequest.setType(1);
+    WalletEntity wallet = WalletEntity.builder().address(ADDRESS_WALLET)
+        .expiryDateNonce(Instant.now().plusSeconds(3600)).build();
+    Mockito.when(walletRepository.findWalletByAddress(ADDRESS_WALLET))
+        .thenReturn(Optional.of(wallet));
+    Mockito.when(authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(ADDRESS_WALLET, NONCE)))
+        .thenThrow(new BusinessException(CommonErrorCode.SIGNATURE_INVALID));
+    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
+      authenticationService.signIn(signInRequest);
+    });
+    String expectedCode = CommonErrorCode.SIGNATURE_INVALID.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  public void whenLoginUsingWallet_AuthenticateSuccess_returnResponse() {
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setSignature(SIGNATURE_TEST);
+    signInRequest.setAddress(ADDRESS_WALLET);
+    signInRequest.setType(1);
+    WalletEntity wallet = WalletEntity.builder().address(ADDRESS_WALLET)
+        .expiryDateNonce(Instant.now().plusSeconds(3600)).build();
+    Authentication authentication = Mockito.mock(Authentication.class);
+    RoleEntity role = new RoleEntity();
+    role.setName(ERole.ROLE_USER);
+    UserEntity user = UserEntity.builder().username(ADDRESS_WALLET)
+        .email("test5.6@gmail.com").roles(Set.of(role)).isDeleted(false).build();
+    UserDetailsImpl userDetails = UserDetailsImpl.build(user, NONCE);
+    Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+    Mockito.when(walletRepository.findWalletByAddress(ADDRESS_WALLET))
+        .thenReturn(Optional.of(wallet));
+    Mockito.when(authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(ADDRESS_WALLET, NONCE))).thenReturn(authentication);
+    Mockito.when(userService.findByUsername(ADDRESS_WALLET)).thenReturn(user);
+    Mockito.when(jwtProvider.generateJwtToken(authentication, ADDRESS_WALLET)).thenReturn(JWT);
+    Mockito.when(refreshTokenService.addRefreshToken(user))
+        .thenReturn(RefreshTokenEntity.builder().token(REFRESH_TOKEN).build());
+    Mockito.when(userHistoryRepository.save(any())).thenReturn(UserHistoryEntity.builder().build());
+    SignInResponse response = authenticationService.signIn(signInRequest);
+    Assertions.assertNotNull(response);
+  }
+
+  @Test
+  public void whenLoginUsingUsername_UserIsNotExist_ThrowException() {
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setUsername(USER_NAME);
+    signInRequest.setPassword(PASSWORD);
+    signInRequest.setType(0);
+    Mockito.when(authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(USER_NAME, PASSWORD)))
+        .thenThrow(new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
+      authenticationService.signIn(signInRequest);
+    });
+    String expectedCode = CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  public void whenLoginUsingUsername_UsernameOrPasswordInValid_ThrowException() {
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setUsername(USER_NAME);
+    signInRequest.setPassword(PASSWORD);
+    signInRequest.setType(0);
+    Mockito.when(authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(USER_NAME, PASSWORD)))
+        .thenThrow(new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID));
+    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
+      authenticationService.signIn(signInRequest);
+    });
+    String expectedCode = CommonErrorCode.USERNAME_OR_PASSWORD_INVALID.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  public void whenLoginUsingUsername_AuthenticateSuccess_ThrowException() {
+    SignInRequest signInRequest = new SignInRequest();
+    signInRequest.setUsername(USER_NAME);
+    signInRequest.setPassword(PASSWORD);
+    signInRequest.setType(0);
+    Authentication authentication = Mockito.mock(Authentication.class);
+    RoleEntity role = new RoleEntity();
+    role.setName(ERole.ROLE_USER);
+    UserEntity user = UserEntity.builder().username(USER_NAME)
+        .email("test5.6@gmail.com").roles(Set.of(role)).isDeleted(false).build();
+    UserDetailsImpl userDetails = UserDetailsImpl.build(user, PASSWORD);
+    Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+    Mockito.when(authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(USER_NAME, PASSWORD))).thenReturn(authentication);
+    Mockito.when(userService.findByUsername(USER_NAME)).thenReturn(user);
+    Mockito.when(jwtProvider.generateJwtToken(authentication, USER_NAME)).thenReturn(JWT);
+    Mockito.when(refreshTokenService.addRefreshToken(user))
+        .thenReturn(RefreshTokenEntity.builder().token(REFRESH_TOKEN).build());
+    Mockito.when(userHistoryRepository.save(any())).thenReturn(UserHistoryEntity.builder().build());
+    SignInResponse response = authenticationService.signIn(signInRequest);
+    Assertions.assertNotNull(response);
+  }
+
+  @Test
+  public void whenSignUp_EmailIsExist_ThrowException() {
+    SignUpRequest signUpRequest = new SignUpRequest();
+    signUpRequest.setEmail("test5.6@gmail.com");
+    signUpRequest.setPassword(PASSWORD);
+    Mockito.when(userService.checkExistEmail("test5.6@gmail.com")).thenReturn(true);
+    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
+      authenticationService.signUp(signUpRequest);
+    });
+    String expectedCode = CommonErrorCode.EMAIL_IS_ALREADY_EXIST.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  public void whenRefreshToken_RefreshTokenIsNotExist_ThrowException() {
+    Mockito.when(jwtProvider.parseJwt(any())).thenReturn(JWT);
+    Mockito.when(refreshTokenService.findByRefToken(REFRESH_TOKEN)).thenReturn(Optional.empty());
+    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
+      authenticationService.refreshToken(REFRESH_TOKEN, any());
+    });
+    String expectedCode = CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  public void whenRefreshToken_RefreshTokenIsExpired_ThrowException() {
+    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder()
+        .expiryDate(Instant.now().minusSeconds(3600)).token(REFRESH_TOKEN).build();
+    Mockito.when(jwtProvider.parseJwt(any())).thenReturn(JWT);
+    Mockito.when(refreshTokenService.findByRefToken(REFRESH_TOKEN))
+        .thenReturn(Optional.of(refreshToken));
+    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
+      authenticationService.refreshToken(REFRESH_TOKEN, any());
+    });
+    String expectedCode = CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+}

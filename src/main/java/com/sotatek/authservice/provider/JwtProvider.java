@@ -40,7 +40,7 @@ public class JwtProvider {
 
   public String generateJwtToken(Authentication authentication, String username) {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-    return Jwts.builder().setSubject(username).setId(userPrincipal.getUsername())
+    return Jwts.builder().setSubject(username)
         .claim(CommonConstant.AUTHORITIES_KEY,
             userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList())).setIssuedAt(new Date())
@@ -48,15 +48,7 @@ public class JwtProvider {
         .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }
 
-  public String generateJwtTokenFromUsername(UserEntity user, String id) {
-    return Jwts.builder().setSubject(user.getUsername()).setId(id)
-        .claim(CommonConstant.AUTHORITIES_KEY,
-            user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()))
-        .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
-        .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
-  }
-
-  public String generateJwtForVerifyAdmin(String username) {
+  public String generateCodeForVerify(String username) {
     return Jwts.builder().setSubject(username).setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + mail.getExpirationMs()))
         .signWith(rsaConfig.getPrivateKeyMail(), SignatureAlgorithm.RS256).compact();
@@ -67,9 +59,10 @@ public class JwtProvider {
         .parseClaimsJws(token).getBody().getSubject();
   }
 
-  public String getIdFromJwtToken(String token) {
+  public String getUserNameFromJwtToken(HttpServletRequest httpServletRequest) {
+    String token = parseJwt(httpServletRequest);
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
-        .parseClaimsJws(token).getBody().getId();
+        .parseClaimsJws(token).getBody().getSubject();
   }
 
   public String parseJwt(HttpServletRequest request) {
@@ -119,7 +112,7 @@ public class JwtProvider {
   }
 
   public String generateJwtTokenFromUser(UserEntity user) {
-    return Jwts.builder().setSubject(user.getUsername()).setId(user.getEmail())
+    return Jwts.builder().setSubject(user.getUsername())
         .claim(CommonConstant.AUTHORITIES_KEY,
             user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()))
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))

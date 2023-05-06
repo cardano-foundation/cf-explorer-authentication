@@ -1,6 +1,7 @@
 package com.sotatek.authservice.model.entity;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,6 +37,10 @@ public class BookMarkEntity extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(name = "type", nullable = false)
   private EBookMarkType type;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "network", nullable = false)
+  private ENetworkType network;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")

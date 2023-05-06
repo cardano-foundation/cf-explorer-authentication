@@ -4,7 +4,6 @@ import com.sotatek.authservice.constant.AuthConstant;
 import com.sotatek.authservice.model.entity.security.UserDetailsImpl;
 import com.sotatek.authservice.provider.JwtProvider;
 import com.sotatek.authservice.provider.RedisProvider;
-import com.sotatek.authservice.repository.WalletRepository;
 import com.sotatek.authservice.service.UserService;
 import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
 import java.io.IOException;
@@ -34,9 +33,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   private final UserService userService;
 
-  private final WalletRepository walletRepository;
-
-
   @Override
   protected void doFilterInternal(@NotNull HttpServletRequest request,
       @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
@@ -47,8 +43,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       throw new InvalidAccessTokenException();
     }
 
-    String param = jwtProvider.getIdFromJwtToken(token);
-    UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(param);
+    String username = jwtProvider.getUserNameFromJwtToken(token);
+    UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(username);
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
         userDetails.getUsername(), null, userDetails.getAuthorities());
     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -60,7 +56,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(@NotNull HttpServletRequest request) throws ServletException {
     return Stream.of(AuthConstant.AUTH_WHITELIST, AuthConstant.USER_WHITELIST,
-            AuthConstant.CSRF_TOKEN_PATH, AuthConstant.DOCUMENT_WHITELIST).flatMap(Stream::of)
+            AuthConstant.DOCUMENT_WHITELIST).flatMap(Stream::of)
         .anyMatch(x -> new AntPathMatcher().match(x, request.getServletPath()));
   }
 }

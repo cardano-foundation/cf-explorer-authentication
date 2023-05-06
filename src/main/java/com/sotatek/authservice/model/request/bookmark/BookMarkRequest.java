@@ -1,6 +1,7 @@
 package com.sotatek.authservice.model.request.bookmark;
 
 import com.sotatek.authservice.model.enums.EBookMarkType;
+import com.sotatek.authservice.model.enums.ENetworkType;
 import javax.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NonNull;
@@ -19,5 +20,9 @@ public class BookMarkRequest {
   @NonNull
   @NotBlank
   private EBookMarkType type;
+
+  @NonNull
+  @NotBlank
+  private ENetworkType network;
 
 }

@@ -11,8 +11,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: phuc.nguyen5@sotatek.com
-    password: anhphuc1996
+    username: test.sotatek1@gmail.com
+    password: zcphnnfpneuuoalv
     properties:
       mail:
         transport:
@@ -42,7 +42,7 @@ nonce:
   expirationMs: 345600000 #4 days
 
 mail:
-  from: 'phuc.nguyen5@sotatek.com'
+  from: 'test.sotatek1@gmail.com'
   sender: 'Sotatek'
   subject-registration: 'Please verify your registration'
   subject-reset-password: 'Do you want change password?'

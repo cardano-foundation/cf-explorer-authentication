@@ -10,13 +10,9 @@ import lombok.Setter;
 public class TransfersWalletRequest {
 
   @NotNull
-  @NotBlank
-  private String username;
-
-  @NotNull
   private WalletRequest wallet;
 
   @NotNull
   @NotBlank
-  private String refreshToken;
+  private String refreshJwt;
 }
