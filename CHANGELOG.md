@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.0...v0.1.1) (2023-05-15)
+
+
+### Bug Fixes
+
+* Update README.md trigger release ([c0f092e](https://github.com/cardano-foundation/cf-explorer-authentication/commit/c0f092e48d3218e7cc36dfbfdd17e7612003156b))
+
 ## 0.1.0 (2023-05-15)
 
 
