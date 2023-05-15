@@ -1,7 +1,7 @@
 package org.cardanofoundation.authentication.provider;
 
-import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;

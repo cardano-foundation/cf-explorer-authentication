@@ -1,11 +1,12 @@
 package org.cardanofoundation.authentication.model.response;
 
-import com.sotatek.cardanocommonapi.exceptions.enums.ErrorCode;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.cardanofoundation.explorer.common.exceptions.enums.ErrorCode;
 
 @Getter
 @Setter

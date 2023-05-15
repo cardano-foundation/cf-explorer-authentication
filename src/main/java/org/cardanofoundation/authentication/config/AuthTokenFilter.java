@@ -1,6 +1,6 @@
 package org.cardanofoundation.authentication.config;
 
-import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
+import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

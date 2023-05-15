@@ -1,9 +1,9 @@
 package org.cardanofoundation.authentication.provider;
 
 import org.cardanofoundation.authentication.constant.RedisConstant;
-import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
-import com.sotatek.cardanocommonapi.utils.StringUtils;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.core.RedisTemplate;
