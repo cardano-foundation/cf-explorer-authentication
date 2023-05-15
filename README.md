@@ -1,4 +1,4 @@
-# cardano-authentication
+# cf-explorer-authentication
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/tests.yaml/badge.svg" />
