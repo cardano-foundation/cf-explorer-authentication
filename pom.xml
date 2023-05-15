@@ -2,17 +2,67 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.0.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>org.cardanofoundation.authentication</groupId>
 	<artifactId>auth-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<name>auth-service</name>
 	<description>Auth Service for Spring Boot</description>
+
+	<scm>
+		<connection>scm:git:git://github.com/cardano-foundation/cf-explorer-authentication.git</connection>
+		<url>https://github.com/cardano-foundation/cf-explorer-authentication</url>
+		<developerConnection>scm:git:git://github.com/cardano-foundation/cf-explorer-authentication.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
+	<issueManagement>
+		<url>https://github.com/cardano-foundation/cf-explorer-authentication/issues</url>
+		<system>GitHub issues</system>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>MPL 2.0</name>
+			<url>https://www.mozilla.org/en-US/MPL/2.0/</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<organization>Cardano Foundation</organization>
+			<organizationUrl>https://cardanofoundation.org</organizationUrl>
+		</developer>
+	</developers>
+
+	<organization>
+		<name>Cardano Foundation</name>
+		<url>https://cardanofoundation.org</url>
+	</organization>
+
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>gitlab-private-registry</id>
+			<url>https://pro.gitlab.metadata.dev.cf-deployments.org/api/v4/projects/2/packages/maven</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<properties>
 		<java.version>17</java.version>
 	</properties>
