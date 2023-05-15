@@ -1,4 +1,5 @@
-FROM openjdk:11-jdk-slim AS build
+FROM openjdk:18-jdk-slim AS build
+RUN apt update -qq && apt install -y gettext-base
 
 ARG PRIVATE_MVN_REGISTRY_URL
 ARG PRIVATE_MVN_REGISTRY_USER
@@ -16,7 +17,7 @@ RUN ./mvnw verify clean --fail-never
 COPY . /app
 RUN ./mvnw clean package -DskipTests
 
-FROM openjdk:11-jdk-slim AS runtime
+FROM openjdk:18-jdk-slim AS runtime
 COPY --from=build /app/target/*.jar /app/cardano-authentication.jar
 WORKDIR /app
 ENTRYPOINT ["java", "-jar", "cardano-authentication.jar"]
