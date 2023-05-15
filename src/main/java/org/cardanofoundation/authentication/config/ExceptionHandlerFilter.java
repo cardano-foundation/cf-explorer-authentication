@@ -2,11 +2,11 @@ package org.cardanofoundation.authentication.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sotatek.cardanocommonapi.exceptions.AccessTokenExpireException;
-import com.sotatek.cardanocommonapi.exceptions.BusinessException;
-import com.sotatek.cardanocommonapi.exceptions.ErrorResponse;
-import com.sotatek.cardanocommonapi.exceptions.InvalidAccessTokenException;
-import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exceptions.AccessTokenExpireException;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

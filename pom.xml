@@ -124,9 +124,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.sotatek</groupId>
-			<artifactId>cardano-common-api</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>org.cardanofoundation.explorer</groupId>
+			<artifactId>common</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>

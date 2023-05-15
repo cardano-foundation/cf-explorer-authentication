@@ -1,6 +1,6 @@
 package org.cardanofoundation.authentication.service.impl;
 
-import com.sotatek.cardanocommonapi.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
