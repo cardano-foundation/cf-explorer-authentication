@@ -1,9 +1,9 @@
 # cardano-authentication
 
 <p align="left">
-<img alt="Tests" src="https://github.com/cardano-foundation/cf-ledger-consumer/actions/workflows/tests.yaml/badge.svg" />
-<img alt="Release" src="https://github.com/cardano-foundation/cf-ledger-consumer/actions/workflows/release.yaml/badge.svg?branch=main" />
-<img alt="Publish" src="https://github.com/cardano-foundation/cf-ledger-consumer/actions/workflows/publish.yaml/badge.svg?branch=main" />
+<img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/tests.yaml/badge.svg" />
+<img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/release.yaml/badge.svg?branch=main" />
+<img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
 ## Getting Started
