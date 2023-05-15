@@ -1,4 +1,16 @@
-FROM openjdk:11-jdk-slim
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+FROM openjdk:11-jdk-slim AS build
+ENV TZ=Asia/Ho_Chi_Minh
+WORKDIR /app
+COPY .m2/settings.xml /root/.m2/settings.xml
+COPY pom.xml /app/pom.xml
+COPY mvnw  /app/mvnw
+COPY .mvn /app/.mvn
+RUN ./mvnw verify clean --fail-never
+COPY . /app
+RUN ./mvnw clean package -DskipTests
+
+FROM openjdk:11-jdk-slim AS runtime
+ENV TZ=Asia/Ho_Chi_Minh
+COPY --from=build /app/target/*.jar /app/cardano-authentication.jar
+WORKDIR /app
+ENTRYPOINT ["java", "-jar", "cardano-authentication.jar"]
