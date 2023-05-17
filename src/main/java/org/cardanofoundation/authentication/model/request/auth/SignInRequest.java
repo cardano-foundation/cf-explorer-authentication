@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.model.request.auth;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,5 +16,6 @@ public class SignInRequest {
 
   private String password;
 
+  @NotNull
   private Integer type;
 }
