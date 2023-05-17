@@ -41,7 +41,7 @@ public class UserAspect {
 
   @AfterReturning("execution(* org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl.signUp(*)) && args(signUpRequest)")
   public void signUpLog(SignUpRequest signUpRequest) {
-    UserEntity user = userService.findByUsername(signUpRequest.getUsername());
+    UserEntity user = userService.findByUsername(signUpRequest.getEmail());
     userHistoryService.saveUserHistory(EUserAction.CREATED, Instant.now(), user);
   }
 

@@ -115,6 +115,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserEntity saveUser(SignUpRequest signUpRequest) {
     UserEntity user = userMapper.requestToEntity(signUpRequest);
+    user.setUsername(signUpRequest.getEmail());
     user.setStatus(EStatus.PENDING);
     user.setRoles(addRoleForUser(ERole.ROLE_USER));
     return userRepository.save(user);
@@ -195,22 +196,23 @@ public class UserServiceImpl implements UserService {
   private Set<RoleEntity> addRoleForUser(ERole eRole) {
     Set<RoleEntity> roles = new HashSet<>();
     switch (eRole) {
-      case ROLE_ADMIN:
+      case ROLE_ADMIN -> {
         RoleEntity rAdmin = roleRepository.findByName(ERole.ROLE_ADMIN)
             .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
         roles.add(rAdmin);
-        break;
-      case ROLE_USER:
+      }
+      case ROLE_USER -> {
         RoleEntity rUser = roleRepository.findByName(ERole.ROLE_USER)
             .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
         roles.add(rUser);
-        break;
-      case ROLE_MODERATOR:
+      }
+      case ROLE_MODERATOR -> {
         RoleEntity rMode = roleRepository.findByName(ERole.ROLE_MODERATOR)
             .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
         roles.add(rMode);
-        break;
-      default:
+      }
+      default -> {
+      }
     }
     return roles;
   }
