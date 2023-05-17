@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.model.request.bookmark;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
@@ -12,13 +13,14 @@ public class BookMarkRequest {
 
   private String urlPage;
 
+  @NotNull
   @NotBlank
   private String keyword;
 
-  @NotBlank
+  @NotNull
   private EBookMarkType type;
 
-  @NotBlank
+  @NotNull
   private ENetworkType network;
 
 }

@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.ERole;
 
@@ -12,7 +11,7 @@ import org.cardanofoundation.authentication.model.enums.ERole;
 @Setter
 public class SignUpAdminRequest {
 
-  @NonNull
+  @NotNull
   @NotBlank
   private String username;
 
@@ -21,10 +20,10 @@ public class SignUpAdminRequest {
   @Email
   private String email;
 
-  @NonNull
+  @NotNull
   @NotBlank
   private String password;
 
-  @NonNull
+  @NotNull
   private ERole role;
 }
