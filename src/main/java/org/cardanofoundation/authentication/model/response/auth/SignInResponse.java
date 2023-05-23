@@ -13,8 +13,6 @@ public class SignInResponse {
 
   private String tokenType;
 
-  private String username;
-
   private String email;
 
   private String refreshToken;

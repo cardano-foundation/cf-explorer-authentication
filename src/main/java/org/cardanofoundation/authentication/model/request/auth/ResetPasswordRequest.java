@@ -1,4 +1,4 @@
-package org.cardanofoundation.authentication.model.request.admin;
+package org.cardanofoundation.authentication.model.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

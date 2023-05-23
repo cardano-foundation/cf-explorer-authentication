@@ -1,6 +1,5 @@
 package org.cardanofoundation.authentication.service.impl;
 
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,7 @@ import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
-import org.cardanofoundation.authentication.model.request.admin.ResetPasswordRequest;
+import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
@@ -18,6 +17,7 @@ import org.cardanofoundation.authentication.repository.UserRepository;
 import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.cardanofoundation.authentication.thread.MailHandler;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,11 +49,11 @@ public class VerifyServiceImpl implements VerifyService {
     if (validateCode.equals(Boolean.FALSE)) {
       return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
     }
-    String username = jwtProvider.getUserNameFromVerifyCode(code);
-    redisProvider.blacklistJwt(code, username);
-    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.PENDING);
+    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
+    redisProvider.blacklistJwt(code, accountId);
+    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.PENDING);
     if (Objects.nonNull(user)) {
-      userService.activeUser(username);
+      userService.activeUser(accountId);
     } else {
       return new MessageResponse(CommonErrorCode.VERIFY_CODE_NOT_PENDING);
     }
@@ -70,9 +70,9 @@ public class VerifyServiceImpl implements VerifyService {
     if (validateCode.equals(Boolean.FALSE)) {
       return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
     }
-    String username = jwtProvider.getUserNameFromVerifyCode(code);
-    redisProvider.blacklistJwt(code, username);
-    UserEntity user = userService.findByUsernameAndStatus(username, EStatus.ACTIVE);
+    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
+    redisProvider.blacklistJwt(code, accountId);
+    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.ACTIVE);
     if (Objects.isNull(user)) {
       return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
     }
@@ -87,7 +87,7 @@ public class VerifyServiceImpl implements VerifyService {
     if (Objects.isNull(user)) {
       return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
     }
-    String code = jwtProvider.generateCodeForVerify(user.getUsername());
+    String code = jwtProvider.generateCodeForVerify(email);
     sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }

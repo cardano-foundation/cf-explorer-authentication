@@ -15,5 +15,5 @@ public class SignOutRequest {
 
   @NotNull
   @NotBlank
-  private String username;
+  private String accountId;
 }

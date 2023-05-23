@@ -41,8 +41,8 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
    */
   @Query(value = "SELECT pn FROM PrivateNoteEntity pn "
       + "JOIN UserEntity ue ON pn.user.id = ue.id "
-      + "WHERE ue.username = :username AND pn.network = :network "
+      + "WHERE ue.id = :userId AND pn.network = :network "
       + "ORDER BY pn.createdDate DESC")
-  Page<PrivateNoteEntity> findAllNote(@Param("username") String username, @Param("network")
+  Page<PrivateNoteEntity> findAllNote(@Param("userId") Long userId, @Param("network")
   ENetworkType network, Pageable pageable);
 }

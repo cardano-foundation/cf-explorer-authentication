@@ -24,7 +24,7 @@ public class MailProvider {
   private final MailProperties mail;
 
   public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code) {
-    log.info("start send verify mail to: " + user.getUsername());
+    log.info("start send verify mail to: " + user.getEmail());
     String contentHtml
         = "Hi there,<br />"
         + "Please click the link below to verify account:<br />"

@@ -19,19 +19,19 @@ public class RedisProvider {
   /*
    * @author: phuc.nguyen5
    * @since: 06/12/2022
-   * description: Add access token + username to redis after logout or refresh token
+   * description: Add access token + accountId to redis after logout or refresh token
    * @update:
    */
-  public void blacklistJwt(String token, String username) {
+  public void blacklistJwt(String token, String accountId) {
     if (!isTokenBlacklisted(token)) {
-      redisTemplate.opsForValue().set(RedisConstant.JWT + token, username);
+      redisTemplate.opsForValue().set(RedisConstant.JWT + token, accountId);
     }
   }
 
   /*
    * @author: phuc.nguyen5
    * @since: 06/12/2022
-   * description: Check exist access token + username from redis
+   * description: Check exist access token + accountId from redis
    * @update:
    */
   public boolean isTokenBlacklisted(String token) {

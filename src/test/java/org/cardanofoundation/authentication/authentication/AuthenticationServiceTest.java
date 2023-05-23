@@ -2,6 +2,9 @@ package org.cardanofoundation.authentication.authentication;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import java.time.Instant;
+import java.util.Optional;
+import java.util.Set;
 import org.cardanofoundation.authentication.model.entity.RefreshTokenEntity;
 import org.cardanofoundation.authentication.model.entity.RoleEntity;
 import org.cardanofoundation.authentication.model.entity.UserEntity;
@@ -23,9 +26,6 @@ import org.cardanofoundation.authentication.service.impl.AuthenticationServiceIm
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -84,7 +84,7 @@ public class AuthenticationServiceTest {
 
   private final String REFRESH_TOKEN = "b2d4e520-4e07-43aa-9a09-f9667f52ce0e";
 
-  private final String USER_NAME = "Test";
+  private final String EMAIL = "test.30.04@gmail.com";
 
   private final String PASSWORD = "password";
 
@@ -169,15 +169,15 @@ public class AuthenticationServiceTest {
     Authentication authentication = Mockito.mock(Authentication.class);
     RoleEntity role = new RoleEntity();
     role.setName(ERole.ROLE_USER);
-    UserEntity user = UserEntity.builder().username(ADDRESS_WALLET)
-        .email("test5.6@gmail.com").roles(Set.of(role)).isDeleted(false).build();
-    UserDetailsImpl userDetails = UserDetailsImpl.build(user, NONCE);
+    UserEntity user = UserEntity.builder()
+        .email(EMAIL).roles(Set.of(role)).isDeleted(false).build();
+    UserDetailsImpl userDetails = UserDetailsImpl.build(user, ADDRESS_WALLET, NONCE);
     Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
     Mockito.when(walletRepository.findWalletByAddress(ADDRESS_WALLET))
         .thenReturn(Optional.of(wallet));
     Mockito.when(authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(ADDRESS_WALLET, NONCE))).thenReturn(authentication);
-    Mockito.when(userService.findByUsername(ADDRESS_WALLET)).thenReturn(user);
+    Mockito.when(userService.findByAccountId(ADDRESS_WALLET)).thenReturn(user);
     Mockito.when(jwtProvider.generateJwtToken(authentication, ADDRESS_WALLET)).thenReturn(JWT);
     Mockito.when(refreshTokenService.addRefreshToken(user))
         .thenReturn(RefreshTokenEntity.builder().token(REFRESH_TOKEN).build());
@@ -187,13 +187,13 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void whenLoginUsingUsername_UserIsNotExist_ThrowException() {
+  public void whenLoginUsingEmal_UserIsNotExist_ThrowException() {
     SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setUsername(USER_NAME);
+    signInRequest.setEmail(EMAIL);
     signInRequest.setPassword(PASSWORD);
     signInRequest.setType(0);
     Mockito.when(authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(USER_NAME, PASSWORD)))
+            new UsernamePasswordAuthenticationToken(EMAIL, PASSWORD)))
         .thenThrow(new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
       authenticationService.signIn(signInRequest);
@@ -204,13 +204,13 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void whenLoginUsingUsername_UsernameOrPasswordInValid_ThrowException() {
+  public void whenLoginUsingEmal_EmalOrPasswordInValid_ThrowException() {
     SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setUsername(USER_NAME);
+    signInRequest.setEmail(EMAIL);
     signInRequest.setPassword(PASSWORD);
     signInRequest.setType(0);
     Mockito.when(authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(USER_NAME, PASSWORD)))
+            new UsernamePasswordAuthenticationToken(EMAIL, PASSWORD)))
         .thenThrow(new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID));
     BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
       authenticationService.signIn(signInRequest);
@@ -221,22 +221,22 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void whenLoginUsingUsername_AuthenticateSuccess_ThrowException() {
+  public void whenLoginUsingEmal_AuthenticateSuccess_ThrowException() {
     SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setUsername(USER_NAME);
+    signInRequest.setEmail(EMAIL);
     signInRequest.setPassword(PASSWORD);
     signInRequest.setType(0);
     Authentication authentication = Mockito.mock(Authentication.class);
     RoleEntity role = new RoleEntity();
     role.setName(ERole.ROLE_USER);
-    UserEntity user = UserEntity.builder().username(USER_NAME)
+    UserEntity user = UserEntity.builder()
         .email("test5.6@gmail.com").roles(Set.of(role)).isDeleted(false).build();
-    UserDetailsImpl userDetails = UserDetailsImpl.build(user, PASSWORD);
+    UserDetailsImpl userDetails = UserDetailsImpl.build(user, EMAIL, PASSWORD);
     Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
     Mockito.when(authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(USER_NAME, PASSWORD))).thenReturn(authentication);
-    Mockito.when(userService.findByUsername(USER_NAME)).thenReturn(user);
-    Mockito.when(jwtProvider.generateJwtToken(authentication, USER_NAME)).thenReturn(JWT);
+        new UsernamePasswordAuthenticationToken(EMAIL, PASSWORD))).thenReturn(authentication);
+    Mockito.when(userService.findByAccountId(EMAIL)).thenReturn(user);
+    Mockito.when(jwtProvider.generateJwtToken(authentication, EMAIL)).thenReturn(JWT);
     Mockito.when(refreshTokenService.addRefreshToken(user))
         .thenReturn(RefreshTokenEntity.builder().token(REFRESH_TOKEN).build());
     Mockito.when(userHistoryRepository.save(any())).thenReturn(UserHistoryEntity.builder().build());

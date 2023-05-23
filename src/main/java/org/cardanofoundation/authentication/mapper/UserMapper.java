@@ -1,7 +1,6 @@
 package org.cardanofoundation.authentication.mapper;
 
 import org.cardanofoundation.authentication.model.entity.UserEntity;
-import org.cardanofoundation.authentication.model.request.admin.SignUpAdminRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
 import org.cardanofoundation.authentication.model.response.UserResponse;
 import org.mapstruct.Mapper;
@@ -15,6 +14,4 @@ public interface UserMapper {
   UserEntity requestToEntity(SignUpRequest request);
 
   UserResponse entityToResponse(UserEntity user);
-
-  UserEntity requestAdminToEntity(SignUpAdminRequest request);
 }

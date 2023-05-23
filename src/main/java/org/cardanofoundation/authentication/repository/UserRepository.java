@@ -14,18 +14,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   /*
    * @author: phuc.nguyen5
    * @since: 26/10/2022
-   * description: find user by username
+   * description: find user by email
    * @update: 05/12/2022
    */
-  Optional<UserEntity> findByUsername(String username);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 26/10/2022
-   * description: check exist user by username
-   * @update: 05/12/2022
-   */
-  Boolean existsByUsername(String username);
+  Optional<UserEntity> findByEmail(String email);
 
   /*
    * @author: phuc.nguyen5
@@ -36,7 +28,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   @Query("SELECT ue FROM UserEntity ue "
       + "JOIN WalletEntity we ON ue.id = we.user.id "
       + "WHERE we.address = :address")
-  Optional<UserEntity> findUserByWalletAddress(@Param("address") String address);
+  Optional<UserEntity> findUserByAddress(@Param("address") String address);
 
   /*
    * @author: phuc.nguyen5
@@ -53,13 +45,4 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
    * @update:
    */
   Optional<UserEntity> findByEmailAndStatus(String email, EStatus status);
-
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 11/01/2023
-   * description: find user by username
-   * @update:
-   */
-  Optional<UserEntity> findByUsernameAndStatus(String username, EStatus status);
 }
