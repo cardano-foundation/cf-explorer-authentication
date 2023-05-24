@@ -75,6 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     log.info("login is running...");
     String accountId = "";
     String password = "";
+    String address = "";
     WalletEntity wallet = null;
     Integer type = signInRequest.getType();
     if (type == 0) {
@@ -110,10 +111,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String accessToken = jwtProvider.generateJwtToken(authentication, accountId);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(user);
-    if (Objects.nonNull(wallet)) {
+    if (type == 0) {
+      address = user.getStakeKey();
+    } else {
+      address = signInRequest.getAddress();
       walletService.updateNonce(wallet);
     }
-    return SignInResponse.builder().token(accessToken).address(signInRequest.getAddress())
+    return SignInResponse.builder().token(accessToken).address(address)
         .email(userDetails.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(refreshToken.getToken()).build();
   }

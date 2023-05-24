@@ -46,6 +46,9 @@ public class UserEntity extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private EStatus status;
 
+  @Column(name = "stake_key")
+  private String stakeKey;
+
   @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
   private boolean isDeleted;
 

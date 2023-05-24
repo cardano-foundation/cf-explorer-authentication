@@ -152,17 +152,25 @@ public class UserServiceImpl implements UserService {
       HttpServletRequest httpServletRequest) {
     log.info("edit user is running...");
     String emailReq = editUserRequest.getEmail();
+    String addressReq = editUserRequest.getAddress();
     String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
     UserEntity user = findByAccountId(accountId);
-    if (Objects.nonNull(user.getEmail())) {
-      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
+    String address = "";
+    if (Objects.nonNull(emailReq)) {
+      if (Boolean.TRUE.equals(checkExistEmail(emailReq))) {
+        throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
+      }
+      user.setEmail(emailReq);
+      address = walletRepository.findAddressByUserId(user.getId());
     }
-    if (Boolean.TRUE.equals(checkExistEmail(emailReq))) {
-      throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
+    if (Objects.nonNull(addressReq)) {
+      user.setStakeKey(addressReq);
+      address = addressReq;
     }
-    user.setEmail(emailReq);
     UserEntity userEdit = userRepository.save(user);
-    return userMapper.entityToResponse(userEdit);
+    UserResponse res = userMapper.entityToResponse(userEdit);
+    res.setAddress(address);
+    return res;
   }
 
   @Override
