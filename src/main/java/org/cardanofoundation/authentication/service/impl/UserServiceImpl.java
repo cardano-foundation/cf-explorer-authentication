@@ -106,6 +106,9 @@ public class UserServiceImpl implements UserService {
           EUserAction.CREATED);
     }
     String address = walletRepository.findAddressByUserId(userId);
+    if (Objects.isNull(address)) {
+      address = user.getStakeKey();
+    }
     return UserInfoResponse.builder().address(address).email(user.getEmail())
         .avatar(user.getAvatar()).sizeBookmark(sizeBookMark).sizeNote(sizeNote)
         .lastLogin(userHistory.getActionTime()).build();
