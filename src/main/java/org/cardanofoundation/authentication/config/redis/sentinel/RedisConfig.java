@@ -1,7 +1,6 @@
-package org.cardanofoundation.authentication.config;
+package org.cardanofoundation.authentication.config.redis.sentinel;
 
-import org.cardanofoundation.authentication.config.properties.RedisProperties;
-import org.cardanofoundation.authentication.config.properties.RedisProperties.SentinelNode;
+import org.cardanofoundation.authentication.config.redis.sentinel.RedisProperties.SentinelNode;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.function.Function;
@@ -20,6 +19,7 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -41,6 +41,7 @@ import redis.clients.jedis.JedisPoolConfig;
 @Configuration
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @EnableCaching
+@Profile("sentinel")
 public class RedisConfig extends CachingConfigurerSupport {
 
   /**

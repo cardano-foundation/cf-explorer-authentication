@@ -1,4 +1,4 @@
-package org.cardanofoundation.authentication.config.properties;
+package org.cardanofoundation.authentication.config.redis.sentinel;
 
 import java.util.List;
 import lombok.AccessLevel;
