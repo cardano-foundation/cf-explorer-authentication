@@ -1,5 +1,8 @@
 package org.cardanofoundation.authentication.crud;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import org.cardanofoundation.authentication.model.entity.BookMarkEntity;
 import org.cardanofoundation.authentication.model.entity.PrivateNoteEntity;
 import org.cardanofoundation.authentication.model.entity.RefreshTokenEntity;
@@ -20,9 +23,6 @@ import org.cardanofoundation.authentication.repository.RoleRepository;
 import org.cardanofoundation.authentication.repository.UserHistoryRepository;
 import org.cardanofoundation.authentication.repository.UserRepository;
 import org.cardanofoundation.authentication.repository.WalletRepository;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -59,9 +59,13 @@ public class JpaTest {
   @Autowired
   private PrivateNoteRepository privateNoteRepository;
 
+  private final String EMAIL = "test.30.04@gmail.com";
+
+  private final String ADDRESS = "123456789QWERTY";
+
   @Test
   public void whenInsertUser() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userTest = userRepository.save(user);
@@ -69,69 +73,62 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindByUsername() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+  public void whenFindByEmail() {
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     userRepository.save(user);
-    Optional<UserEntity> userOpt = userRepository.findByUsername("test.30.04");
+    Optional<UserEntity> userOpt = userRepository.findByEmail(EMAIL);
     Assertions.assertTrue(userOpt.isPresent());
-  }
-
-  @Test
-  public void whenExistsByUsername() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
-        .avatar(null)
-        .isDeleted(false).build();
-    userRepository.save(user);
-    Boolean isExist = userRepository.existsByUsername("test.30.04");
-    Assertions.assertTrue(isExist);
   }
 
   @Test
   public void whenExistsByEmail() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     userRepository.save(user);
-    Boolean isExist = userRepository.existsByEmail("test.30.04@gmail.com");
+    Boolean isExist = userRepository.existsByEmail(EMAIL);
     Assertions.assertTrue(isExist);
   }
 
   @Test
-  public void findByEmailAndStatus() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+  public void whenFindByEmailAndStatus() {
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .status(
             EStatus.ACTIVE)
         .isDeleted(false).build();
     userRepository.save(user);
-    Optional<UserEntity> userOpt = userRepository.findByEmailAndStatus("test.30.04@gmail.com",
+    Optional<UserEntity> userOpt = userRepository.findByEmailAndStatus(EMAIL,
         EStatus.ACTIVE);
     Assertions.assertTrue(userOpt.isPresent());
   }
 
   @Test
-  public void findByUsernameAndStatus() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
-        .avatar(null)
-        .status(
-            EStatus.ACTIVE)
-        .isDeleted(false).build();
-    userRepository.save(user);
-    Optional<UserEntity> userOpt = userRepository.findByUsernameAndStatus("test.30.04",
-        EStatus.ACTIVE);
-    Assertions.assertTrue(userOpt.isPresent());
-  }
-
-  @Test
-  public void whenInsertWallet() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+  public void whenFindUserByAddress() {
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
     WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
-        .address("123456789QWERTY").nonce("8890825581941064700")
+        .address(ADDRESS).nonce("8890825581941064700")
+        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .user(user1).build();
+    walletRepository.save(wallet);
+    UserEntity userTest = userRepository.findUserByAddress(ADDRESS).orElse(null);
+    Assertions.assertNotNull(userTest);
+  }
+
+  @Test
+  public void whenInsertWallet() {
+    UserEntity user = UserEntity.builder().email(EMAIL)
+        .avatar(null)
+        .isDeleted(false).build();
+    UserEntity user1 = userRepository.save(user);
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
+        .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
         .user(user1).build();
@@ -140,24 +137,40 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindByStakeAddress() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+  public void whenFindWalletByAddress() {
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
     WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
-        .address("123456789QWERTY").nonce("8890825581941064700")
+        .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
         .user(user1).build();
     walletRepository.save(wallet);
-    Optional<WalletEntity> walletOpt = walletRepository.findWalletByAddress("123456789QWERTY");
+    Optional<WalletEntity> walletOpt = walletRepository.findWalletByAddress(ADDRESS);
     Assertions.assertTrue(walletOpt.isPresent());
   }
 
   @Test
+  public void whenFindAddressByUserId() {
+    UserEntity user = UserEntity.builder().email(EMAIL)
+        .avatar(null)
+        .isDeleted(false).build();
+    UserEntity user1 = userRepository.save(user);
+    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
+        .address(ADDRESS).nonce("8890825581941064700")
+        .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .user(user1).build();
+    walletRepository.save(wallet);
+    String address = walletRepository.findAddressByUserId(user1.getId());
+    Assertions.assertEquals(ADDRESS, address);
+  }
+
+  @Test
   public void whenInsertUserHistory() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
@@ -171,7 +184,7 @@ public class JpaTest {
 
   @Test
   public void whenInsertRefreshToken() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
@@ -183,7 +196,7 @@ public class JpaTest {
 
   @Test
   public void whenFindRefreshTokenByToken() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
@@ -196,16 +209,16 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindAllRefreshTokenByUsername() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+  public void whenFindAllRefreshTokenByUserId() {
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userInsert = userRepository.save(user);
     RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().token("123qsf34fwf45fwdeaf5gsfc")
         .user(userInsert).expiryDate(Instant.now()).build();
     refreshTokenRepository.save(refreshToken);
-    List<RefreshTokenEntity> refreshTokens = refreshTokenRepository.findALlByUsername(
-        "test.30.04");
+    List<RefreshTokenEntity> refreshTokens = refreshTokenRepository.findALlByUserId(
+        userInsert.getId());
     Assertions.assertEquals(1, refreshTokens.size());
   }
 
@@ -217,7 +230,7 @@ public class JpaTest {
 
   @Test
   public void whenInsertBookmark() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userTest = userRepository.save(user);
@@ -229,7 +242,7 @@ public class JpaTest {
 
   @Test
   public void whenInsertPrivateNote() {
-    UserEntity user = UserEntity.builder().username("test.30.04").email("test.30.04@gmail.com")
+    UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userTest = userRepository.save(user);

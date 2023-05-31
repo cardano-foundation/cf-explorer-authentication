@@ -54,12 +54,4 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         .token(UUID.randomUUID().toString()).build();
     return refreshTokenRepository.save(refreshToken);
   }
-
-  @Override
-  public void revokeRefreshTokenByUsername(String username) {
-    List<RefreshTokenEntity> refreshTokenList = refreshTokenRepository.findALlByUsername(username);
-    if (Objects.nonNull(refreshTokenList) && !refreshTokenList.isEmpty()) {
-      refreshTokenList.forEach(refreshTokenRepository::delete);
-    }
-  }
 }

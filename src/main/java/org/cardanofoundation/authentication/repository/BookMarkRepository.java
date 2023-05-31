@@ -17,14 +17,14 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
   /*
    * @author: phuc.nguyen5
    * @since: 10/11/2022
-   * description: find all bookmark by username and type
+   * description: find all bookmark by userId and type
    * @update: 05/12/2022
    */
   @Query(value = "SELECT be FROM BookMarkEntity be "
       + "JOIN UserEntity ue ON be.user.id = ue.id "
-      + "WHERE ue.username = :username AND be.type = :type AND be.network = :network "
+      + "WHERE ue.id = :userId AND be.type = :type AND be.network = :network "
       + "ORDER BY be.createdDate DESC")
-  Page<BookMarkEntity> findAllBookMarkByUserAndType(@Param("username") String username,
+  Page<BookMarkEntity> findAllBookMarkByUserAndType(@Param("userId") Long userId,
       @Param("type") EBookMarkType type, @Param("network") ENetworkType network, Pageable pageable);
 
   /*
@@ -45,12 +45,12 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
   /*
    * @author: phuc.nguyen5
    * @since: 30/01/2023
-   * description: find all bookmark key by username
+   * description: find all bookmark key by userId
    * @update:
    */
   @Query(value = "SELECT be FROM BookMarkEntity be "
       + "JOIN UserEntity ue ON be.user.id = ue.id "
-      + "WHERE ue.username = :username AND be.network = :network")
-  List<BookMarkEntity> findAllKeyBookMarkByUser(@Param("username") String username,
+      + "WHERE ue.id = :userId AND be.network = :network")
+  List<BookMarkEntity> findAllKeyBookMarkByUser(@Param("userId") Long userId,
       @Param("network") ENetworkType network);
 }

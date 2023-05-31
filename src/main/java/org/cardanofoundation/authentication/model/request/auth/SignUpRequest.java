@@ -10,9 +10,6 @@ import lombok.Setter;
 public class SignUpRequest {
 
   @NotNull
-  private String username;
-
-  @NotNull
   @Email
   private String email;
 

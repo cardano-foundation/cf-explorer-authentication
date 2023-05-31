@@ -43,8 +43,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       throw new InvalidAccessTokenException();
     }
 
-    String username = jwtProvider.getUserNameFromJwtToken(token);
-    UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(username);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(token);
+    UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(accountId);
     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
         userDetails.getUsername(), null, userDetails.getAuthorities());
     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

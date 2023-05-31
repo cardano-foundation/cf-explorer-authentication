@@ -1,8 +1,5 @@
 package org.cardanofoundation.authentication.service.impl;
 
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Objects;
@@ -34,6 +31,9 @@ import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.WalletService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.authentication.util.NonceUtils;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -73,17 +73,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public SignInResponse signIn(SignInRequest signInRequest) {
     log.info("login is running...");
-    String username = "";
+    String accountId = "";
     String password = "";
+    String address = "";
     WalletEntity wallet = null;
     Integer type = signInRequest.getType();
     if (type == 0) {
-      log.info("login with username and password...");
-      username = signInRequest.getUsername();
+      log.info("login with email and password...");
+      accountId = signInRequest.getEmail();
       password = signInRequest.getPassword();
     } else {
       log.info("login with cardano wallet...");
-      username = signInRequest.getAddress();
+      accountId = signInRequest.getAddress();
       password = NonceUtils.getNonceFromSignature(signInRequest.getSignature());
       wallet = walletRepository.findWalletByAddress(signInRequest.getAddress())
           .orElseThrow(() -> new BusinessException(CommonErrorCode.WALLET_IS_NOT_EXIST));
@@ -96,7 +97,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Authentication authentication;
     try {
       authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(username, password));
+          new UsernamePasswordAuthenticationToken(accountId, password));
     } catch (AuthenticationException e) {
       log.error("Exception authentication: " + e.getMessage());
       if (type == 0) {
@@ -105,15 +106,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);
       }
     }
-    UserEntity user = userService.findByUsername(username);
+    UserEntity user = userService.findByAccountId(accountId);
     SecurityContextHolder.getContext().setAuthentication(authentication);
-    String accessToken = jwtProvider.generateJwtToken(authentication, username);
+    String accessToken = jwtProvider.generateJwtToken(authentication, accountId);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(user);
-    if (Objects.nonNull(wallet)) {
+    if (type == 0) {
+      address = user.getStakeKey();
+    } else {
+      address = signInRequest.getAddress();
       walletService.updateNonce(wallet);
     }
-    return SignInResponse.builder().token(accessToken).username(username)
+    return SignInResponse.builder().token(accessToken).address(address)
         .email(userDetails.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(refreshToken.getToken()).build();
   }
@@ -127,7 +131,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
     signUpRequest.setPassword(encoder.encode(signUpRequest.getPassword()));
     UserEntity user = userService.saveUser(signUpRequest);
-    String verifyCode = jwtProvider.generateCodeForVerify(user.getUsername());
+    String verifyCode = jwtProvider.generateCodeForVerify(email);
     sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));
     return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
         .message(CommonConstant.RESPONSE_SUCCESS).build();
@@ -140,8 +144,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return refreshTokenService.findByRefToken(refreshJwt).map(refreshTokenService::verifyExpiration)
         .map(refToken -> {
           UserEntity user = refToken.getUser();
-          redisProvider.blacklistJwt(accessToken, user.getUsername());
-          return jwtProvider.generateJwtTokenFromUser(user);
+          String address = walletRepository.findAddressByUserId(user.getId());
+          String accountId = Objects.isNull(address) ? user.getEmail() : address;
+          redisProvider.blacklistJwt(accessToken, accountId);
+          return jwtProvider.generateJwtToken(user, accountId);
         }).map(newAccessToken -> RefreshTokenResponse.builder().accessToken(newAccessToken)
             .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())
         .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
@@ -150,11 +156,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public MessageResponse signOut(SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
-    String username = signOutRequest.getUsername();
     String refreshJwt = signOutRequest.getRefreshJwt();
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
     refreshTokenService.revokeRefreshToken(refreshJwt);
-    redisProvider.blacklistJwt(accessToken, username);
+    redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 

@@ -44,8 +44,8 @@ public class BookMarkServiceImpl implements BookMarkService {
   @Override
   public BookMarkResponse addBookMark(BookMarkRequest bookMarkRequest,
       HttpServletRequest httpServletRequest) {
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    UserEntity user = userService.findByUsername(username);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = userService.findByAccountId(accountId);
     if (Objects.nonNull(
         bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
             bookMarkRequest.getType(), bookMarkRequest.getNetwork()))) {
@@ -67,8 +67,10 @@ public class BookMarkServiceImpl implements BookMarkService {
       HttpServletRequest httpServletRequest, EBookMarkType bookMarkType, ENetworkType network,
       Pageable pageable) {
     BasePageResponse<BookMarkResponse> response = new BasePageResponse<>();
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    Page<BookMarkEntity> bookMarkPage = bookMarkRepository.findAllBookMarkByUserAndType(username,
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = userService.findByAccountId(accountId);
+    Page<BookMarkEntity> bookMarkPage = bookMarkRepository.findAllBookMarkByUserAndType(
+        user.getId(),
         bookMarkType, network, pageable);
     if (!bookMarkPage.isEmpty()) {
       response.setData(bookMarkMapper.listEntityToResponse(bookMarkPage.getContent()));
@@ -88,16 +90,18 @@ public class BookMarkServiceImpl implements BookMarkService {
   @Override
   public List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest,
       ENetworkType network) {
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    List<BookMarkEntity> bookMarks = bookMarkRepository.findAllKeyBookMarkByUser(username, network);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = userService.findByAccountId(accountId);
+    List<BookMarkEntity> bookMarks = bookMarkRepository.findAllKeyBookMarkByUser(user.getId(),
+        network);
     return bookMarkMapper.listEntityToResponse(bookMarks);
   }
 
   @Override
   public AddBookMarkResponse addBookMarks(BookMarksRequest bookMarksRequest,
       HttpServletRequest httpServletRequest) {
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    UserEntity user = userService.findByUsername(username);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = userService.findByAccountId(accountId);
     AtomicReference<Integer> pass = new AtomicReference<>(0);
     AtomicReference<Integer> fail = new AtomicReference<>(0);
     bookMarksRequest.getBookMarks().forEach(bookMarkRequest -> {

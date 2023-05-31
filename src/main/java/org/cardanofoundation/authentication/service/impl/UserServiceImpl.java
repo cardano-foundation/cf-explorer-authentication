@@ -1,7 +1,5 @@
 package org.cardanofoundation.authentication.service.impl;
 
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Base64;
@@ -22,7 +20,6 @@ import org.cardanofoundation.authentication.model.enums.ERole;
 import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.EditUserRequest;
-import org.cardanofoundation.authentication.model.request.admin.SignUpAdminRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.model.response.UserResponse;
@@ -34,6 +31,8 @@ import org.cardanofoundation.authentication.repository.UserHistoryRepository;
 import org.cardanofoundation.authentication.repository.UserRepository;
 import org.cardanofoundation.authentication.repository.WalletRepository;
 import org.cardanofoundation.authentication.service.UserService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -61,27 +60,25 @@ public class UserServiceImpl implements UserService {
   private static final UserMapper userMapper = UserMapper.INSTANCE;
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    UserEntity user = userRepository.findByUsernameAndStatus(username, EStatus.ACTIVE)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    String password = user.getPassword();
-    WalletEntity wallet = walletRepository.findWalletByAddress(username).orElse(null);
-    if (Objects.nonNull(wallet)) {
+  public UserDetails loadUserByUsername(String accountId) throws UsernameNotFoundException {
+    UserEntity user = userRepository.findByEmailAndStatus(accountId, EStatus.ACTIVE).orElse(null);
+    String password = "";
+    if (Objects.isNull(user)) {
+      WalletEntity wallet = walletRepository.findWalletByAddress(accountId)
+          .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
       password = wallet.getNonceEncode();
+      user = wallet.getUser();
+    } else {
+      password = user.getPassword();
     }
-    return UserDetailsImpl.build(user, password);
-  }
-
-  @Override
-  public Boolean checkExistUsername(String username) {
-    return userRepository.existsByUsername(username);
+    return UserDetailsImpl.build(user, accountId, password);
   }
 
   @Override
   public UserResponse editAvatar(MultipartFile avatar, HttpServletRequest httpServletRequest) {
     log.info("edit user image is running...");
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    UserEntity user = findByUsername(username);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = findByAccountId(accountId);
     if (Objects.nonNull(avatar)) {
       StringBuilder base64Image = new StringBuilder(CommonConstant.BASE64_PREFIX);
       try {
@@ -97,17 +94,22 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserInfoResponse infoUser(HttpServletRequest httpServletRequest, ENetworkType network) {
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    UserEntity user = findByUsername(username);
-    Integer sizeBookMark = bookMarkRepository.getCountBookMarkByUser(user.getId(), network);
-    Integer sizeNote = noteRepository.getCountNoteByUser(user.getId(), network);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = findByAccountId(accountId);
+    Long userId = user.getId();
+    Integer sizeBookMark = bookMarkRepository.getCountBookMarkByUser(userId, network);
+    Integer sizeNote = noteRepository.getCountNoteByUser(userId, network);
     UserHistoryEntity userHistory = userHistoryRepository.findFirstByUserAndUserActionOrderByActionTimeDesc(
         user, EUserAction.LOGIN);
     if (Objects.isNull(userHistory)) {
       userHistory = userHistoryRepository.findFirstByUserAndUserActionOrderByActionTimeDesc(user,
           EUserAction.CREATED);
     }
-    return UserInfoResponse.builder().username(username).email(user.getEmail())
+    String address = walletRepository.findAddressByUserId(userId);
+    if (Objects.isNull(address)) {
+      address = user.getStakeKey();
+    }
+    return UserInfoResponse.builder().address(address).email(user.getEmail())
         .avatar(user.getAvatar()).sizeBookmark(sizeBookMark).sizeNote(sizeNote)
         .lastLogin(userHistory.getActionTime()).build();
   }
@@ -121,9 +123,12 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserEntity findByUsername(String username) {
-    return userRepository.findByUsername(username)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
+  public UserEntity findByAccountId(String accountId) {
+    UserEntity user = userRepository.findUserByAddress(accountId).orElse(null);
+    if (Objects.isNull(user)) {
+      return userRepository.findByEmail(accountId).orElse(null);
+    }
+    return user;
   }
 
   @Override
@@ -132,16 +137,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserEntity saveUserAdmin(SignUpAdminRequest signUpAdmin) {
-    UserEntity user = userMapper.requestAdminToEntity(signUpAdmin);
-    user.setRoles(addRoleForUser(signUpAdmin.getRole()));
-    user.setStatus(EStatus.PENDING);
-    return userRepository.save(user);
-  }
-
-  @Override
-  public void activeUser(String username) {
-    UserEntity user = userRepository.findByUsername(username)
+  public void activeUser(String email) {
+    UserEntity user = userRepository.findByEmail(email)
         .orElseThrow(() -> new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
     user.setStatus(EStatus.ACTIVE);
     userRepository.save(user);
@@ -154,32 +151,34 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserEntity findByUsernameAndStatus(String username, EStatus status) {
-    return userRepository.findByUsernameAndStatus(username, status).orElse(null);
-  }
-
-  @Override
   public UserResponse editUser(EditUserRequest editUserRequest,
       HttpServletRequest httpServletRequest) {
     log.info("edit user is running...");
     String emailReq = editUserRequest.getEmail();
-    String token = jwtProvider.parseJwt(httpServletRequest);
-    String username = jwtProvider.getUserNameFromJwtToken(token);
-    UserEntity user = findByUsername(username);
+    String addressReq = editUserRequest.getAddress();
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = findByAccountId(accountId);
+    String address = "";
     if (Objects.nonNull(emailReq)) {
       if (Boolean.TRUE.equals(checkExistEmail(emailReq))) {
         throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
       }
       user.setEmail(emailReq);
+      address = walletRepository.findAddressByUserId(user.getId());
+    }
+    if (Objects.nonNull(addressReq)) {
+      user.setStakeKey(addressReq);
+      address = addressReq;
     }
     UserEntity userEdit = userRepository.save(user);
-    return userMapper.entityToResponse(userEdit);
+    UserResponse res = userMapper.entityToResponse(userEdit);
+    res.setAddress(address);
+    return res;
   }
 
   @Override
   public UserEntity saveUser(String address) {
     UserEntity user = UserEntity.builder()
-        .username(address)
         .status(EStatus.ACTIVE)
         .roles(addRoleForUser(ERole.ROLE_USER))
         .build();
@@ -195,22 +194,23 @@ public class UserServiceImpl implements UserService {
   private Set<RoleEntity> addRoleForUser(ERole eRole) {
     Set<RoleEntity> roles = new HashSet<>();
     switch (eRole) {
-      case ROLE_ADMIN:
+      case ROLE_ADMIN -> {
         RoleEntity rAdmin = roleRepository.findByName(ERole.ROLE_ADMIN)
             .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
         roles.add(rAdmin);
-        break;
-      case ROLE_USER:
+      }
+      case ROLE_USER -> {
         RoleEntity rUser = roleRepository.findByName(ERole.ROLE_USER)
             .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
         roles.add(rUser);
-        break;
-      case ROLE_MODERATOR:
+      }
+      case ROLE_MODERATOR -> {
         RoleEntity rMode = roleRepository.findByName(ERole.ROLE_MODERATOR)
             .orElseThrow(() -> new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));
         roles.add(rMode);
-        break;
-      default:
+      }
+      default -> {
+      }
     }
     return roles;
   }

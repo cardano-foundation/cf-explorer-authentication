@@ -10,7 +10,7 @@ import lombok.Setter;
 @Builder
 public class UserInfoResponse {
 
-  private String username;
+  private String address;
 
   private String email;
 

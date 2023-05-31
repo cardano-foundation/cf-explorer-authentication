@@ -15,7 +15,7 @@ public interface AuthenticationService {
   /*
    * @author: phuc.nguyen5
    * @since: 21/10/2022
-   * description: process login with wallet or username
+   * description: process login with wallet or email
    * @update:
    */
   SignInResponse signIn(SignInRequest signInRequest);
