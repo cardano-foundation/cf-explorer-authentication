@@ -5,7 +5,6 @@ import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.request.EditUserRequest;
-import org.cardanofoundation.authentication.model.request.admin.SignUpAdminRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.model.response.UserResponse;
@@ -13,14 +12,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService extends UserDetailsService {
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 9/11/2022
-   * description: check exist username
-   * @update:
-   */
-  Boolean checkExistUsername(String username);
 
   /*
    * @author: phuc.nguyen5
@@ -49,10 +40,10 @@ public interface UserService extends UserDetailsService {
   /*
    * @author: phuc.nguyen5
    * @since: 22/12/2022
-   * description: find user by username
+   * description: find user by accountId
    * @update:
    */
-  UserEntity findByUsername(String username);
+  UserEntity findByAccountId(String accountId);
 
   /*
    * @author: phuc.nguyen5
@@ -64,19 +55,11 @@ public interface UserService extends UserDetailsService {
 
   /*
    * @author: phuc.nguyen5
-   * @since: 7/1/2023
-   * description: save user admin
-   * @update:
-   */
-  UserEntity saveUserAdmin(SignUpAdminRequest signUpAdmin);
-
-  /*
-   * @author: phuc.nguyen5
    * @since: 9/1/2023
-   * description: active user admin
+   * description: active user
    * @update:
    */
-  void activeUser(String username);
+  void activeUser(String accountId);
 
   /*
    * @author: phuc.nguyen5
@@ -85,14 +68,6 @@ public interface UserService extends UserDetailsService {
    * @update:
    */
   UserEntity findByEmailAndStatus(String email, EStatus status);
-
-  /*
-   * @author: phuc.nguyen5
-   * @since: 22/12/2022
-   * description: find user by username
-   * @update:
-   */
-  UserEntity findByUsernameAndStatus(String username, EStatus status);
 
   /*
    * @author: phuc.nguyen5

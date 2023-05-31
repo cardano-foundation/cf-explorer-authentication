@@ -28,27 +28,26 @@ public class UserAspect {
 
   @AfterReturning("execution(* org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl.signIn(*)) && args(signInRequest)")
   public void signInLog(SignInRequest signInRequest) {
-    String username = "";
+    String accountId = "";
     Integer type = signInRequest.getType();
     if (type == 0) {
-      username = signInRequest.getUsername();
+      accountId = signInRequest.getEmail();
     } else {
-      username = signInRequest.getAddress();
+      accountId = signInRequest.getAddress();
     }
-    UserEntity user = userService.findByUsername(username);
+    UserEntity user = userService.findByAccountId(accountId);
     userHistoryService.saveUserHistory(EUserAction.LOGIN, Instant.now(), user);
   }
 
   @AfterReturning("execution(* org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl.signUp(*)) && args(signUpRequest)")
   public void signUpLog(SignUpRequest signUpRequest) {
-    UserEntity user = userService.findByUsername(signUpRequest.getUsername());
+    UserEntity user = userService.findByAccountId(signUpRequest.getEmail());
     userHistoryService.saveUserHistory(EUserAction.CREATED, Instant.now(), user);
   }
 
   @AfterReturning("execution(* org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl.signOut(org.cardanofoundation.authentication.model.request.auth.SignOutRequest,..)) && args(signOutRequest,..)")
   public void signOutLog(SignOutRequest signOutRequest) {
-    String username = signOutRequest.getUsername();
-    UserEntity user = userService.findByUsername(username);
+    UserEntity user = userService.findByAccountId(signOutRequest.getAccountId());
     userHistoryService.saveUserHistory(EUserAction.LOGOUT, Instant.now(), user);
   }
 }

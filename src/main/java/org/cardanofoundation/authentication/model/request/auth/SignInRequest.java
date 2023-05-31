@@ -12,7 +12,7 @@ public class SignInRequest {
 
   private String signature;
 
-  private String username;
+  private String email;
 
   private String password;
 

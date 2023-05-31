@@ -1,6 +1,6 @@
 package org.cardanofoundation.authentication.service;
 
-import org.cardanofoundation.authentication.model.request.admin.ResetPasswordRequest;
+import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 
 public interface VerifyService {

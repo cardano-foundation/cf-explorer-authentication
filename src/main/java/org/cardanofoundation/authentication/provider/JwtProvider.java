@@ -37,29 +37,28 @@ public class JwtProvider {
 
   private final MailProperties mail;
 
-
-  public String generateJwtToken(Authentication authentication, String username) {
+  public String generateJwtToken(Authentication authentication, String accountId) {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-    return Jwts.builder().setSubject(username)
+    return Jwts.builder().setSubject(accountId)
         .claim(CommonConstant.AUTHORITIES_KEY,
             userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList())).setIssuedAt(new Date())
+                .toList()).setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }
 
-  public String generateCodeForVerify(String username) {
-    return Jwts.builder().setSubject(username).setIssuedAt(new Date())
+  public String generateCodeForVerify(String email) {
+    return Jwts.builder().setSubject(email).setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + mail.getExpirationMs()))
         .signWith(rsaConfig.getPrivateKeyMail(), SignatureAlgorithm.RS256).compact();
   }
 
-  public String getUserNameFromJwtToken(String token) {
+  public String getAccountIdFromJwtToken(String token) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
         .parseClaimsJws(token).getBody().getSubject();
   }
 
-  public String getUserNameFromJwtToken(HttpServletRequest httpServletRequest) {
+  public String getAccountIdFromJwtToken(HttpServletRequest httpServletRequest) {
     String token = parseJwt(httpServletRequest);
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
         .parseClaimsJws(token).getBody().getSubject();
@@ -106,15 +105,15 @@ public class JwtProvider {
     return Boolean.TRUE;
   }
 
-  public String getUserNameFromVerifyCode(String code) {
+  public String getAccountIdFromVerifyCode(String code) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyMail()).build()
         .parseClaimsJws(code).getBody().getSubject();
   }
 
-  public String generateJwtTokenFromUser(UserEntity user) {
-    return Jwts.builder().setSubject(user.getUsername())
+  public String generateJwtToken(UserEntity user, String accountId) {
+    return Jwts.builder().setSubject(accountId)
         .claim(CommonConstant.AUTHORITIES_KEY,
-            user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toList()))
+            user.getRoles().stream().map(RoleEntity::getName).toList())
         .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
         .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }

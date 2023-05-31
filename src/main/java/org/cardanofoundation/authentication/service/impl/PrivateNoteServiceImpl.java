@@ -39,8 +39,8 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
   @Override
   public MessageResponse addPrivateNote(PrivateNoteRequest privateNoteRequest,
       HttpServletRequest httpServletRequest) {
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    UserEntity user = userService.findByUsername(username);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = userService.findByAccountId(accountId);
     if (Objects.nonNull(
         noteRepository.checkExistNote(user.getId(), privateNoteRequest.getTxHash(),
             privateNoteRequest.getNetwork()))) {
@@ -62,8 +62,9 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
       ENetworkType network,
       Pageable pageable) {
     BasePageResponse<PrivateNoteResponse> response = new BasePageResponse<>();
-    String username = jwtProvider.getUserNameFromJwtToken(httpServletRequest);
-    Page<PrivateNoteEntity> notePage = noteRepository.findAllNote(username, network, pageable);
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserEntity user = userService.findByAccountId(accountId);
+    Page<PrivateNoteEntity> notePage = noteRepository.findAllNote(user.getId(), network, pageable);
     if (!notePage.isEmpty()) {
       response.setData(noteMapper.listEntityToResponse(notePage.getContent()));
     }

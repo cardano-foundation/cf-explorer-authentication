@@ -1,10 +1,10 @@
 package org.cardanofoundation.authentication.controller;
 
-import org.cardanofoundation.authentication.model.request.admin.ResetPasswordRequest;
-import org.cardanofoundation.authentication.model.response.MessageResponse;
-import org.cardanofoundation.authentication.service.VerifyService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
+import org.cardanofoundation.authentication.model.response.MessageResponse;
+import org.cardanofoundation.authentication.service.VerifyService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

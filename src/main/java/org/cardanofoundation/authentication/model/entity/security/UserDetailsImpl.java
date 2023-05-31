@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.model.entity.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serial;
 import org.cardanofoundation.authentication.model.entity.UserEntity;
 import java.util.Collection;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class UserDetailsImpl implements UserDetails {
 
+  @Serial
   private static final long serialVersionUID = 1L;
 
   private final Long id;
@@ -34,16 +36,14 @@ public class UserDetailsImpl implements UserDetails {
     this.authorities = authorities;
   }
 
-  public static UserDetailsImpl build(UserEntity user, String password) {
-    List<GrantedAuthority> authorities =
+  public static UserDetailsImpl build(UserEntity user, String accountId, String password) {
+    List<SimpleGrantedAuthority> authorities =
         user.getRoles().stream()
             .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-            .collect(Collectors.toList());
-
+            .toList();
     return new UserDetailsImpl(
-        user.getId(), user.getUsername(), user.getEmail(), password, authorities);
+        user.getId(), accountId, user.getEmail(), password, authorities);
   }
-
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

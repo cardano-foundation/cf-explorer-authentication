@@ -25,11 +25,6 @@ public class UserController {
 
   private final UserService userService;
 
-  @GetMapping("/exist-username")
-  public ResponseEntity<Boolean> checkExistUsername(@RequestParam("username") String username) {
-    return ResponseEntity.ok(userService.checkExistUsername(username));
-  }
-
   @PutMapping("/edit-avatar")
   public ResponseEntity<UserResponse> editAvatar(@RequestParam("avatar") MultipartFile avatar,
       HttpServletRequest httpServletRequest) {

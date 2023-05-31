@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -34,11 +33,7 @@ import org.hibernate.annotations.Where;
 @Where(clause = "is_deleted = false")
 public class UserEntity extends BaseEntity {
 
-  @Column(name = "username", length = 64, nullable = false)
-  @NotNull
-  private String username;
-
-  @Column(name = "email", length = 64)
+  @Column(name = "email", length = 64, unique = true)
   private String email;
 
   @Column(name = "avatar")
@@ -51,8 +46,10 @@ public class UserEntity extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private EStatus status;
 
+  @Column(name = "stake_key")
+  private String stakeKey;
+
   @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-  @NotNull
   private boolean isDeleted;
 
   @ManyToMany(fetch = FetchType.EAGER)
