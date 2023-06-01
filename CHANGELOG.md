@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.2...v0.1.3) (2023-05-31)
+
+
+### Features
+
+* added cluster and standalone redis mode ([32da18b](https://github.com/cardano-foundation/cf-explorer-authentication/commit/32da18b5e7ab4c764e2d7e8c326d0103d9ec8e49))
+
 ## [0.1.2](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.1...v0.1.2) (2023-05-31)
 
 
