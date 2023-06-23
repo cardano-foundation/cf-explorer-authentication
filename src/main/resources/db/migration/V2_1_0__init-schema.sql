@@ -22,7 +22,7 @@ CREATE TABLE "user" (
 	created_date timestamptz(6) NOT NULL,
 	modified_by varchar(255) NULL,
 	modified_date timestamptz(6) NULL,
-	avatar varchar(255) NULL,
+	avatar text NULL,
 	email varchar(64) NULL,
 	is_deleted bool NOT NULL DEFAULT false,
 	"password" varchar(256) NULL,
