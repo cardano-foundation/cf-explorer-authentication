@@ -84,4 +84,12 @@ public interface UserService extends UserDetailsService {
    * @update:
    */
   UserEntity saveUser(String address);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 29/06/2023
+   * description: check exist email and status
+   * @update:
+   */
+  Boolean checkExistEmailAndStatus(String email, EStatus status);
 }

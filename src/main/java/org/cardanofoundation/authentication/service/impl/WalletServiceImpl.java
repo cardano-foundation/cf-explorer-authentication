@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.entity.WalletEntity;
-import org.cardanofoundation.authentication.model.enums.EWalletName;
 import org.cardanofoundation.authentication.repository.WalletRepository;
 import org.cardanofoundation.authentication.service.WalletService;
 import org.cardanofoundation.authentication.util.NonceUtils;
@@ -36,7 +35,7 @@ public class WalletServiceImpl implements WalletService {
   }
 
   @Override
-  public WalletEntity saveWallet(String address, UserEntity user, EWalletName walletName) {
+  public WalletEntity saveWallet(String address, UserEntity user, String walletName) {
     String nonce = NonceUtils.createNonce();
     WalletEntity wallet = WalletEntity.builder().address(address).nonce(nonce)
         .nonceEncode(encoder.encode(nonce))
