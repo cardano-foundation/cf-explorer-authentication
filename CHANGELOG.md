@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.4](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.3...v0.1.4) (2023-06-29)
+
+
+### Features
+
+* update new migration ([030ba89](https://github.com/cardano-foundation/cf-explorer-authentication/commit/030ba89dcf9c7d802b4deed41ca905daaf5f4d81))
+
+
+### Bug Fixes
+
+* add migration for authentication service ([141fd2e](https://github.com/cardano-foundation/cf-explorer-authentication/commit/141fd2e214760e06fe89559c5705de682bab6dfd))
+* bug sign-up and login using wallet ([b96bb3d](https://github.com/cardano-foundation/cf-explorer-authentication/commit/b96bb3d8631029492d23f2b1d5e54059dfa0c33f))
+* **gha:** fix condition for main branch workflow trigger ([2972f6d](https://github.com/cardano-foundation/cf-explorer-authentication/commit/2972f6db8cb77a5e260bfb2e058748543c937f47))
+* **gha:** fix condition for main branch workflow trigger ([e5f0f12](https://github.com/cardano-foundation/cf-explorer-authentication/commit/e5f0f12a929e1734b93b3884d8823ce02062d810))
+* **gha:** fixed PR builds ([f747e54](https://github.com/cardano-foundation/cf-explorer-authentication/commit/f747e544c61349878549697baef0c2c2ae25a3b0))
+* insert role ([85828bb](https://github.com/cardano-foundation/cf-explorer-authentication/commit/85828bb1c8dba47995a73154d82d8ec0c9d48291))
+* **version:** set correct snapshot version ([4d51ebe](https://github.com/cardano-foundation/cf-explorer-authentication/commit/4d51ebe6ada1b52cb28f1e02baeae3f10c495bd2))
+
 ## [0.1.3](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.2...v0.1.3) (2023-05-31)
 
 
