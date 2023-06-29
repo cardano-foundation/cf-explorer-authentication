@@ -1,7 +1,6 @@
 package org.cardanofoundation.authentication.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.cardanofoundation.authentication.model.enums.EWalletName;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
@@ -51,5 +50,5 @@ public interface AuthenticationService {
    * description: get nonce value by public address from user table
    * @update:
    */
-  NonceResponse findNonceByAddress(String address, EWalletName walletName);
+  NonceResponse findNonceByAddress(String address, String walletName);
 }

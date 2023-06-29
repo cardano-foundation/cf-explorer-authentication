@@ -17,7 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
-import org.cardanofoundation.authentication.model.enums.EWalletName;
 import org.hibernate.Hibernate;
 
 @Entity
@@ -32,9 +31,8 @@ public class WalletEntity extends BaseEntity {
   @Column(name = "address", nullable = false, unique = true)
   private String address;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "wallet_name")
-  private EWalletName walletName;
+  private String walletName;
 
   @Column(name = "nonce", nullable = false)
   private String nonce;

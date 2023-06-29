@@ -45,4 +45,13 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
    * @update:
    */
   Optional<UserEntity> findByEmailAndStatus(String email, EStatus status);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 29/06/2023
+   * description: check exist user by email and status
+   * @update:
+   */
+  Boolean existsByEmailAndStatus(String email, EStatus status);
+
 }

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.authentication.model.enums.EWalletName;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
@@ -56,8 +55,7 @@ public class AuthController {
 
   @GetMapping("/get-nonce")
   public ResponseEntity<NonceResponse> findNonceByAddress(@RequestParam("address") String address,
-      @RequestParam("walletName")
-      EWalletName walletName) {
+      @RequestParam("walletName") String walletName) {
     return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));
   }
 }
