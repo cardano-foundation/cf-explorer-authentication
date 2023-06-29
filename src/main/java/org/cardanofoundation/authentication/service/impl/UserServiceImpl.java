@@ -185,6 +185,11 @@ public class UserServiceImpl implements UserService {
     return userRepository.save(user);
   }
 
+  @Override
+  public Boolean checkExistEmailAndStatus(String email, EStatus status) {
+    return userRepository.existsByEmailAndStatus(email, status);
+  }
+
   /*
    * @author: phuc.nguyen5
    * @since: 22/12/2022

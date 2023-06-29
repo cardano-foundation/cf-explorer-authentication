@@ -12,6 +12,7 @@ import org.cardanofoundation.authentication.model.entity.UserHistoryEntity;
 import org.cardanofoundation.authentication.model.entity.WalletEntity;
 import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
 import org.cardanofoundation.authentication.model.enums.ERole;
+import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
@@ -249,7 +250,8 @@ public class AuthenticationServiceTest {
     SignUpRequest signUpRequest = new SignUpRequest();
     signUpRequest.setEmail("test5.6@gmail.com");
     signUpRequest.setPassword(PASSWORD);
-    Mockito.when(userService.checkExistEmail("test5.6@gmail.com")).thenReturn(true);
+    Mockito.when(userService.checkExistEmailAndStatus("test5.6@gmail.com", EStatus.ACTIVE))
+        .thenReturn(true);
     BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
       authenticationService.signUp(signUpRequest);
     });

@@ -15,7 +15,6 @@ import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.enums.ERole;
 import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
-import org.cardanofoundation.authentication.model.enums.EWalletName;
 import org.cardanofoundation.authentication.repository.BookMarkRepository;
 import org.cardanofoundation.authentication.repository.PrivateNoteRepository;
 import org.cardanofoundation.authentication.repository.RefreshTokenRepository;
@@ -111,7 +110,7 @@ public class JpaTest {
         .avatar(null)
         .isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
-    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
+    WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
@@ -127,7 +126,7 @@ public class JpaTest {
         .avatar(null)
         .isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
-    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
+    WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
@@ -142,7 +141,7 @@ public class JpaTest {
         .avatar(null)
         .isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
-    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
+    WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
@@ -158,7 +157,7 @@ public class JpaTest {
         .avatar(null)
         .isDeleted(false).build();
     UserEntity user1 = userRepository.save(user);
-    WalletEntity wallet = WalletEntity.builder().walletName(EWalletName.NAMI)
+    WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
         .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)

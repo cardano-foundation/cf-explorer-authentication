@@ -12,8 +12,8 @@ import org.cardanofoundation.authentication.model.entity.RefreshTokenEntity;
 import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.entity.WalletEntity;
 import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
+import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
-import org.cardanofoundation.authentication.model.enums.EWalletName;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
@@ -24,6 +24,7 @@ import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.UserRepository;
 import org.cardanofoundation.authentication.repository.WalletRepository;
 import org.cardanofoundation.authentication.service.AuthenticationService;
 import org.cardanofoundation.authentication.service.RefreshTokenService;
@@ -65,6 +66,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final MailProvider mailProvider;
 
   private final ThreadPoolExecutor sendMailExecutor;
+
+  private final UserRepository userRepository;
 
   private final PasswordEncoder encoder;
 
@@ -126,11 +129,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public MessageResponse signUp(SignUpRequest signUpRequest) {
     String email = signUpRequest.getEmail();
-    if (Boolean.TRUE.equals(userService.checkExistEmail(email))) {
+    if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {
       throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
     }
-    signUpRequest.setPassword(encoder.encode(signUpRequest.getPassword()));
-    UserEntity user = userService.saveUser(signUpRequest);
+    String password = encoder.encode(signUpRequest.getPassword());
+    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.PENDING).orElse(null);
+    if (Objects.nonNull(user)) {
+      user.setPassword(password);
+      userRepository.save(user);
+    } else {
+      signUpRequest.setPassword(password);
+      user = userService.saveUser(signUpRequest);
+    }
     String verifyCode = jwtProvider.generateCodeForVerify(email);
     sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));
     return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
@@ -164,7 +174,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  public NonceResponse findNonceByAddress(String address, EWalletName walletName) {
+  public NonceResponse findNonceByAddress(String address, String walletName) {
     Optional<WalletEntity> walletOpt = walletRepository.findWalletByAddress(address);
     if (walletOpt.isPresent()) {
       WalletEntity wallet = walletOpt.get();

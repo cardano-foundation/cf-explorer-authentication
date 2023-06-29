@@ -2,7 +2,6 @@ package org.cardanofoundation.authentication.service;
 
 import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.entity.WalletEntity;
-import org.cardanofoundation.authentication.model.enums.EWalletName;
 
 public interface WalletService {
 
@@ -20,5 +19,5 @@ public interface WalletService {
    * description: save empty wallet
    * @update:
    */
-  WalletEntity saveWallet(String address, UserEntity user, EWalletName walletName);
+  WalletEntity saveWallet(String address, UserEntity user, String walletName);
 }
