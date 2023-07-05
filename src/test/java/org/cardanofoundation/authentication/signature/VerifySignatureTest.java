@@ -20,12 +20,12 @@ import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Profile;
 
-@RunWith(SpringRunner.class)
 @Log4j2
+@Profile("Test")
 public class VerifySignatureTest {
 
   public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";

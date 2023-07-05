@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:hsqldb:mem:myDb
+    username: cardano-test
+    password: password321
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.HSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: none
+
+  flyway:
+    enabled: false

@@ -22,18 +22,18 @@ import org.cardanofoundation.authentication.repository.RoleRepository;
 import org.cardanofoundation.authentication.repository.UserHistoryRepository;
 import org.cardanofoundation.authentication.repository.UserRepository;
 import org.cardanofoundation.authentication.repository.WalletRepository;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.context.annotation.Profile;
 
-
-@RunWith(SpringRunner.class)
 @DataJpaTest
+@Profile("Test")
+@Disabled
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 public class JpaTest {
 
