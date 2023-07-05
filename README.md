@@ -1,10 +1,22 @@
-# cf-explorer-authentication
+# Iris Authentication
 
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/tests.yaml/badge.svg" />
 <img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/release.yaml/badge.svg?branch=main" />
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
+
+The Iris Authentication API enables users to log in, with or without a wallet, to share personalized data such as bookmarks across devices.
+
+👉 Check the [Iris repository](https://github.com/cardano-foundation/cf-explorer) to understand how the microservices work together
+
+## 🧪 Test Reports
+
+To ensure the stability and reliability of this project, unit and mutation tests have been implemented. By clicking on the links below, you can access the detailed test reports and review the outcomes of the tests performed.
+
+📊 [Coverage Report](https://cardano-foundation.github.io/cf-explorer-authentication/html-report/reporthtml.html)
+
+📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-authentication/mutation-report/)
 
 ## Getting Started
 
@@ -14,7 +26,7 @@
 
 ### Installing
 
-- Clone the repository
+- Clone this repository
 - Copy `./.m2/settings.default.xml.tpl` to `./.m2/settings.xml`
 - Fill `{PRIVATE_MVN_REGISTRY_URL}`, `{PRIVATE_MVN_REGISTRY_USER}` and `{PRIVATE_MVN_REGISTRY_PASS}` in `./.m2/settings.xml`
 - Copy `.env.example`  to `.env`

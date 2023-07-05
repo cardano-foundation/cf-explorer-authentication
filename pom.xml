@@ -64,7 +64,17 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<version.maven-surefire-plugin>3.0.0-M5</version.maven-surefire-plugin>
+		<version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
+		<version.pitest>1.14.2</version.pitest>
+		<version.pitest-junit5>1.1.1</version.pitest-junit5>
+		<version.maven-site-plugin>4.0.0-M2</version.maven-site-plugin>
+		<version.sonarcube-maven-plugin>3.9.1.2184</version.sonarcube-maven-plugin>
+		<version.maven-project-info-reports-plugin>3.3.0</version.maven-project-info-reports-plugin>
+		<version.bloxbean>0.4.3</version.bloxbean>
+		<version.spring-boot-starter-aop>3.0.4</version.spring-boot-starter-aop>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -99,6 +109,22 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -141,17 +167,17 @@
 		<dependency>
 			<groupId>io.github.classgraph</groupId>
 			<artifactId>classgraph</artifactId>
-			<version>4.8.152</version>
+			<version>4.8.157</version>
 		</dependency>
 		<dependency>
 			<groupId>com.bloxbean.cardano</groupId>
 			<artifactId>cardano-client-lib</artifactId>
-			<version>0.4.0</version>
+			<version>${version.bloxbean}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.bloxbean.cardano</groupId>
 			<artifactId>cardano-client-backend-blockfrost</artifactId>
-			<version>0.4.0</version>
+			<version>${version.bloxbean}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.i2p.crypto</groupId>
@@ -165,11 +191,6 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -190,7 +211,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
-			<version>3.0.1</version>
+			<version>${version.spring-boot-starter-aop}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -256,6 +277,71 @@
 							<version>1.4.2.Final</version>
 						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${version.maven-surefire-plugin}</version>
+				<configuration>
+					<includes>
+						<include>**/*TestCases.java</include>
+						<include>**/*Tests.java</include>
+						<include>**/*TestCase.java</include>
+						<include>**/*Test.java</include>
+						<include>**/Test*.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${version.jacoco-maven-plugin}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>generate-code-coverage-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>${version.maven-site-plugin}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${version.maven-project-info-reports-plugin}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>${version.sonarcube-maven-plugin}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>${version.pitest}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>${version.pitest-junit5}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<features>
+						<feature>+auto_threads</feature>
+					</features>
 				</configuration>
 			</plugin>
 		</plugins>
