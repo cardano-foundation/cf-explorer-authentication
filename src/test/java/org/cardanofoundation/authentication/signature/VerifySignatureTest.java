@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Profile;
 
 @Log4j2
-@Profile("Test")
 public class VerifySignatureTest {
 
   public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";

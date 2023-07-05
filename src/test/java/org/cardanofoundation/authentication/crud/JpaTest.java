@@ -32,7 +32,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Profile;
 
 @DataJpaTest
-@Profile("Test")
 @Disabled
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 public class JpaTest {
