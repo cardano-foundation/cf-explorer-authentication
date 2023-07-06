@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExceptionHandlerFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.config</a> &gt; <span class="el_source">ExceptionHandlerFilter.java</span></div><h1>ExceptionHandlerFilter.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.config;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cardanofoundation.explorer.common.exceptions.AccessTokenExpireException;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
+import java.io.IOException;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+<span class="nc" id="L20">@Log4j2</span>
+<span class="nc" id="L21">public class ExceptionHandlerFilter extends OncePerRequestFilter {</span>
+
+  @Override
+  protected void doFilterInternal(@NotNull HttpServletRequest httpServletRequest,
+      @NotNull HttpServletResponse httpServletResponse, @NotNull FilterChain filterChain)
+      throws ServletException, IOException {
+<span class="nc" id="L27">    httpServletResponse.setContentType(&quot;application/json&quot;);</span>
+<span class="nc" id="L28">    httpServletResponse.setCharacterEncoding(&quot;UTF-8&quot;);</span>
+    try {
+<span class="nc" id="L30">      filterChain.doFilter(httpServletRequest, httpServletResponse);</span>
+<span class="nc" id="L31">    } catch (InvalidAccessTokenException | AccessTokenExpireException e) {</span>
+<span class="nc" id="L32">      log.error(e.getMessage());</span>
+<span class="nc" id="L33">      ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="nc" id="L34">          .errorCode(e.getErrorCode().getServiceErrorCode())</span>
+<span class="nc" id="L35">          .errorMessage(e.getErrorCode().getDesc()).build();</span>
+<span class="nc" id="L36">      httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());</span>
+<span class="nc" id="L37">      httpServletResponse.getWriter().write(convertObjectToJson(errorResponse));</span>
+<span class="nc" id="L38">    } catch (BusinessException e) {</span>
+<span class="nc" id="L39">      log.error(e.getMessage());</span>
+<span class="nc" id="L40">      ErrorResponse errorResponse = ErrorResponse.builder().errorCode(e.getErrorCode())</span>
+<span class="nc" id="L41">          .errorMessage(e.getErrorMsg()).build();</span>
+<span class="nc" id="L42">      httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());</span>
+<span class="nc" id="L43">      httpServletResponse.getWriter().write(convertObjectToJson(errorResponse));</span>
+<span class="nc" id="L44">    } catch (Exception e) {</span>
+<span class="nc" id="L45">      log.error(e.getMessage());</span>
+<span class="nc" id="L46">      ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="nc" id="L47">          .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())</span>
+<span class="nc" id="L48">          .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build();</span>
+<span class="nc" id="L49">      httpServletResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());</span>
+<span class="nc" id="L50">      httpServletResponse.getWriter().write(convertObjectToJson(errorResponse));</span>
+<span class="nc" id="L51">    }</span>
+<span class="nc" id="L52">  }</span>
+
+  public String convertObjectToJson(Object object) throws JsonProcessingException {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">    if (object == null) {</span>
+<span class="nc" id="L56">      return null;</span>
+    }
+<span class="nc" id="L58">    ObjectMapper mapper = new ObjectMapper();</span>
+<span class="nc" id="L59">    return mapper.writeValueAsString(object);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

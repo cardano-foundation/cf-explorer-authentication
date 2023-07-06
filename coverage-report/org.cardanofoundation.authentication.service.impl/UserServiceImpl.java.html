@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.service.impl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.service.impl;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.mapper.UserMapper;
+import org.cardanofoundation.authentication.model.entity.RoleEntity;
+import org.cardanofoundation.authentication.model.entity.UserEntity;
+import org.cardanofoundation.authentication.model.entity.UserHistoryEntity;
+import org.cardanofoundation.authentication.model.entity.WalletEntity;
+import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
+import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.authentication.model.enums.ERole;
+import org.cardanofoundation.authentication.model.enums.EStatus;
+import org.cardanofoundation.authentication.model.enums.EUserAction;
+import org.cardanofoundation.authentication.model.request.EditUserRequest;
+import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
+import org.cardanofoundation.authentication.model.response.UserInfoResponse;
+import org.cardanofoundation.authentication.model.response.UserResponse;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.repository.BookMarkRepository;
+import org.cardanofoundation.authentication.repository.PrivateNoteRepository;
+import org.cardanofoundation.authentication.repository.RoleRepository;
+import org.cardanofoundation.authentication.repository.UserHistoryRepository;
+import org.cardanofoundation.authentication.repository.UserRepository;
+import org.cardanofoundation.authentication.repository.WalletRepository;
+import org.cardanofoundation.authentication.service.UserService;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+@Service
+<span class="nc" id="L42">@RequiredArgsConstructor</span>
+<span class="nc" id="L43">@Log4j2</span>
+public class UserServiceImpl implements UserService {
+
+  private final UserRepository userRepository;
+
+  private final WalletRepository walletRepository;
+
+  private final JwtProvider jwtProvider;
+
+  private final BookMarkRepository bookMarkRepository;
+
+  private final PrivateNoteRepository noteRepository;
+
+  private final UserHistoryRepository userHistoryRepository;
+
+  private final RoleRepository roleRepository;
+
+<span class="nc" id="L60">  private static final UserMapper userMapper = UserMapper.INSTANCE;</span>
+
+  @Override
+  public UserDetails loadUserByUsername(String accountId) throws UsernameNotFoundException {
+<span class="nc" id="L64">    UserEntity user = userRepository.findByEmailAndStatus(accountId, EStatus.ACTIVE).orElse(null);</span>
+<span class="nc" id="L65">    String password = &quot;&quot;;</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">    if (Objects.isNull(user)) {</span>
+<span class="nc" id="L67">      WalletEntity wallet = walletRepository.findWalletByAddress(accountId)</span>
+<span class="nc" id="L68">          .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));</span>
+<span class="nc" id="L69">      password = wallet.getNonceEncode();</span>
+<span class="nc" id="L70">      user = wallet.getUser();</span>
+<span class="nc" id="L71">    } else {</span>
+<span class="nc" id="L72">      password = user.getPassword();</span>
+    }
+<span class="nc" id="L74">    return UserDetailsImpl.build(user, accountId, password);</span>
+  }
+
+  @Override
+  public UserResponse editAvatar(MultipartFile avatar, HttpServletRequest httpServletRequest) {
+<span class="nc" id="L79">    log.info(&quot;edit user image is running...&quot;);</span>
+<span class="nc" id="L80">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="nc" id="L81">    UserEntity user = findByAccountId(accountId);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">    if (Objects.nonNull(avatar)) {</span>
+<span class="nc" id="L83">      StringBuilder base64Image = new StringBuilder(CommonConstant.BASE64_PREFIX);</span>
+      try {
+<span class="nc" id="L85">        base64Image.append(Base64.getEncoder().encodeToString(avatar.getBytes()));</span>
+<span class="nc" id="L86">        user.setAvatar(base64Image.toString());</span>
+<span class="nc" id="L87">      } catch (IOException e) {</span>
+<span class="nc" id="L88">        log.error(&quot;error: convert image file to byte[]&quot;);</span>
+<span class="nc" id="L89">      }</span>
+    }
+<span class="nc" id="L91">    UserEntity userEdit = userRepository.save(user);</span>
+<span class="nc" id="L92">    return userMapper.entityToResponse(userEdit);</span>
+  }
+
+  @Override
+  public UserInfoResponse infoUser(HttpServletRequest httpServletRequest, ENetworkType network) {
+<span class="nc" id="L97">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="nc" id="L98">    UserEntity user = findByAccountId(accountId);</span>
+<span class="nc" id="L99">    Long userId = user.getId();</span>
+<span class="nc" id="L100">    Integer sizeBookMark = bookMarkRepository.getCountBookMarkByUser(userId, network);</span>
+<span class="nc" id="L101">    Integer sizeNote = noteRepository.getCountNoteByUser(userId, network);</span>
+<span class="nc" id="L102">    UserHistoryEntity userHistory = userHistoryRepository.findFirstByUserAndUserActionOrderByActionTimeDesc(</span>
+        user, EUserAction.LOGIN);
+<span class="nc bnc" id="L104" title="All 2 branches missed.">    if (Objects.isNull(userHistory)) {</span>
+<span class="nc" id="L105">      userHistory = userHistoryRepository.findFirstByUserAndUserActionOrderByActionTimeDesc(user,</span>
+          EUserAction.CREATED);
+    }
+<span class="nc" id="L108">    String address = walletRepository.findAddressByUserId(userId);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">    if (Objects.isNull(address)) {</span>
+<span class="nc" id="L110">      address = user.getStakeKey();</span>
+    }
+<span class="nc" id="L112">    return UserInfoResponse.builder().address(address).email(user.getEmail())</span>
+<span class="nc" id="L113">        .avatar(user.getAvatar()).sizeBookmark(sizeBookMark).sizeNote(sizeNote)</span>
+<span class="nc" id="L114">        .lastLogin(userHistory.getActionTime()).build();</span>
+  }
+
+  @Override
+  public UserEntity saveUser(SignUpRequest signUpRequest) {
+<span class="nc" id="L119">    UserEntity user = userMapper.requestToEntity(signUpRequest);</span>
+<span class="nc" id="L120">    user.setStatus(EStatus.PENDING);</span>
+<span class="nc" id="L121">    user.setRoles(addRoleForUser(ERole.ROLE_USER));</span>
+<span class="nc" id="L122">    return userRepository.save(user);</span>
+  }
+
+  @Override
+  public UserEntity findByAccountId(String accountId) {
+<span class="nc" id="L127">    UserEntity user = userRepository.findUserByAddress(accountId).orElse(null);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">    if (Objects.isNull(user)) {</span>
+<span class="nc" id="L129">      return userRepository.findByEmail(accountId).orElse(null);</span>
+    }
+<span class="nc" id="L131">    return user;</span>
+  }
+
+  @Override
+  public Boolean checkExistEmail(String email) {
+<span class="nc" id="L136">    return userRepository.existsByEmail(email);</span>
+  }
+
+  @Override
+  public void activeUser(String email) {
+<span class="nc" id="L141">    UserEntity user = userRepository.findByEmail(email)</span>
+<span class="nc" id="L142">        .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));</span>
+<span class="nc" id="L143">    user.setStatus(EStatus.ACTIVE);</span>
+<span class="nc" id="L144">    userRepository.save(user);</span>
+<span class="nc" id="L145">  }</span>
+
+  @Override
+  public UserEntity findByEmailAndStatus(String email, EStatus status) {
+<span class="nc" id="L149">    return userRepository.findByEmailAndStatus(email, status)</span>
+<span class="nc" id="L150">        .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));</span>
+  }
+
+  @Override
+  public UserResponse editUser(EditUserRequest editUserRequest,
+      HttpServletRequest httpServletRequest) {
+<span class="nc" id="L156">    log.info(&quot;edit user is running...&quot;);</span>
+<span class="nc" id="L157">    String emailReq = editUserRequest.getEmail();</span>
+<span class="nc" id="L158">    String addressReq = editUserRequest.getAddress();</span>
+<span class="nc" id="L159">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="nc" id="L160">    UserEntity user = findByAccountId(accountId);</span>
+<span class="nc" id="L161">    String address = &quot;&quot;;</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">    if (Objects.nonNull(emailReq)) {</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">      if (Boolean.TRUE.equals(checkExistEmail(emailReq))) {</span>
+<span class="nc" id="L164">        throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);</span>
+      }
+<span class="nc" id="L166">      user.setEmail(emailReq);</span>
+<span class="nc" id="L167">      address = walletRepository.findAddressByUserId(user.getId());</span>
+    }
+<span class="nc bnc" id="L169" title="All 2 branches missed.">    if (Objects.nonNull(addressReq)) {</span>
+<span class="nc" id="L170">      user.setStakeKey(addressReq);</span>
+<span class="nc" id="L171">      address = addressReq;</span>
+    }
+<span class="nc" id="L173">    UserEntity userEdit = userRepository.save(user);</span>
+<span class="nc" id="L174">    UserResponse res = userMapper.entityToResponse(userEdit);</span>
+<span class="nc" id="L175">    res.setAddress(address);</span>
+<span class="nc" id="L176">    return res;</span>
+  }
+
+  @Override
+  public UserEntity saveUser(String address) {
+<span class="nc" id="L181">    UserEntity user = UserEntity.builder()</span>
+<span class="nc" id="L182">        .status(EStatus.ACTIVE)</span>
+<span class="nc" id="L183">        .roles(addRoleForUser(ERole.ROLE_USER))</span>
+<span class="nc" id="L184">        .build();</span>
+<span class="nc" id="L185">    return userRepository.save(user);</span>
+  }
+
+  @Override
+  public Boolean checkExistEmailAndStatus(String email, EStatus status) {
+<span class="nc" id="L190">    return userRepository.existsByEmailAndStatus(email, status);</span>
+  }
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 22/12/2022
+   * description: get role for user
+   * @update:
+   */
+  private Set&lt;RoleEntity&gt; addRoleForUser(ERole eRole) {
+<span class="nc" id="L200">    Set&lt;RoleEntity&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L201" title="All 4 branches missed.">    switch (eRole) {</span>
+      case ROLE_ADMIN -&gt; {
+<span class="nc" id="L203">        RoleEntity rAdmin = roleRepository.findByName(ERole.ROLE_ADMIN)</span>
+<span class="nc" id="L204">            .orElseThrow(() -&gt; new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));</span>
+<span class="nc" id="L205">        roles.add(rAdmin);</span>
+<span class="nc" id="L206">      }</span>
+      case ROLE_USER -&gt; {
+<span class="nc" id="L208">        RoleEntity rUser = roleRepository.findByName(ERole.ROLE_USER)</span>
+<span class="nc" id="L209">            .orElseThrow(() -&gt; new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));</span>
+<span class="nc" id="L210">        roles.add(rUser);</span>
+<span class="nc" id="L211">      }</span>
+      case ROLE_MODERATOR -&gt; {
+<span class="nc" id="L213">        RoleEntity rMode = roleRepository.findByName(ERole.ROLE_MODERATOR)</span>
+<span class="nc" id="L214">            .orElseThrow(() -&gt; new RuntimeException(CommonErrorCode.ROLE_IS_NOT_FOUND.getDesc()));</span>
+<span class="nc" id="L215">        roles.add(rMode);</span>
+<span class="nc" id="L216">      }</span>
+      default -&gt; {
+      }
+    }
+<span class="nc" id="L220">    return roles;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

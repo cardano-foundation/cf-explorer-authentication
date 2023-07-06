@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthTokenFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.config</a> &gt; <span class="el_source">AuthTokenFilter.java</span></div><h1>AuthTokenFilter.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.config;
+
+import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
+import java.io.IOException;
+import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.authentication.constant.AuthConstant;
+import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.service.UserService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+<span class="nc" id="L25">@Log4j2</span>
+<span class="nc" id="L26">@RequiredArgsConstructor</span>
+@Component
+public class AuthTokenFilter extends OncePerRequestFilter {
+
+  private final JwtProvider jwtProvider;
+
+  private final RedisProvider redisProvider;
+
+  private final UserService userService;
+
+  @Override
+  protected void doFilterInternal(@NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
+      throws ServletException, IOException {
+<span class="nc" id="L40">    String token = jwtProvider.parseJwt(request);</span>
+<span class="nc" id="L41">    jwtProvider.validateJwtToken(token);</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">    if (redisProvider.isTokenBlacklisted(token)) {</span>
+<span class="nc" id="L43">      throw new InvalidAccessTokenException();</span>
+    }
+
+<span class="nc" id="L46">    String accountId = jwtProvider.getAccountIdFromJwtToken(token);</span>
+<span class="nc" id="L47">    UserDetailsImpl userDetails = (UserDetailsImpl) userService.loadUserByUsername(accountId);</span>
+<span class="nc" id="L48">    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(</span>
+<span class="nc" id="L49">        userDetails.getUsername(), null, userDetails.getAuthorities());</span>
+<span class="nc" id="L50">    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+<span class="nc" id="L51">    SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+
+<span class="nc" id="L53">    filterChain.doFilter(request, response);</span>
+<span class="nc" id="L54">  }</span>
+
+  @Override
+  protected boolean shouldNotFilter(@NotNull HttpServletRequest request) throws ServletException {
+<span class="nc" id="L58">    return Stream.of(AuthConstant.AUTH_WHITELIST, AuthConstant.USER_WHITELIST,</span>
+<span class="nc" id="L59">            AuthConstant.DOCUMENT_WHITELIST, AuthConstant.CLIENT_WHITELIST).flatMap(Stream::of)</span>
+<span class="nc" id="L60">        .anyMatch(x -&gt; new AntPathMatcher().match(x, request.getServletPath()));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

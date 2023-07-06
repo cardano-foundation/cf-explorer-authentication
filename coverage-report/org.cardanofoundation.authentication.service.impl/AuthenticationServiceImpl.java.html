@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthenticationServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.service.impl</a> &gt; <span class="el_source">AuthenticationServiceImpl.java</span></div><h1>AuthenticationServiceImpl.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.service.impl;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ThreadPoolExecutor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.model.entity.RefreshTokenEntity;
+import org.cardanofoundation.authentication.model.entity.UserEntity;
+import org.cardanofoundation.authentication.model.entity.WalletEntity;
+import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
+import org.cardanofoundation.authentication.model.enums.EStatus;
+import org.cardanofoundation.authentication.model.enums.EUserAction;
+import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
+import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
+import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
+import org.cardanofoundation.authentication.model.response.MessageResponse;
+import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
+import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
+import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.MailProvider;
+import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.UserRepository;
+import org.cardanofoundation.authentication.repository.WalletRepository;
+import org.cardanofoundation.authentication.service.AuthenticationService;
+import org.cardanofoundation.authentication.service.RefreshTokenService;
+import org.cardanofoundation.authentication.service.UserService;
+import org.cardanofoundation.authentication.service.WalletService;
+import org.cardanofoundation.authentication.thread.MailHandler;
+import org.cardanofoundation.authentication.util.NonceUtils;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+<span class="fc" id="L48">@RequiredArgsConstructor</span>
+<span class="fc" id="L49">@Log4j2</span>
+public class AuthenticationServiceImpl implements AuthenticationService {
+
+  private final UserService userService;
+
+  private final AuthenticationManager authenticationManager;
+
+  private final JwtProvider jwtProvider;
+
+  private final RefreshTokenService refreshTokenService;
+
+  private final WalletService walletService;
+
+  private final RedisProvider redisProvider;
+
+  private final WalletRepository walletRepository;
+
+  private final MailProvider mailProvider;
+
+  private final ThreadPoolExecutor sendMailExecutor;
+
+  private final UserRepository userRepository;
+
+  private final PasswordEncoder encoder;
+
+  @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
+      IgnoreRollbackException.class})
+  @Override
+  public SignInResponse signIn(SignInRequest signInRequest) {
+<span class="fc" id="L78">    log.info(&quot;login is running...&quot;);</span>
+<span class="fc" id="L79">    String accountId = &quot;&quot;;</span>
+<span class="fc" id="L80">    String password = &quot;&quot;;</span>
+<span class="fc" id="L81">    String address = &quot;&quot;;</span>
+<span class="fc" id="L82">    WalletEntity wallet = null;</span>
+<span class="fc" id="L83">    Integer type = signInRequest.getType();</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">    if (type == 0) {</span>
+<span class="nc" id="L85">      log.info(&quot;login with email and password...&quot;);</span>
+<span class="nc" id="L86">      accountId = signInRequest.getEmail();</span>
+<span class="nc" id="L87">      password = signInRequest.getPassword();</span>
+    } else {
+<span class="fc" id="L89">      log.info(&quot;login with cardano wallet...&quot;);</span>
+<span class="fc" id="L90">      accountId = signInRequest.getAddress();</span>
+<span class="fc" id="L91">      password = NonceUtils.getNonceFromSignature(signInRequest.getSignature());</span>
+<span class="fc" id="L92">      wallet = walletRepository.findWalletByAddress(signInRequest.getAddress())</span>
+<span class="pc" id="L93">          .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.WALLET_IS_NOT_EXIST));</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) &lt; 0) {</span>
+<span class="nc" id="L95">        log.error(&quot;error: nonce value is expired&quot;);</span>
+<span class="nc" id="L96">        walletService.updateNonce(wallet);</span>
+<span class="nc" id="L97">        throw new IgnoreRollbackException(CommonErrorCode.NONCE_EXPIRED);</span>
+      }
+    }
+    Authentication authentication;
+    try {
+<span class="nc" id="L102">      authentication = authenticationManager.authenticate(</span>
+          new UsernamePasswordAuthenticationToken(accountId, password));
+<span class="nc" id="L104">    } catch (AuthenticationException e) {</span>
+<span class="nc" id="L105">      log.error(&quot;Exception authentication: &quot; + e.getMessage());</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">      if (type == 0) {</span>
+<span class="nc" id="L107">        throw new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID);</span>
+      } else {
+<span class="nc" id="L109">        throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);</span>
+      }
+<span class="nc" id="L111">    }</span>
+<span class="nc" id="L112">    UserEntity user = userService.findByAccountId(accountId);</span>
+<span class="nc" id="L113">    SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="nc" id="L114">    String accessToken = jwtProvider.generateJwtToken(authentication, accountId);</span>
+<span class="nc" id="L115">    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();</span>
+<span class="nc" id="L116">    RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(user);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">    if (type == 0) {</span>
+<span class="nc" id="L118">      address = user.getStakeKey();</span>
+    } else {
+<span class="nc" id="L120">      address = signInRequest.getAddress();</span>
+<span class="nc" id="L121">      walletService.updateNonce(wallet);</span>
+    }
+<span class="nc" id="L123">    return SignInResponse.builder().token(accessToken).address(address)</span>
+<span class="nc" id="L124">        .email(userDetails.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)</span>
+<span class="nc" id="L125">        .refreshToken(refreshToken.getToken()).build();</span>
+  }
+
+  @Transactional(rollbackFor = RuntimeException.class)
+  @Override
+  public MessageResponse signUp(SignUpRequest signUpRequest) {
+<span class="nc" id="L131">    String email = signUpRequest.getEmail();</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">    if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {</span>
+<span class="nc" id="L133">      throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);</span>
+    }
+<span class="nc" id="L135">    String password = encoder.encode(signUpRequest.getPassword());</span>
+<span class="nc" id="L136">    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.PENDING).orElse(null);</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">    if (Objects.nonNull(user)) {</span>
+<span class="nc" id="L138">      user.setPassword(password);</span>
+<span class="nc" id="L139">      userRepository.save(user);</span>
+    } else {
+<span class="nc" id="L141">      signUpRequest.setPassword(password);</span>
+<span class="nc" id="L142">      user = userService.saveUser(signUpRequest);</span>
+    }
+<span class="nc" id="L144">    String verifyCode = jwtProvider.generateCodeForVerify(email);</span>
+<span class="nc" id="L145">    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));</span>
+<span class="nc" id="L146">    return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)</span>
+<span class="nc" id="L147">        .message(CommonConstant.RESPONSE_SUCCESS).build();</span>
+  }
+
+  @Override
+  public RefreshTokenResponse refreshToken(String refreshJwt,
+      HttpServletRequest httpServletRequest) {
+<span class="fc" id="L153">    final String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
+<span class="pc" id="L154">    return refreshTokenService.findByRefToken(refreshJwt).map(refreshTokenService::verifyExpiration)</span>
+<span class="fc" id="L155">        .map(refToken -&gt; {</span>
+<span class="nc" id="L156">          UserEntity user = refToken.getUser();</span>
+<span class="nc" id="L157">          String address = walletRepository.findAddressByUserId(user.getId());</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">          String accountId = Objects.isNull(address) ? user.getEmail() : address;</span>
+<span class="nc" id="L159">          redisProvider.blacklistJwt(accessToken, accountId);</span>
+<span class="nc" id="L160">          return jwtProvider.generateJwtToken(user, accountId);</span>
+<span class="pc" id="L161">        }).map(newAccessToken -&gt; RefreshTokenResponse.builder().accessToken(newAccessToken)</span>
+<span class="nc" id="L162">            .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())</span>
+<span class="pc" id="L163">        .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.UNKNOWN_ERROR));</span>
+  }
+
+  @Override
+  public MessageResponse signOut(SignOutRequest signOutRequest,
+      HttpServletRequest httpServletRequest) {
+<span class="nc" id="L169">    String refreshJwt = signOutRequest.getRefreshJwt();</span>
+<span class="nc" id="L170">    String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
+<span class="nc" id="L171">    refreshTokenService.revokeRefreshToken(refreshJwt);</span>
+<span class="nc" id="L172">    redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());</span>
+<span class="nc" id="L173">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+  }
+
+  @Override
+  public NonceResponse findNonceByAddress(String address, String walletName) {
+<span class="nc" id="L178">    Optional&lt;WalletEntity&gt; walletOpt = walletRepository.findWalletByAddress(address);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">    if (walletOpt.isPresent()) {</span>
+<span class="nc" id="L180">      WalletEntity wallet = walletOpt.get();</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) &lt; 0) {</span>
+<span class="nc" id="L182">        wallet = walletService.updateNonce(wallet);</span>
+      }
+<span class="nc" id="L184">      return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS)</span>
+<span class="nc" id="L185">          .nonce(wallet.getNonce()).build();</span>
+    }
+<span class="nc" id="L187">    UserEntity user = userService.saveUser(address);</span>
+<span class="nc" id="L188">    WalletEntity wallet = walletService.saveWallet(address, user, walletName);</span>
+<span class="nc" id="L189">    return NonceResponse.builder().message(CommonConstant.CODE_FAILURE)</span>
+<span class="nc" id="L190">        .nonce(wallet.getNonce()).build();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

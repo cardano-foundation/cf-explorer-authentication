@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WalletEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.model.entity</a> &gt; <span class="el_source">WalletEntity.java</span></div><h1>WalletEntity.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.time.Instant;
+import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.hibernate.Hibernate;
+
+@Entity
+@Table(name = &quot;wallet&quot;)
+@Getter
+<span class="nc" id="L25">@Setter</span>
+<span class="nc" id="L26">@NoArgsConstructor</span>
+<span class="nc" id="L27">@AllArgsConstructor</span>
+<span class="nc" id="L28">@Builder</span>
+public class WalletEntity extends BaseEntity {
+
+  @Column(name = &quot;address&quot;, nullable = false, unique = true)
+<span class="nc" id="L32">  private String address;</span>
+
+  @Column(name = &quot;wallet_name&quot;)
+<span class="nc" id="L35">  private String walletName;</span>
+
+  @Column(name = &quot;nonce&quot;, nullable = false)
+<span class="nc" id="L38">  private String nonce;</span>
+
+  @Column(name = &quot;nonce_encode&quot;, nullable = false)
+<span class="nc" id="L41">  private String nonceEncode;</span>
+
+  @Column(name = &quot;expiry_date_nonce&quot;, nullable = false)
+<span class="nc" id="L44">  private Instant expiryDateNonce;</span>
+
+  @Column(name = &quot;network_id&quot;)
+<span class="nc" id="L47">  private String networkId;</span>
+
+  @Column(name = &quot;network_type&quot;)
+  @Enumerated(EnumType.STRING)
+<span class="nc" id="L51">  private ENetworkType networkType;</span>
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = &quot;user_id&quot;, referencedColumnName = &quot;id&quot;)
+  @EqualsAndHashCode.Exclude
+<span class="nc" id="L56">  private UserEntity user;</span>
+
+  @Override
+  public boolean equals(Object o) {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">    if (this == o) {</span>
+<span class="nc" id="L61">      return true;</span>
+    }
+<span class="nc bnc" id="L63" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
+<span class="nc" id="L64">      return false;</span>
+    }
+<span class="nc" id="L66">    WalletEntity wallet = (WalletEntity) o;</span>
+<span class="nc bnc" id="L67" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), wallet.getId());</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L72">    return getClass().hashCode();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrivateNoteServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.service.impl</a> &gt; <span class="el_source">PrivateNoteServiceImpl.java</span></div><h1>PrivateNoteServiceImpl.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.service.impl;
+
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.mapper.NoteMapper;
+import org.cardanofoundation.authentication.model.entity.PrivateNoteEntity;
+import org.cardanofoundation.authentication.model.entity.UserEntity;
+import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.authentication.model.request.note.PrivateNoteRequest;
+import org.cardanofoundation.authentication.model.response.MessageResponse;
+import org.cardanofoundation.authentication.model.response.PrivateNoteResponse;
+import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.repository.PrivateNoteRepository;
+import org.cardanofoundation.authentication.service.PrivateNoteService;
+import org.cardanofoundation.authentication.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="nc" id="L27">@RequiredArgsConstructor</span>
+<span class="nc" id="L28">@Log4j2</span>
+public class PrivateNoteServiceImpl implements PrivateNoteService {
+
+  private final PrivateNoteRepository noteRepository;
+
+  private final UserService userService;
+
+  private final JwtProvider jwtProvider;
+
+<span class="nc" id="L37">  private static final NoteMapper noteMapper = NoteMapper.INSTANCE;</span>
+
+  @Override
+  public MessageResponse addPrivateNote(PrivateNoteRequest privateNoteRequest,
+      HttpServletRequest httpServletRequest) {
+<span class="nc" id="L42">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="nc" id="L43">    UserEntity user = userService.findByAccountId(accountId);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">    if (Objects.nonNull(</span>
+<span class="nc" id="L45">        noteRepository.checkExistNote(user.getId(), privateNoteRequest.getTxHash(),</span>
+<span class="nc" id="L46">            privateNoteRequest.getNetwork()))) {</span>
+<span class="nc" id="L47">      throw new BusinessException(CommonErrorCode.PRIVATE_NOTE_IS_EXIST);</span>
+    }
+<span class="nc" id="L49">    Integer countCurrent = noteRepository.getCountNoteByUser(user.getId(),</span>
+<span class="nc" id="L50">        privateNoteRequest.getNetwork());</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">    if (countCurrent &gt;= CommonConstant.LIMIT_NOTE) {</span>
+<span class="nc" id="L52">      throw new BusinessException(CommonErrorCode.LIMIT_NOTE_IS_2000);</span>
+    }
+<span class="nc" id="L54">    PrivateNoteEntity privateNote = noteMapper.requestToEntity(privateNoteRequest);</span>
+<span class="nc" id="L55">    privateNote.setUser(user);</span>
+<span class="nc" id="L56">    noteRepository.save(privateNote);</span>
+<span class="nc" id="L57">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+  }
+
+  @Override
+  public BasePageResponse&lt;PrivateNoteResponse&gt; findAllNote(HttpServletRequest httpServletRequest,
+      ENetworkType network,
+      Pageable pageable) {
+<span class="nc" id="L64">    BasePageResponse&lt;PrivateNoteResponse&gt; response = new BasePageResponse&lt;&gt;();</span>
+<span class="nc" id="L65">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="nc" id="L66">    UserEntity user = userService.findByAccountId(accountId);</span>
+<span class="nc" id="L67">    Page&lt;PrivateNoteEntity&gt; notePage = noteRepository.findAllNote(user.getId(), network, pageable);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">    if (!notePage.isEmpty()) {</span>
+<span class="nc" id="L69">      response.setData(noteMapper.listEntityToResponse(notePage.getContent()));</span>
+    }
+<span class="nc" id="L71">    response.setTotalItems(notePage.getTotalElements());</span>
+<span class="nc" id="L72">    return response;</span>
+  }
+
+  @Override
+  public MessageResponse deleteById(Long noteId) {
+<span class="nc" id="L77">    PrivateNoteEntity privateNote = noteRepository.findById(noteId)</span>
+<span class="nc" id="L78">        .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.UNKNOWN_ERROR));</span>
+<span class="nc" id="L79">    noteRepository.delete(privateNote);</span>
+<span class="nc" id="L80">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+  }
+
+  @Override
+  public PrivateNoteResponse editById(Long noteId, String note) {
+<span class="nc" id="L85">    PrivateNoteEntity privateNote = noteRepository.findById(noteId)</span>
+<span class="nc" id="L86">        .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.UNKNOWN_ERROR));</span>
+<span class="nc" id="L87">    privateNote.setNote(note);</span>
+<span class="nc" id="L88">    PrivateNoteEntity privateNoteEdit = noteRepository.save(privateNote);</span>
+<span class="nc" id="L89">    return noteMapper.entityToResponse(privateNoteEdit);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NonceUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.util</a> &gt; <span class="el_source">NonceUtils.java</span></div><h1>NonceUtils.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.util;
+
+import co.nstant.in.cbor.CborDecoder;
+import co.nstant.in.cbor.CborException;
+import co.nstant.in.cbor.model.Array;
+import co.nstant.in.cbor.model.ByteString;
+import co.nstant.in.cbor.model.DataItem;
+import com.bloxbean.cardano.client.util.HexUtil;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import java.security.SecureRandom;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+<span class="fc" id="L18">@Log4j2</span>
+public class NonceUtils {
+
+<span class="fc" id="L21">  private static final SecureRandom random = new SecureRandom();</span>
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 21/10/2022
+   * description: gen nonce value using random function
+   * @update: 04/11/2022
+   */
+  public static String createNonce() {
+<span class="nc" id="L30">    int nonce1 = Math.abs(random.nextInt(Integer.MAX_VALUE));</span>
+<span class="nc" id="L31">    int nonce2 = Math.abs(random.nextInt(Integer.MAX_VALUE));</span>
+<span class="nc" id="L32">    int nonce3 = Math.abs(random.nextInt(Integer.MAX_VALUE));</span>
+<span class="nc" id="L33">    return String.valueOf(nonce1) + nonce2 + nonce3;</span>
+  }
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 07/11/2022
+   * description: get nonce value from signature
+   * @update:
+   */
+  public static String getNonceFromSignature(String signature) {
+<span class="fc" id="L43">    List&lt;DataItem&gt; itemList = null;</span>
+    try {
+<span class="fc" id="L45">      itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));</span>
+<span class="nc" id="L46">    } catch (CborException e) {</span>
+<span class="nc" id="L47">      log.error(&quot;Exception decode cbor: &quot; + e.getMessage());</span>
+<span class="nc" id="L48">      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);</span>
+<span class="fc" id="L49">    }</span>
+<span class="fc" id="L50">    List&lt;DataItem&gt; topArray = ((Array) itemList.get(0)).getDataItems();</span>
+<span class="fc" id="L51">    ByteString messageToSign = (ByteString) topArray.get(2);</span>
+<span class="fc" id="L52">    byte[] message = messageToSign.getBytes();</span>
+<span class="fc" id="L53">    return new String(message);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

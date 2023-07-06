@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RsaConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.config</a> &gt; <span class="el_source">RsaConfig.java</span></div><h1>RsaConfig.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.config;
+
+import jakarta.annotation.PostConstruct;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.cardanofoundation.authentication.provider.RsaProvider;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(&quot;rsa.key&quot;)
+@Getter
+<span class="nc" id="L16">@Setter</span>
+<span class="nc" id="L17">@RequiredArgsConstructor</span>
+public class RsaConfig {
+
+<span class="nc" id="L20">  private String privateKeyAuthPath;</span>
+
+<span class="nc" id="L22">  private String publicKeyAuthPath;</span>
+
+<span class="nc" id="L24">  private String privateKeyMailPath;</span>
+
+<span class="nc" id="L26">  private String publicKeyMailPath;</span>
+
+<span class="nc" id="L28">  private PrivateKey privateKeyAuth;</span>
+
+<span class="nc" id="L30">  private PublicKey publicKeyAuth;</span>
+
+<span class="nc" id="L32">  private PrivateKey privateKeyMail;</span>
+
+<span class="nc" id="L34">  private PublicKey publicKeyMail;</span>
+
+<span class="nc" id="L36">  private final RsaProvider rsaProvider;</span>
+
+  @PostConstruct
+  public void createRsaKey() {
+<span class="nc" id="L40">    java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());</span>
+<span class="nc" id="L41">    privateKeyAuth = rsaProvider.getPrivateKey(privateKeyAuthPath);</span>
+<span class="nc" id="L42">    publicKeyAuth = rsaProvider.getPublicKey(publicKeyAuthPath);</span>
+<span class="nc" id="L43">    privateKeyMail = rsaProvider.getPrivateKey(privateKeyMailPath);</span>
+<span class="nc" id="L44">    publicKeyMail = rsaProvider.getPublicKey(publicKeyMailPath);</span>
+<span class="nc" id="L45">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

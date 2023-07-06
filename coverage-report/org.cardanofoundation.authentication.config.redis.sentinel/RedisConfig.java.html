@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RedisConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.config.redis.sentinel</a> &gt; <span class="el_source">RedisConfig.java</span></div><h1>RedisConfig.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.config.redis.sentinel;
+
+import org.cardanofoundation.authentication.config.redis.sentinel.RedisProperties.SentinelNode;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisNode;
+import org.springframework.data.redis.connection.RedisPassword;
+import org.springframework.data.redis.connection.RedisSentinelConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import redis.clients.jedis.JedisPoolConfig;
+
+<span class="nc" id="L40">@Slf4j</span>
+@Configuration
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@EnableCaching
+@Profile(&quot;sentinel&quot;)
+public class RedisConfig extends CachingConfigurerSupport {
+
+  /**
+   * Redis properties config
+   */
+  RedisProperties redisProperties;
+
+  @Autowired
+<span class="nc" id="L53">  RedisConfig(RedisProperties redisProperties) {</span>
+<span class="nc" id="L54">    this.redisProperties = redisProperties;</span>
+<span class="nc" id="L55">  }</span>
+
+
+  @Bean
+  @Primary
+  JedisPoolConfig poolConfig() {
+<span class="nc" id="L61">    var jedisPoolConfig = new JedisPoolConfig();</span>
+<span class="nc" id="L62">    jedisPoolConfig.setTestOnBorrow(redisProperties.getTestOnBorrow());</span>
+<span class="nc" id="L63">    jedisPoolConfig.setMaxTotal(redisProperties.getMaxTotal());</span>
+<span class="nc" id="L64">    jedisPoolConfig.setMaxIdle(redisProperties.getMaxIdle());</span>
+<span class="nc" id="L65">    jedisPoolConfig.setMinIdle(redisProperties.getMinIdle());</span>
+<span class="nc" id="L66">    jedisPoolConfig.setTestOnReturn(redisProperties.getTestOnReturn());</span>
+<span class="nc" id="L67">    jedisPoolConfig.setTestWhileIdle(redisProperties.getTestWhileIdle());</span>
+<span class="nc" id="L68">    return jedisPoolConfig;</span>
+  }
+
+
+  @Bean
+  @Primary
+  RedisSentinelConfiguration sentinelConfig() {
+<span class="nc" id="L75">    var sentinelConfig = new RedisSentinelConfiguration();</span>
+
+<span class="nc" id="L77">    sentinelConfig.master(redisProperties.getMaster());</span>
+<span class="nc" id="L78">    sentinelConfig.setSentinelPassword(RedisPassword.of(redisProperties.getPassword()));</span>
+<span class="nc" id="L79">    sentinelConfig.setDatabase(redisProperties.getDatabaseIndex());</span>
+<span class="nc" id="L80">    var sentinels = redisProperties.getSentinels().stream().map(getSentinelNodeRedisNodeFunction())</span>
+<span class="nc" id="L81">        .collect(Collectors.toSet());</span>
+
+<span class="nc" id="L83">    sentinelConfig.setSentinels(sentinels);</span>
+<span class="nc" id="L84">    return sentinelConfig;</span>
+  }
+
+  private static Function&lt;SentinelNode, RedisNode&gt; getSentinelNodeRedisNodeFunction() {
+<span class="nc" id="L88">    return sentinel -&gt; new RedisNode(sentinel.getHost(), sentinel.getPort());</span>
+  }
+
+  /**
+   * jedis connection factory configuration
+   *
+   * @return JedisConnectionFactory
+   */
+  @Bean(name = &quot;jedisConnectionFactory&quot;)
+  @Autowired
+  JedisConnectionFactory jedisConnectionFactory(RedisSentinelConfiguration sentinelConfig) {
+<span class="nc" id="L99">    return new JedisConnectionFactory(sentinelConfig, poolConfig());</span>
+  }
+
+  /**
+   * Lettuce connection factory configuration
+   *
+   * @return LettuceConnectionFactory
+   */
+  @Bean(name = &quot;lettuceConnectionFactory&quot;)
+  @Autowired
+  LettuceConnectionFactory lettuceConnectionFactory(RedisSentinelConfiguration sentinelConfig) {
+
+<span class="nc" id="L111">    return new LettuceConnectionFactory(sentinelConfig);</span>
+  }
+
+  /**
+   * RedisTemplate configuration
+   *
+   * @return redisTemplate
+   */
+  @Bean
+  @Autowired
+  RedisTemplate&lt;String, ?&gt; redisTemplate(//NOSONAR
+      final LettuceConnectionFactory lettuceConnectionFactory) {
+<span class="nc" id="L123">    var redisTemplate = new RedisTemplate&lt;String, Object&gt;();</span>
+<span class="nc" id="L124">    redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
+<span class="nc" id="L125">    redisTemplate.setValueSerializer(new GenericToStringSerializer&lt;&gt;(Object.class));</span>
+<span class="nc" id="L126">    return redisTemplate;</span>
+  }
+
+  /**
+   * Config bean hashOperations
+   *
+   * @param redisTemplate bean
+   * @param &lt;HK&gt;          hash key type
+   * @param &lt;V&gt;           value type
+   * @return bean hashOperations
+   */
+  @Bean
+  &lt;HK, V&gt; HashOperations&lt;String, HK, V&gt; hashOperations(
+      final RedisTemplate&lt;String, V&gt; redisTemplate) { //NOSONAR
+<span class="nc" id="L140">    return redisTemplate.opsForHash();</span>
+  }
+
+  /**
+   * ListOperations bean configuration
+   *
+   * @param redisTemplate inject bean
+   * @param &lt;V&gt;           value type
+   * @return listOperations
+   */
+  @Bean
+  &lt;V&gt; ListOperations&lt;String, V&gt; listOperations(final RedisTemplate&lt;String, V&gt; redisTemplate) {
+<span class="nc" id="L152">    return redisTemplate.opsForList();</span>
+  }
+
+  /**
+   * ZSetOperations configuration
+   *
+   * @param redisTemplate inject bean
+   * @param &lt;V&gt;           value type
+   * @return ZSetOperations&lt;String, V&gt;
+   */
+  @Bean
+  &lt;V&gt; ZSetOperations&lt;String, V&gt; zSetOperations(final RedisTemplate&lt;String, V&gt; redisTemplate) {
+<span class="nc" id="L164">    return redisTemplate.opsForZSet();</span>
+  }
+
+  /**
+   * SetOperations configuration
+   *
+   * @param redisTemplate inject bean
+   * @param &lt;V&gt;           value type
+   * @return SetOperations&lt;String, V&gt;
+   */
+  @Bean
+  &lt;V&gt; SetOperations&lt;String, V&gt; setOperations(final RedisTemplate&lt;String, V&gt; redisTemplate) {
+<span class="nc" id="L176">    return redisTemplate.opsForSet();</span>
+  }
+
+  /**
+   * ValueOperations configuration
+   *
+   * @param redisTemplate inject bean
+   * @param &lt;V&gt;           value type
+   * @return ValueOperations&lt;String, V&gt;
+   */
+  @Bean
+  &lt;V&gt; ValueOperations&lt;String, V&gt; valueOperations(final RedisTemplate&lt;String, V&gt; redisTemplate) {
+<span class="nc" id="L188">    return redisTemplate.opsForValue();</span>
+  }
+
+  /**
+   * Customize rules for generating keys
+   *
+   * @return KeyGenerator
+   */
+  @Override
+  public KeyGenerator keyGenerator() {
+<span class="nc" id="L198">    return (target, method, params) -&gt; {</span>
+<span class="nc" id="L199">      val sb = new StringBuilder();</span>
+<span class="nc" id="L200">      sb.append(target.getClass().getName());</span>
+<span class="nc" id="L201">      sb.append(method.getName());</span>
+<span class="nc" id="L202">      Arrays.stream(params).sequential().forEach(sb::append);</span>
+<span class="nc" id="L203">      log.info(&quot;call Redis cache Key : &quot; + sb);</span>
+<span class="nc" id="L204">      return sb.toString();</span>
+    };
+  }
+
+  /**
+   * Customize for redis cache manager
+   *
+   * @return RedisCacheManagerBuilderCustomizer
+   */
+  @Bean
+  RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+<span class="nc" id="L215">    return builder -&gt; builder.withCacheConfiguration(&quot;monolithic&quot;,</span>
+<span class="nc" id="L216">        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(5)));</span>
+  }
+
+  /**
+   * Cache manager configuration
+   *
+   * @param redisConnectionFactory bean inject
+   * @return CacheManager
+   */
+  @Bean
+  CacheManager cacheManager(
+      @Qualifier(&quot;jedisConnectionFactory&quot;) final RedisConnectionFactory redisConnectionFactory) {
+<span class="nc" id="L228">    return RedisCacheManager.create(redisConnectionFactory);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

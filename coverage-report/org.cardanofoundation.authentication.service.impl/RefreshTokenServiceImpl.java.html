@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RefreshTokenServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.service.impl</a> &gt; <span class="el_source">RefreshTokenServiceImpl.java</span></div><h1>RefreshTokenServiceImpl.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.service.impl;
+
+import org.cardanofoundation.explorer.common.exceptions.TokenRefreshException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.authentication.model.entity.RefreshTokenEntity;
+import org.cardanofoundation.authentication.model.entity.UserEntity;
+import org.cardanofoundation.authentication.repository.RefreshTokenRepository;
+import org.cardanofoundation.authentication.service.RefreshTokenService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="nc" id="L20">@RequiredArgsConstructor</span>
+<span class="nc" id="L21">@Log4j2</span>
+public class RefreshTokenServiceImpl implements RefreshTokenService {
+
+  @Value(&quot;${jwt.refreshExpirationMs}&quot;)
+  private Long refreshExpirationMs;
+
+  private final RefreshTokenRepository refreshTokenRepository;
+
+  @Override
+  public Optional&lt;RefreshTokenEntity&gt; findByRefToken(String token) {
+<span class="nc" id="L31">    return refreshTokenRepository.findByToken(token);</span>
+  }
+
+  @Override
+  public RefreshTokenEntity verifyExpiration(RefreshTokenEntity token) {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">    if (token.getExpiryDate().compareTo(Instant.now()) &lt; 0) {</span>
+<span class="nc" id="L37">      refreshTokenRepository.delete(token);</span>
+<span class="nc" id="L38">      throw new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);</span>
+    }
+<span class="nc" id="L40">    return token;</span>
+  }
+
+  @Override
+  public void revokeRefreshToken(String token) {
+<span class="nc" id="L45">    RefreshTokenEntity refreshToken = refreshTokenRepository.findByToken(token)</span>
+<span class="nc" id="L46">        .orElseThrow(() -&gt; new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_IS_NOT_EXIST));</span>
+<span class="nc" id="L47">    refreshTokenRepository.delete(refreshToken);</span>
+<span class="nc" id="L48">  }</span>
+
+  @Override
+  public RefreshTokenEntity addRefreshToken(UserEntity user) {
+<span class="nc" id="L52">    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(user)</span>
+<span class="nc" id="L53">        .expiryDate(Instant.now().plusMillis(refreshExpirationMs))</span>
+<span class="nc" id="L54">        .token(UUID.randomUUID().toString()).build();</span>
+<span class="nc" id="L55">    return refreshTokenRepository.save(refreshToken);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
