@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.controller.advice;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.explorer.common.exceptions.AccessTokenExpireException;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
@@ -10,6 +11,9 @@ import org.cardanofoundation.explorer.common.exceptions.TokenRefreshException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -71,5 +75,16 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
         ErrorResponse.builder().errorCode(e.getErrorCode().getServiceErrorCode())
             .errorMessage(e.getErrorCode().getDesc()).build());
+  }
+
+  @ExceptionHandler({ConstraintViolationException.class,
+      MissingServletRequestParameterException.class, HttpMediaTypeNotSupportedException.class,
+      MethodArgumentNotValidException.class})
+  public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+      Exception e) {
+    log.warn("constraint not valid: {}", e.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        ErrorResponse.builder().errorCode(CommonErrorCode.INVALID_PARAM.getCode())
+            .errorMessage(CommonErrorCode.INVALID_PARAM.getDesc()).build());
   }
 }

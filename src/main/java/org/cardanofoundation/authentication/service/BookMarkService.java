@@ -30,7 +30,7 @@ public interface BookMarkService {
    * @update: 05/12/2022
    */
   BasePageResponse<BookMarkResponse> findBookMarkByType(HttpServletRequest httpServletRequest,
-      EBookMarkType bookMarkType, ENetworkType network, Pageable pageable);
+      String bookMarkType, String network, Pageable pageable);
 
   /*
    * @author: phuc.nguyen5
@@ -47,7 +47,7 @@ public interface BookMarkService {
    * @update:
    */
   List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest,
-      ENetworkType network);
+      String network);
 
   /*
    * @author: phuc.nguyen5

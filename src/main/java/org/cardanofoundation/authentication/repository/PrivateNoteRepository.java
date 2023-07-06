@@ -1,7 +1,6 @@
 package org.cardanofoundation.authentication.repository;
 
 import org.cardanofoundation.authentication.model.entity.PrivateNoteEntity;
-import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,8 +18,7 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
    * @update:
    */
   @Query(value = "SELECT count(pn.id) FROM PrivateNoteEntity pn WHERE pn.user.id = :userId AND pn.network = :network")
-  Integer getCountNoteByUser(@Param("userId") Long userId, @Param("network")
-  ENetworkType network);
+  Integer getCountNoteByUser(@Param("userId") Long userId, @Param("network") String network);
 
   /*
    * @author: phuc.nguyen5
@@ -30,8 +28,7 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
    */
   @Query(value = "SELECT pn.id FROM PrivateNoteEntity pn WHERE pn.user.id = :userId AND pn.txHash = :txHash AND pn.network = :network")
   Long checkExistNote(@Param("userId") Long userId, @Param("txHash") String txHash,
-      @Param("network")
-      ENetworkType network);
+      @Param("network") String network);
 
   /*
    * @author: phuc.nguyen5
@@ -43,6 +40,6 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
       + "JOIN UserEntity ue ON pn.user.id = ue.id "
       + "WHERE ue.id = :userId AND pn.network = :network "
       + "ORDER BY pn.createdDate DESC")
-  Page<PrivateNoteEntity> findAllNote(@Param("userId") Long userId, @Param("network")
-  ENetworkType network, Pageable pageable);
+  Page<PrivateNoteEntity> findAllNote(@Param("userId") Long userId,
+      @Param("network") String network, Pageable pageable);
 }
