@@ -58,10 +58,9 @@ domain:
   client: ${SWAGGER_CLIENT_URL:http://localhost:7276}
   server: ${SWAGGER_SERVER_URL:http://localhost:8021}
 
-data:
-  redis:
-    databaseIndex: 1
-    standalone:
-      host: ${REDIS_STANDALONE_HOST:127.0.0.1}
-      port: ${REDIS_STANDALONE_PORT:6379}
-    password: ${REDIS_STANDALONE_PASSWORD:bitnami}
+redis:
+  databaseIndex: 1
+  standalone:
+    host: ${REDIS_STANDALONE_HOST:127.0.0.1}
+    port: ${REDIS_STANDALONE_PORT:6379}
+  password: ${REDIS_STANDALONE_PASSWORD:bitnami}
