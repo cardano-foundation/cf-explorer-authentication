@@ -29,6 +29,12 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
+  redis:
+    databaseIndex: 1
+    standalone:
+      host: ${REDIS_STANDALONE_HOST:127.0.0.1}
+      port: ${REDIS_STANDALONE_PORT:6379}
+    password: ${REDIS_STANDALONE_PASSWORD:bitnami}
   jpa:
     open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -57,10 +63,3 @@ spring:
 domain:
   client: ${SWAGGER_CLIENT_URL:http://localhost:7276}
   server: ${SWAGGER_SERVER_URL:http://localhost:8021}
-
-redis:
-  databaseIndex: 1
-  standalone:
-    host: ${REDIS_STANDALONE_HOST:127.0.0.1}
-    port: ${REDIS_STANDALONE_PORT:6379}
-  password: ${REDIS_STANDALONE_PASSWORD:bitnami}
