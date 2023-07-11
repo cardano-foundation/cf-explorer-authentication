@@ -29,19 +29,6 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
-  redis:
-    databaseIndex: 1
-    master: ${REDIS_STANDALONE_HOST:mymaster}
-    password: ${REDIS_STANDALONE_PASSWORD:redis_sentinel_password}
-    standalone:
-      host: ${REDIS_STANDALONE_HOST:127.0.0.1}
-      port: ${REDIS_STANDALONE_PORT:6379}
-    testOnBorrow: false
-    maxTotal: 10
-    maxIdle: 5
-    minIdle: 3
-    testOnReturn: false
-    testWhileIdle: false
   jpa:
     open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
