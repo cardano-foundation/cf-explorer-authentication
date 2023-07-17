@@ -1,5 +1,6 @@
 # Iris Authentication
 
+
 <p align="left">
 <img alt="Tests" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/tests.yaml/badge.svg" />
 <img alt="Release" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/release.yaml/badge.svg?branch=main" />
@@ -14,7 +15,7 @@ The Iris Authentication API enables users to log in, with or without a wallet, t
 
 To ensure the stability and reliability of this project, unit and mutation tests have been implemented. By clicking on the links below, you can access the detailed test reports and review the outcomes of the tests performed.
 
-📊 [Coverage Report](https://cardano-foundation.github.io/cf-explorer-authentication/html-report/reporthtml.html)
+📊 [Coverage Report](https://cardano-foundation.github.io/cf-explorer-authentication/coverage-report/)
 
 📊 [Mutation Report](https://cardano-foundation.github.io/cf-explorer-authentication/mutation-report/)
 

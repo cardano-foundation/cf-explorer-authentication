@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.5...v0.1.6) (2023-07-11)
+
+
+### Miscellaneous Chores
+
+* release 0.1.6 ([6571a80](https://github.com/cardano-foundation/cf-explorer-authentication/commit/6571a80db3efbda326b27ff983d21bb3acf3e9c1))
+
 ## [0.1.5](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.4...v0.1.5) (2023-07-05)
 
 
