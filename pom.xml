@@ -73,6 +73,8 @@
 		<version.maven-project-info-reports-plugin>3.3.0</version.maven-project-info-reports-plugin>
 		<version.bloxbean>0.4.3</version.bloxbean>
 		<version.spring-boot-starter-aop>3.0.4</version.spring-boot-starter-aop>
+		<version.pitest>1.14.2</version.pitest>
+		<version.pitest-junit5>1.1.1</version.pitest-junit5>
 	</properties>
 
 	<dependencies>
@@ -342,6 +344,29 @@
 					<features>
 						<feature>+auto_threads</feature>
 					</features>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>${version.pitest}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>${version.pitest-junit5}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<features>
+						<feature>+auto_threads</feature>
+					</features>
+					<targetClasses>
+						<param>org.cardanofoundation.authentication.*</param>
+					</targetClasses>
+					<targetTests>
+						<param>org.cardanofoundation.authentication.*</param>
+					</targetTests>
 				</configuration>
 			</plugin>
 		</plugins>
