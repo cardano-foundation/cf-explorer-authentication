@@ -1,4 +1,4 @@
-package org.cardanofoundation.authentication.crud;
+package org.cardanofoundation.authentication.repository;
 
 import java.time.Instant;
 import java.util.List;
@@ -15,26 +15,20 @@ import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.enums.ERole;
 import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
-import org.cardanofoundation.authentication.repository.BookMarkRepository;
-import org.cardanofoundation.authentication.repository.PrivateNoteRepository;
-import org.cardanofoundation.authentication.repository.RefreshTokenRepository;
-import org.cardanofoundation.authentication.repository.RoleRepository;
-import org.cardanofoundation.authentication.repository.UserHistoryRepository;
-import org.cardanofoundation.authentication.repository.UserRepository;
-import org.cardanofoundation.authentication.repository.WalletRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 @DataJpaTest
-@Disabled
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-public class JpaTest {
+@TestPropertySource(locations = "classpath:application.properties")
+@ActiveProfiles("dev")
+class RepositoryTest {
 
   @Autowired
   private UserRepository userRepository;
@@ -62,7 +56,7 @@ public class JpaTest {
   private final String ADDRESS = "123456789QWERTY";
 
   @Test
-  public void whenInsertUser() {
+  void whenInsertUser() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -71,7 +65,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindByEmail() {
+  void whenFindByEmail() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -81,7 +75,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenExistsByEmail() {
+  void whenExistsByEmail() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -91,7 +85,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindByEmailAndStatus() {
+  void whenFindByEmailAndStatus() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .status(
@@ -104,7 +98,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindUserByAddress() {
+  void whenFindUserByAddress() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -120,7 +114,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenInsertWallet() {
+  void whenInsertWallet() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -135,7 +129,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindWalletByAddress() {
+  void whenFindWalletByAddress() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -151,7 +145,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindAddressByUserId() {
+  void whenFindAddressByUserId() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -167,7 +161,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenInsertUserHistory() {
+  void whenInsertUserHistory() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -181,7 +175,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenInsertRefreshToken() {
+  void whenInsertRefreshToken() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -193,7 +187,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindRefreshTokenByToken() {
+  void whenFindRefreshTokenByToken() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -207,7 +201,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindAllRefreshTokenByUserId() {
+  void whenFindAllRefreshTokenByUserId() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -221,13 +215,17 @@ public class JpaTest {
   }
 
   @Test
-  public void whenFindRoleByName() {
+  void whenFindRoleByName() {
+    RoleEntity role = new RoleEntity();
+    role.setName(ERole.ROLE_USER);
+    role.setDescription("insert role");
+    roleRepository.save(role);
     Optional<RoleEntity> roleOpt = roleRepository.findByName(ERole.ROLE_USER);
     Assertions.assertTrue(roleOpt.isPresent());
   }
 
   @Test
-  public void whenInsertBookmark() {
+  void whenInsertBookmark() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
@@ -239,7 +237,7 @@ public class JpaTest {
   }
 
   @Test
-  public void whenInsertPrivateNote() {
+  void whenInsertPrivateNote() {
     UserEntity user = UserEntity.builder().email(EMAIL)
         .avatar(null)
         .isDeleted(false).build();
