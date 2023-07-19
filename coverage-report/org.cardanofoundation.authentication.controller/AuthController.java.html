@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
@@ -12,8 +13,10 @@ import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
 import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.service.AuthenticationService;
+import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,40 +26,42 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(&quot;/api/v1/auth&quot;)
-<span class="nc" id="L26">@RequiredArgsConstructor</span>
+<span class="fc" id="L29">@RequiredArgsConstructor</span>
 @Tag(name = &quot;Authentication Controller&quot;, description = &quot;&quot;)
+@Validated
 public class AuthController {
 
   private final AuthenticationService authenticationService;
 
   @PostMapping(value = &quot;/sign-in&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity&lt;SignInResponse&gt; signIn(@Valid @RequestBody SignInRequest signInRequest) {
-<span class="nc" id="L34">    return ResponseEntity.ok(authenticationService.signIn(signInRequest));</span>
+<span class="fc" id="L38">    return ResponseEntity.ok(authenticationService.signIn(signInRequest));</span>
   }
 
   @PostMapping(value = &quot;/sign-up&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity&lt;MessageResponse&gt; signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-<span class="nc" id="L39">    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));</span>
+<span class="fc" id="L43">    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));</span>
   }
 
   @GetMapping(&quot;/refresh-token&quot;)
   public ResponseEntity&lt;RefreshTokenResponse&gt; refreshToken(
       @Valid @RequestParam(&quot;refreshJwt&quot;) String refreshJwt,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L46">    return ResponseEntity.ok(</span>
-<span class="nc" id="L47">        authenticationService.refreshToken(refreshJwt, httpServletRequest));</span>
+<span class="fc" id="L50">    return ResponseEntity.ok(</span>
+<span class="fc" id="L51">        authenticationService.refreshToken(refreshJwt, httpServletRequest));</span>
   }
 
   @PostMapping(value = &quot;/sign-out&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity&lt;MessageResponse&gt; signOut(@Valid @RequestBody SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L53">    return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));</span>
+<span class="fc" id="L57">    return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));</span>
   }
 
   @GetMapping(&quot;/get-nonce&quot;)
-  public ResponseEntity&lt;NonceResponse&gt; findNonceByAddress(@RequestParam(&quot;address&quot;) String address,
+  public ResponseEntity&lt;NonceResponse&gt; findNonceByAddress(
+      @RequestParam(&quot;address&quot;) @PrefixedValid(CommonConstant.PREFIXED_ADDRESS) String address,
       @RequestParam(&quot;walletName&quot;) String walletName) {
-<span class="nc" id="L59">    return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));</span>
+<span class="fc" id="L64">    return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

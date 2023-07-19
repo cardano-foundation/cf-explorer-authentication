@@ -3,6 +3,7 @@
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
@@ -14,10 +15,13 @@ import org.cardanofoundation.authentication.model.response.BookMarkResponse;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
 import org.cardanofoundation.authentication.service.BookMarkService;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
+import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.springdoc.api.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,8 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(&quot;/api/v1/bookmark&quot;)
-<span class="nc" id="L32">@RequiredArgsConstructor</span>
+<span class="fc" id="L36">@RequiredArgsConstructor</span>
 @Tag(name = &quot;BookMark Controller&quot;, description = &quot;&quot;)
+@Validated
 public class BookMarkController {
 
   private final BookMarkService bookMarkService;
@@ -38,35 +43,37 @@ public class BookMarkController {
   @PostMapping(&quot;/add&quot;)
   public ResponseEntity&lt;BookMarkResponse&gt; addBookMark(
       @Valid @RequestBody BookMarkRequest bookMarkRequest, HttpServletRequest httpServletRequest) {
-<span class="nc" id="L41">    return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));</span>
+<span class="fc" id="L46">    return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));</span>
   }
 
   @GetMapping(&quot;/find-all&quot;)
   public ResponseEntity&lt;BasePageResponse&lt;BookMarkResponse&gt;&gt; findBookMarkByType(
-      @RequestParam(&quot;type&quot;) EBookMarkType type, @RequestParam(&quot;network&quot;) ENetworkType network,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @RequestParam(&quot;type&quot;) @EnumValid(enumClass = EBookMarkType.class) String type,
+      @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L49">    return ResponseEntity.ok(</span>
-<span class="nc" id="L50">        bookMarkService.findBookMarkByType(httpServletRequest, type, network, pageable));</span>
+<span class="fc" id="L55">    return ResponseEntity.ok(</span>
+<span class="fc" id="L56">        bookMarkService.findBookMarkByType(httpServletRequest, type, network,</span>
+<span class="fc" id="L57">            pagination.toPageable()));</span>
   }
 
   @DeleteMapping(&quot;/delete/{bookMarkId}&quot;)
-  public ResponseEntity&lt;MessageResponse&gt; deleteById(@PathVariable Long bookMarkId) {
-<span class="nc" id="L55">    return ResponseEntity.ok(bookMarkService.deleteById(bookMarkId));</span>
+  public ResponseEntity&lt;MessageResponse&gt; deleteById(@PathVariable @Min(1) Long bookMarkId) {
+<span class="fc" id="L62">    return ResponseEntity.ok(bookMarkService.deleteById(bookMarkId));</span>
   }
 
   @GetMapping(&quot;/find-all-key&quot;)
   public ResponseEntity&lt;List&lt;BookMarkResponse&gt;&gt; findKeyBookMark(
-      @RequestParam(&quot;network&quot;) ENetworkType network,
+      @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L62">    return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest, network));</span>
+<span class="fc" id="L69">    return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest, network));</span>
   }
 
   @PostMapping(&quot;/add-list&quot;)
   public ResponseEntity&lt;AddBookMarkResponse&gt; addBookMarks(
       @Valid @RequestBody BookMarksRequest bookMarksRequest,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L69">    return ResponseEntity.ok(bookMarkService.addBookMarks(bookMarksRequest, httpServletRequest));</span>
+<span class="fc" id="L76">    return ResponseEntity.ok(bookMarkService.addBookMarks(bookMarksRequest, httpServletRequest));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

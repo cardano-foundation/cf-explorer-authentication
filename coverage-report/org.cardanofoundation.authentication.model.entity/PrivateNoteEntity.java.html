@@ -2,8 +2,6 @@
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,47 +14,48 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = &quot;private_note&quot;)
 @Getter
-<span class="nc" id="L24">@Setter</span>
-<span class="nc" id="L25">@NoArgsConstructor</span>
-<span class="nc" id="L26">@AllArgsConstructor</span>
-<span class="nc" id="L27">@Builder</span>
+<span class="nc" id="L23">@Setter</span>
+<span class="fc" id="L24">@NoArgsConstructor</span>
+<span class="fc" id="L25">@AllArgsConstructor</span>
+<span class="pc" id="L26">@Builder</span>
 public class PrivateNoteEntity extends BaseEntity {
 
   @Column(name = &quot;note&quot;)
-<span class="nc" id="L31">  private String note;</span>
+<span class="nc" id="L30">  private String note;</span>
 
   @Column(name = &quot;tx_hash&quot;, nullable = false)
-<span class="nc" id="L34">  private String txHash;</span>
+<span class="nc" id="L33">  private String txHash;</span>
 
-  @Enumerated(EnumType.STRING)
+  @EnumValid(enumClass = ENetworkType.class)
   @Column(name = &quot;network&quot;, nullable = false)
-<span class="nc" id="L38">  private ENetworkType network;</span>
+<span class="nc" id="L37">  private String network;</span>
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = &quot;user_id&quot;)
   @EqualsAndHashCode.Exclude
-<span class="nc" id="L43">  private UserEntity user;</span>
+<span class="nc" id="L42">  private UserEntity user;</span>
 
   @Override
   public boolean equals(Object o) {
-<span class="nc bnc" id="L47" title="All 2 branches missed.">    if (this == o) {</span>
-<span class="nc" id="L48">      return true;</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">    if (this == o) {</span>
+<span class="nc" id="L47">      return true;</span>
     }
-<span class="nc bnc" id="L50" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
-<span class="nc" id="L51">      return false;</span>
+<span class="nc bnc" id="L49" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
+<span class="nc" id="L50">      return false;</span>
     }
-<span class="nc" id="L53">    PrivateNoteEntity that = (PrivateNoteEntity) o;</span>
-<span class="nc bnc" id="L54" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
+<span class="nc" id="L52">    PrivateNoteEntity that = (PrivateNoteEntity) o;</span>
+<span class="nc bnc" id="L53" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
   }
 
   @Override
   public int hashCode() {
-<span class="nc" id="L59">    return getClass().hashCode();</span>
+<span class="nc" id="L58">    return getClass().hashCode();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -81,56 +81,56 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 <span class="fc" id="L81">    String address = &quot;&quot;;</span>
 <span class="fc" id="L82">    WalletEntity wallet = null;</span>
 <span class="fc" id="L83">    Integer type = signInRequest.getType();</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">    if (type == 0) {</span>
-<span class="nc" id="L85">      log.info(&quot;login with email and password...&quot;);</span>
-<span class="nc" id="L86">      accountId = signInRequest.getEmail();</span>
-<span class="nc" id="L87">      password = signInRequest.getPassword();</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">    if (type == 0) {</span>
+<span class="fc" id="L85">      log.info(&quot;login with email and password...&quot;);</span>
+<span class="fc" id="L86">      accountId = signInRequest.getEmail();</span>
+<span class="fc" id="L87">      password = signInRequest.getPassword();</span>
     } else {
 <span class="fc" id="L89">      log.info(&quot;login with cardano wallet...&quot;);</span>
 <span class="fc" id="L90">      accountId = signInRequest.getAddress();</span>
 <span class="fc" id="L91">      password = NonceUtils.getNonceFromSignature(signInRequest.getSignature());</span>
 <span class="fc" id="L92">      wallet = walletRepository.findWalletByAddress(signInRequest.getAddress())</span>
-<span class="pc" id="L93">          .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.WALLET_IS_NOT_EXIST));</span>
-<span class="nc bnc" id="L94" title="All 2 branches missed.">      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) &lt; 0) {</span>
-<span class="nc" id="L95">        log.error(&quot;error: nonce value is expired&quot;);</span>
-<span class="nc" id="L96">        walletService.updateNonce(wallet);</span>
-<span class="nc" id="L97">        throw new IgnoreRollbackException(CommonErrorCode.NONCE_EXPIRED);</span>
+<span class="fc" id="L93">          .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.WALLET_IS_NOT_EXIST));</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) &lt; 0) {</span>
+<span class="fc" id="L95">        log.error(&quot;error: nonce value is expired&quot;);</span>
+<span class="fc" id="L96">        walletService.updateNonce(wallet);</span>
+<span class="fc" id="L97">        throw new IgnoreRollbackException(CommonErrorCode.NONCE_EXPIRED);</span>
       }
     }
     Authentication authentication;
     try {
-<span class="nc" id="L102">      authentication = authenticationManager.authenticate(</span>
+<span class="fc" id="L102">      authentication = authenticationManager.authenticate(</span>
           new UsernamePasswordAuthenticationToken(accountId, password));
-<span class="nc" id="L104">    } catch (AuthenticationException e) {</span>
-<span class="nc" id="L105">      log.error(&quot;Exception authentication: &quot; + e.getMessage());</span>
-<span class="nc bnc" id="L106" title="All 2 branches missed.">      if (type == 0) {</span>
+<span class="fc" id="L104">    } catch (AuthenticationException e) {</span>
+<span class="fc" id="L105">      log.error(&quot;Exception authentication: &quot; + e.getMessage());</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">      if (type == 0) {</span>
 <span class="nc" id="L107">        throw new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID);</span>
       } else {
-<span class="nc" id="L109">        throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);</span>
+<span class="fc" id="L109">        throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);</span>
       }
-<span class="nc" id="L111">    }</span>
-<span class="nc" id="L112">    UserEntity user = userService.findByAccountId(accountId);</span>
-<span class="nc" id="L113">    SecurityContextHolder.getContext().setAuthentication(authentication);</span>
-<span class="nc" id="L114">    String accessToken = jwtProvider.generateJwtToken(authentication, accountId);</span>
-<span class="nc" id="L115">    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();</span>
-<span class="nc" id="L116">    RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(user);</span>
-<span class="nc bnc" id="L117" title="All 2 branches missed.">    if (type == 0) {</span>
-<span class="nc" id="L118">      address = user.getStakeKey();</span>
+<span class="fc" id="L111">    }</span>
+<span class="fc" id="L112">    UserEntity user = userService.findByAccountId(accountId);</span>
+<span class="fc" id="L113">    SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="fc" id="L114">    String accessToken = jwtProvider.generateJwtToken(authentication, accountId);</span>
+<span class="fc" id="L115">    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();</span>
+<span class="fc" id="L116">    RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(user);</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">    if (type == 0) {</span>
+<span class="fc" id="L118">      address = user.getStakeKey();</span>
     } else {
-<span class="nc" id="L120">      address = signInRequest.getAddress();</span>
-<span class="nc" id="L121">      walletService.updateNonce(wallet);</span>
+<span class="fc" id="L120">      address = signInRequest.getAddress();</span>
+<span class="fc" id="L121">      walletService.updateNonce(wallet);</span>
     }
-<span class="nc" id="L123">    return SignInResponse.builder().token(accessToken).address(address)</span>
-<span class="nc" id="L124">        .email(userDetails.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)</span>
-<span class="nc" id="L125">        .refreshToken(refreshToken.getToken()).build();</span>
+<span class="fc" id="L123">    return SignInResponse.builder().token(accessToken).address(address)</span>
+<span class="fc" id="L124">        .email(userDetails.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)</span>
+<span class="fc" id="L125">        .refreshToken(refreshToken.getToken()).build();</span>
   }
 
   @Transactional(rollbackFor = RuntimeException.class)
   @Override
   public MessageResponse signUp(SignUpRequest signUpRequest) {
-<span class="nc" id="L131">    String email = signUpRequest.getEmail();</span>
-<span class="nc bnc" id="L132" title="All 2 branches missed.">    if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {</span>
-<span class="nc" id="L133">      throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);</span>
+<span class="fc" id="L131">    String email = signUpRequest.getEmail();</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">    if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {</span>
+<span class="fc" id="L133">      throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);</span>
     }
 <span class="nc" id="L135">    String password = encoder.encode(signUpRequest.getPassword());</span>
 <span class="nc" id="L136">    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.PENDING).orElse(null);</span>

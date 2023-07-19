@@ -2,8 +2,6 @@
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -17,59 +15,60 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = &quot;wallet&quot;)
 @Getter
-<span class="nc" id="L25">@Setter</span>
-<span class="nc" id="L26">@NoArgsConstructor</span>
-<span class="nc" id="L27">@AllArgsConstructor</span>
-<span class="nc" id="L28">@Builder</span>
+<span class="nc" id="L24">@Setter</span>
+<span class="fc" id="L25">@NoArgsConstructor</span>
+<span class="fc" id="L26">@AllArgsConstructor</span>
+<span class="pc" id="L27">@Builder</span>
 public class WalletEntity extends BaseEntity {
 
   @Column(name = &quot;address&quot;, nullable = false, unique = true)
-<span class="nc" id="L32">  private String address;</span>
+<span class="nc" id="L31">  private String address;</span>
 
   @Column(name = &quot;wallet_name&quot;)
-<span class="nc" id="L35">  private String walletName;</span>
+<span class="nc" id="L34">  private String walletName;</span>
 
   @Column(name = &quot;nonce&quot;, nullable = false)
-<span class="nc" id="L38">  private String nonce;</span>
+<span class="nc" id="L37">  private String nonce;</span>
 
   @Column(name = &quot;nonce_encode&quot;, nullable = false)
-<span class="nc" id="L41">  private String nonceEncode;</span>
+<span class="nc" id="L40">  private String nonceEncode;</span>
 
   @Column(name = &quot;expiry_date_nonce&quot;, nullable = false)
-<span class="nc" id="L44">  private Instant expiryDateNonce;</span>
+<span class="fc" id="L43">  private Instant expiryDateNonce;</span>
 
   @Column(name = &quot;network_id&quot;)
-<span class="nc" id="L47">  private String networkId;</span>
+<span class="nc" id="L46">  private String networkId;</span>
 
   @Column(name = &quot;network_type&quot;)
-  @Enumerated(EnumType.STRING)
-<span class="nc" id="L51">  private ENetworkType networkType;</span>
+  @EnumValid(enumClass = ENetworkType.class)
+<span class="nc" id="L50">  private String networkType;</span>
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = &quot;user_id&quot;, referencedColumnName = &quot;id&quot;)
   @EqualsAndHashCode.Exclude
-<span class="nc" id="L56">  private UserEntity user;</span>
+<span class="nc" id="L55">  private UserEntity user;</span>
 
   @Override
   public boolean equals(Object o) {
-<span class="nc bnc" id="L60" title="All 2 branches missed.">    if (this == o) {</span>
-<span class="nc" id="L61">      return true;</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">    if (this == o) {</span>
+<span class="nc" id="L60">      return true;</span>
     }
-<span class="nc bnc" id="L63" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
-<span class="nc" id="L64">      return false;</span>
+<span class="nc bnc" id="L62" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
+<span class="nc" id="L63">      return false;</span>
     }
-<span class="nc" id="L66">    WalletEntity wallet = (WalletEntity) o;</span>
-<span class="nc bnc" id="L67" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), wallet.getId());</span>
+<span class="nc" id="L65">    WalletEntity wallet = (WalletEntity) o;</span>
+<span class="nc bnc" id="L66" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), wallet.getId());</span>
   }
 
   @Override
   public int hashCode() {
-<span class="nc" id="L72">    return getClass().hashCode();</span>
+<span class="nc" id="L71">    return getClass().hashCode();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

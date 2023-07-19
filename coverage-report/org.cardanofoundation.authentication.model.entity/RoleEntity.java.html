@@ -16,14 +16,14 @@ import org.hibernate.Hibernate;
 @Entity
 @Table(name = &quot;role&quot;)
 @Getter
-<span class="nc" id="L19">@Setter</span>
-<span class="nc" id="L20">@NoArgsConstructor</span>
+<span class="fc" id="L19">@Setter</span>
+<span class="fc" id="L20">@NoArgsConstructor</span>
 public class RoleEntity extends BaseEntity {
 
   @Column(name = &quot;name&quot;, length = 64, unique = true, nullable = false)
   @NotNull
   @Enumerated(EnumType.STRING)
-<span class="nc" id="L26">  private ERole name;</span>
+<span class="fc" id="L26">  private ERole name;</span>
 
   @Column(name = &quot;description&quot;, length = 256)
   @NotNull

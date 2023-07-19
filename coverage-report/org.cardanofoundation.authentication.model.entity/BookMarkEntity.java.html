@@ -2,8 +2,6 @@
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -17,51 +15,52 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 import org.hibernate.Hibernate;
 
 @Entity
 @Table(name = &quot;bookmark&quot;)
 @Getter
-<span class="nc" id="L25">@Setter</span>
-<span class="nc" id="L26">@NoArgsConstructor</span>
-<span class="nc" id="L27">@AllArgsConstructor</span>
-<span class="nc" id="L28">@Builder</span>
+<span class="nc" id="L24">@Setter</span>
+<span class="fc" id="L25">@NoArgsConstructor</span>
+<span class="fc" id="L26">@AllArgsConstructor</span>
+<span class="pc" id="L27">@Builder</span>
 public class BookMarkEntity extends BaseEntity {
 
   @Column(name = &quot;url_page&quot;)
-<span class="nc" id="L32">  private String urlPage;</span>
+<span class="nc" id="L31">  private String urlPage;</span>
 
   @Column(name = &quot;keyword&quot;, nullable = false)
-<span class="nc" id="L35">  private String keyword;</span>
+<span class="nc" id="L34">  private String keyword;</span>
 
-  @Enumerated(EnumType.STRING)
+  @EnumValid(enumClass = EBookMarkType.class)
   @Column(name = &quot;type&quot;, nullable = false)
-<span class="nc" id="L39">  private EBookMarkType type;</span>
+<span class="nc" id="L38">  private String type;</span>
 
-  @Enumerated(EnumType.STRING)
+  @EnumValid(enumClass = ENetworkType.class)
   @Column(name = &quot;network&quot;, nullable = false)
-<span class="nc" id="L43">  private ENetworkType network;</span>
+<span class="nc" id="L42">  private String network;</span>
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = &quot;user_id&quot;)
   @EqualsAndHashCode.Exclude
-<span class="nc" id="L48">  private UserEntity user;</span>
+<span class="nc" id="L47">  private UserEntity user;</span>
 
   @Override
   public boolean equals(Object o) {
-<span class="nc bnc" id="L52" title="All 2 branches missed.">    if (this == o) {</span>
-<span class="nc" id="L53">      return true;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">    if (this == o) {</span>
+<span class="nc" id="L52">      return true;</span>
     }
-<span class="nc bnc" id="L55" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
-<span class="nc" id="L56">      return false;</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
+<span class="nc" id="L55">      return false;</span>
     }
-<span class="nc" id="L58">    BookMarkEntity that = (BookMarkEntity) o;</span>
-<span class="nc bnc" id="L59" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
+<span class="nc" id="L57">    BookMarkEntity that = (BookMarkEntity) o;</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
   }
 
   @Override
   public int hashCode() {
-<span class="nc" id="L64">    return getClass().hashCode();</span>
+<span class="nc" id="L63">    return getClass().hashCode();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

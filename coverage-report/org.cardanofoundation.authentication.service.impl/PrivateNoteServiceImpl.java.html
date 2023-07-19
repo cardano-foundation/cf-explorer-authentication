@@ -59,7 +59,7 @@ public class PrivateNoteServiceImpl implements PrivateNoteService {
 
   @Override
   public BasePageResponse&lt;PrivateNoteResponse&gt; findAllNote(HttpServletRequest httpServletRequest,
-      ENetworkType network,
+      String network,
       Pageable pageable) {
 <span class="nc" id="L64">    BasePageResponse&lt;PrivateNoteResponse&gt; response = new BasePageResponse&lt;&gt;();</span>
 <span class="nc" id="L65">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>

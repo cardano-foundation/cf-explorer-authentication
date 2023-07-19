@@ -2,13 +2,17 @@
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.request.EditUserRequest;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.model.response.UserResponse;
 import org.cardanofoundation.authentication.service.UserService;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,8 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(&quot;/api/v1/user&quot;)
-<span class="nc" id="L22">@RequiredArgsConstructor</span>
+<span class="fc" id="L26">@RequiredArgsConstructor</span>
 @Tag(name = &quot;User Controller&quot;, description = &quot;&quot;)
+@Validated
 public class UserController {
 
   private final UserService userService;
@@ -28,24 +33,25 @@ public class UserController {
   @PutMapping(&quot;/edit-avatar&quot;)
   public ResponseEntity&lt;UserResponse&gt; editAvatar(@RequestParam(&quot;avatar&quot;) MultipartFile avatar,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L31">    return ResponseEntity.ok(userService.editAvatar(avatar, httpServletRequest));</span>
+<span class="nc" id="L36">    return ResponseEntity.ok(userService.editAvatar(avatar, httpServletRequest));</span>
   }
 
   @PutMapping(&quot;/edit&quot;)
-  public ResponseEntity&lt;UserResponse&gt; edit(@RequestBody EditUserRequest editUserRequest,
+  public ResponseEntity&lt;UserResponse&gt; edit(@Valid @RequestBody EditUserRequest editUserRequest,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L37">    return ResponseEntity.ok(userService.editUser(editUserRequest, httpServletRequest));</span>
+<span class="fc" id="L42">    return ResponseEntity.ok(userService.editUser(editUserRequest, httpServletRequest));</span>
   }
 
   @GetMapping(&quot;/info&quot;)
-  public ResponseEntity&lt;UserInfoResponse&gt; info(@RequestParam(&quot;network&quot;) ENetworkType network,
+  public ResponseEntity&lt;UserInfoResponse&gt; info(
+      @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L43">    return ResponseEntity.ok(userService.infoUser(httpServletRequest, network));</span>
+<span class="fc" id="L49">    return ResponseEntity.ok(userService.infoUser(httpServletRequest, network));</span>
   }
 
   @GetMapping(&quot;/exist-email&quot;)
-  public ResponseEntity&lt;Boolean&gt; checkExistEmail(@RequestParam(&quot;email&quot;) String email) {
-<span class="nc" id="L48">    return ResponseEntity.ok(userService.checkExistEmail(email));</span>
+  public ResponseEntity&lt;Boolean&gt; checkExistEmail(@RequestParam(&quot;email&quot;) @Email String email) {
+<span class="fc" id="L54">    return ResponseEntity.ok(userService.checkExistEmail(email));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

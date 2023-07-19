@@ -10,14 +10,14 @@ import org.cardanofoundation.explorer.common.exceptions.enums.ErrorCode;
 
 @Getter
 <span class="nc" id="L12">@Setter</span>
-<span class="nc" id="L13">@AllArgsConstructor</span>
+<span class="fc" id="L13">@AllArgsConstructor</span>
 <span class="nc" id="L14">@NoArgsConstructor</span>
-<span class="nc" id="L15">@Builder</span>
+<span class="pc" id="L15">@Builder</span>
 public class MessageResponse {
 
-<span class="nc" id="L18">  private String code;</span>
+<span class="fc" id="L18">  private String code;</span>
 
-<span class="nc" id="L20">  private String message;</span>
+<span class="fc" id="L20">  private String message;</span>
 
 <span class="nc" id="L22">  public MessageResponse(ErrorCode err) {</span>
 <span class="nc" id="L23">    this.code = err.getServiceErrorCode();</span>

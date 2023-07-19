@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserInfoResponse infoUser(HttpServletRequest httpServletRequest, ENetworkType network) {
+  public UserInfoResponse infoUser(HttpServletRequest httpServletRequest, String network) {
 <span class="nc" id="L97">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
 <span class="nc" id="L98">    UserEntity user = findByAccountId(accountId);</span>
 <span class="nc" id="L99">    Long userId = user.getId();</span>

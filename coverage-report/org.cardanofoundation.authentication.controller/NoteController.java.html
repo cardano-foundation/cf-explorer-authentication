@@ -3,6 +3,7 @@
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.request.note.PrivateNoteRequest;
@@ -10,10 +11,13 @@ import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.PrivateNoteResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
 import org.cardanofoundation.authentication.service.PrivateNoteService;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
+import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
+import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
 import org.springdoc.api.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,8 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(&quot;/api/v1/note&quot;)
-<span class="nc" id="L29">@RequiredArgsConstructor</span>
+<span class="fc" id="L33">@RequiredArgsConstructor</span>
 @Tag(name = &quot;Private Note Controller&quot;, description = &quot;&quot;)
+@Validated
 public class NoteController {
 
   private final PrivateNoteService privateNoteService;
@@ -36,27 +41,28 @@ public class NoteController {
   public ResponseEntity&lt;MessageResponse&gt; addNote(
       @Valid @RequestBody PrivateNoteRequest privateNoteRequest,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L39">    return ResponseEntity.ok(</span>
-<span class="nc" id="L40">        privateNoteService.addPrivateNote(privateNoteRequest, httpServletRequest));</span>
+<span class="fc" id="L44">    return ResponseEntity.ok(</span>
+<span class="fc" id="L45">        privateNoteService.addPrivateNote(privateNoteRequest, httpServletRequest));</span>
   }
 
   @GetMapping(&quot;/find-all&quot;)
   public ResponseEntity&lt;BasePageResponse&lt;PrivateNoteResponse&gt;&gt; findAllNote(
-      @RequestParam(&quot;network&quot;) ENetworkType network,
-      @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable,
+      @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
+      @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L48">    return ResponseEntity.ok(privateNoteService.findAllNote(httpServletRequest, network, pageable));</span>
+<span class="fc" id="L53">    return ResponseEntity.ok(</span>
+<span class="fc" id="L54">        privateNoteService.findAllNote(httpServletRequest, network, pagination.toPageable()));</span>
   }
 
   @DeleteMapping(&quot;/delete/{noteId}&quot;)
-  public ResponseEntity&lt;MessageResponse&gt; deleteById(@PathVariable Long noteId) {
-<span class="nc" id="L53">    return ResponseEntity.ok(privateNoteService.deleteById(noteId));</span>
+  public ResponseEntity&lt;MessageResponse&gt; deleteById(@PathVariable @Min(1) Long noteId) {
+<span class="fc" id="L59">    return ResponseEntity.ok(privateNoteService.deleteById(noteId));</span>
   }
 
   @PutMapping(&quot;/edit&quot;)
   public ResponseEntity&lt;PrivateNoteResponse&gt; editNote(@RequestParam(&quot;note&quot;) String note,
-      @RequestParam(&quot;noteId&quot;) Long noteId) {
-<span class="nc" id="L59">    return ResponseEntity.ok(privateNoteService.editById(noteId, note));</span>
+      @RequestParam(&quot;noteId&quot;) @Min(1) Long noteId) {
+<span class="fc" id="L65">    return ResponseEntity.ok(privateNoteService.editById(noteId, note));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

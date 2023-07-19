@@ -21,12 +21,12 @@ import org.hibernate.Hibernate;
 @Getter
 <span class="nc" id="L22">@Setter</span>
 <span class="pc" id="L23">@Builder</span>
-<span class="nc" id="L24">@NoArgsConstructor</span>
+<span class="fc" id="L24">@NoArgsConstructor</span>
 <span class="fc" id="L25">@AllArgsConstructor</span>
 public class RefreshTokenEntity extends BaseEntity {
 
   @Column(name = &quot;token&quot;, nullable = false, unique = true)
-<span class="nc" id="L29">  private String token;</span>
+<span class="fc" id="L29">  private String token;</span>
 
   @Column(name = &quot;expiry_date&quot;, nullable = false)
 <span class="nc" id="L32">  private Instant expiryDate;</span>

@@ -6,22 +6,24 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 
 @Getter
-<span class="nc" id="L11">@Setter</span>
-<span class="nc" id="L12">public class BookMarkRequest {</span>
+<span class="pc" id="L12">@Setter</span>
+<span class="fc" id="L13">public class BookMarkRequest {</span>
 
-<span class="nc" id="L14">  private String urlPage;</span>
+<span class="nc" id="L15">  private String urlPage;</span>
 
   @NotNull
   @NotBlank
-<span class="nc" id="L18">  private String keyword;</span>
+<span class="nc" id="L19">  private String keyword;</span>
 
   @NotNull
-<span class="nc" id="L21">  private EBookMarkType type;</span>
+  @EnumValid(enumClass = EBookMarkType.class)
+<span class="nc" id="L23">  private String type;</span>
 
   @NotNull
-<span class="nc" id="L24">  private ENetworkType network;</span>
-
+  @EnumValid(enumClass = ENetworkType.class)
+<span class="nc" id="L27">  private String network;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
