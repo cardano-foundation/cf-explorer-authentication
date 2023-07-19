@@ -91,4 +91,9 @@ public class VerifyServiceImpl implements VerifyService {
     sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
+
+  @Override
+  public Boolean checkExpiredCode(String code) {
+    return jwtProvider.validateVerifyCode(code);
+  }
 }

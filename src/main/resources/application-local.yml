@@ -65,9 +65,9 @@ server:
   port: 8021
 
 redis:
-  databaseIndex: 1
-  master: mymaster
-  password: Y2FyZGFuby1yZWRpcy1zZW50aW5lbA==
+  databaseIndex: 0
+  master: ${REDIS_MASTER_NAME:mymaster}
+  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
   testOnBorrow: false
   maxTotal: 10
   maxIdle: 5
@@ -75,5 +75,5 @@ redis:
   testOnReturn: false
   testWhileIdle: false
   sentinels:
-    - host: 172.16.1.230
+    - host: ${REDIS_SENTINEL_HOST:localhost}
       port: 26379

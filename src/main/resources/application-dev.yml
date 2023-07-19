@@ -59,7 +59,7 @@ domain:
   server: ${SWAGGER_SERVER_URL:http://localhost:8021}
 
 redis:
-  databaseIndex: 1
+  databaseIndex: 0
   master: ${REDIS_SENTINEL_MASTER_NAME:mymaster}
   password: ${REDIS_SENTINEL_PASSWORD:redis_sentinel_password}
   testOnBorrow: false
