@@ -20,7 +20,8 @@ public final class AuthConstant {
       BASE_AUTH_PATH + "get-nonce***",
       BASE_VERIFY_PATH + "active",
       BASE_VERIFY_PATH + "forgot-password",
-      BASE_VERIFY_PATH + "reset-password"
+      BASE_VERIFY_PATH + "reset-password",
+      BASE_VERIFY_PATH + "expired-code"
   };
 
   public static final String[] USER_WHITELIST = {

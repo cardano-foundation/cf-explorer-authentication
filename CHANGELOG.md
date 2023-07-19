@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.1.7](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.6...v0.1.7) (2023-07-19)
+
+
+### Bug Fixes
+
+* add controller test for authentication ([4251da8](https://github.com/cardano-foundation/cf-explorer-authentication/commit/4251da81cfc950baef164fcdb8152ebacf6a607c))
+* fix conflict and update unit test ([1e1bdbc](https://github.com/cardano-foundation/cf-explorer-authentication/commit/1e1bdbcf977cff3edc6cc978825b711e7661270d))
+* run unit test fail ([94bab10](https://github.com/cardano-foundation/cf-explorer-authentication/commit/94bab1001152eefb6348967e91e0bcad342bc091))
+* set profile for repository test ([78c0da4](https://github.com/cardano-foundation/cf-explorer-authentication/commit/78c0da433b1763cd2403c2b6b9790d21edff090c))
+
+## [0.1.6](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.5...v0.1.6) (2023-07-11)
+
+
+### Miscellaneous Chores
+
+* release 0.1.6 ([6571a80](https://github.com/cardano-foundation/cf-explorer-authentication/commit/6571a80db3efbda326b27ff983d21bb3acf3e9c1))
+
+## [0.1.5](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.4...v0.1.5) (2023-07-05)
+
+
+### Bug Fixes
+
+* repair tests upgrade junit ([af1602c](https://github.com/cardano-foundation/cf-explorer-authentication/commit/af1602ce6e2c80fe54ce4cdd83fc13dffbbb77fc))
+
 ## [0.1.4](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.3...v0.1.4) (2023-06-29)
 
 
