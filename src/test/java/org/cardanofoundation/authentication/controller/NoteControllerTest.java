@@ -56,8 +56,8 @@ class NoteControllerTest {
   @Test
   void whenCallAdd() throws Exception {
     PrivateNoteRequest request = new PrivateNoteRequest();
-    request.setTxHash("txHash123456789");
-    request.setNetwork(ENetworkType.MAIN_NET);
+    request.setTxHash("8e0280beebc3d12626e87b182f4205d75e49981042f54081cd35f3a4a85630b0");
+    request.setNetwork(ENetworkType.MAIN_NET.name());
     request.setNote("Note");
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     MessageResponse res = MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
@@ -80,7 +80,7 @@ class NoteControllerTest {
     BasePageResponse<PrivateNoteResponse> res = new BasePageResponse<>();
     res.setData(List.of(privateNoteResponse));
     given(privateNoteService.findAllNote(httpServletRequest,
-        ENetworkType.MAIN_NET,
+        ENetworkType.MAIN_NET.name(),
         PageRequest.of(0, 1))).willReturn(res);
     mockMvc.perform(get("/api/v1/note/find-all")
             .param("network", String.valueOf(ENetworkType.MAIN_NET))

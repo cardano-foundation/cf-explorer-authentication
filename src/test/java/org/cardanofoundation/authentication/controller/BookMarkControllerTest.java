@@ -58,8 +58,8 @@ class BookMarkControllerTest {
   void whenCallAdd() throws Exception {
     BookMarkRequest request = new BookMarkRequest();
     request.setKeyword("1");
-    request.setNetwork(ENetworkType.MAIN_NET);
-    request.setType(EBookMarkType.POOL);
+    request.setNetwork(ENetworkType.MAIN_NET.name());
+    request.setType(EBookMarkType.POOL.name());
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     BookMarkResponse res = new BookMarkResponse();
     res.setKeyword("1");
@@ -82,8 +82,8 @@ class BookMarkControllerTest {
     bookMarkResponse.setType(EBookMarkType.POOL);
     BasePageResponse<BookMarkResponse> res = new BasePageResponse<>();
     res.setData(List.of(bookMarkResponse));
-    given(bookMarkService.findBookMarkByType(httpServletRequest, EBookMarkType.POOL,
-        ENetworkType.MAIN_NET,
+    given(bookMarkService.findBookMarkByType(httpServletRequest, EBookMarkType.POOL.name(),
+        ENetworkType.MAIN_NET.name(),
         PageRequest.of(0, 1))).willReturn(res);
     mockMvc.perform(get("/api/v1/bookmark/find-all")
             .param("network", String.valueOf(ENetworkType.MAIN_NET))
@@ -114,7 +114,7 @@ class BookMarkControllerTest {
     bookMarkResponse.setNetwork(ENetworkType.MAIN_NET);
     bookMarkResponse.setType(EBookMarkType.POOL);
     List<BookMarkResponse> res = List.of(bookMarkResponse);
-    given(bookMarkService.findKeyBookMark(httpServletRequest, ENetworkType.MAIN_NET)).willReturn(
+    given(bookMarkService.findKeyBookMark(httpServletRequest, ENetworkType.MAIN_NET.name())).willReturn(
         res);
     mockMvc.perform(get("/api/v1/bookmark/find-all-key")
             .param("network", String.valueOf(ENetworkType.MAIN_NET))
@@ -127,8 +127,8 @@ class BookMarkControllerTest {
   void whenCallAddList() throws Exception {
     BookMarkRequest bookMarkReq = new BookMarkRequest();
     bookMarkReq.setKeyword("1");
-    bookMarkReq.setNetwork(ENetworkType.MAIN_NET);
-    bookMarkReq.setType(EBookMarkType.POOL);
+    bookMarkReq.setNetwork(ENetworkType.MAIN_NET.name());
+    bookMarkReq.setType(EBookMarkType.POOL.name());
     List<BookMarkRequest> bookMarksReq = List.of(bookMarkReq);
     BookMarksRequest request = new BookMarksRequest();
     request.setBookMarks(bookMarksReq);

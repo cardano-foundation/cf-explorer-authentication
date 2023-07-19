@@ -123,7 +123,7 @@ class AuthControllerTest {
     NonceResponse res = NonceResponse.builder().nonce(NONCE).build();
     given(authenticationService.findNonceByAddress(ADDRESS_WALLET, "NAMI")).willReturn(res);
     mockMvc.perform(get("/api/v1/auth/get-nonce")
-            .param("address", REFRESH_TOKEN)
+            .param("address", ADDRESS_WALLET)
             .param("walletName", "NAMI")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())

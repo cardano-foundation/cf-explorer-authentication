@@ -66,7 +66,7 @@ class UserControllerTest {
     UserInfoResponse res = UserInfoResponse.builder().email("Test@gmail.com")
         .address(ADDRESS_WALLET).build();
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-    given(userService.infoUser(httpServletRequest, ENetworkType.MAIN_NET)).willReturn(res);
+    given(userService.infoUser(httpServletRequest, ENetworkType.MAIN_NET.name())).willReturn(res);
     mockMvc.perform(get("/api/v1/user/info")
             .param("network", String.valueOf(ENetworkType.MAIN_NET))
             .accept(MediaType.APPLICATION_JSON))
