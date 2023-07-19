@@ -2,8 +2,6 @@ package org.cardanofoundation.authentication.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -17,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 import org.hibernate.Hibernate;
 
 @Entity
@@ -47,8 +46,8 @@ public class WalletEntity extends BaseEntity {
   private String networkId;
 
   @Column(name = "network_type")
-  @Enumerated(EnumType.STRING)
-  private ENetworkType networkType;
+  @EnumValid(enumClass = ENetworkType.class)
+  private String networkType;
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id", referencedColumnName = "id")

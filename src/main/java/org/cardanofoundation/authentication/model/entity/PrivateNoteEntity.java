@@ -2,8 +2,6 @@ package org.cardanofoundation.authentication.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 import org.hibernate.Hibernate;
 
 @Entity
@@ -33,9 +32,9 @@ public class PrivateNoteEntity extends BaseEntity {
   @Column(name = "tx_hash", nullable = false)
   private String txHash;
 
-  @Enumerated(EnumType.STRING)
+  @EnumValid(enumClass = ENetworkType.class)
   @Column(name = "network", nullable = false)
-  private ENetworkType network;
+  private String network;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")

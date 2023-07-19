@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
@@ -12,8 +13,10 @@ import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
 import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.service.AuthenticationService;
+import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication Controller", description = "")
+@Validated
 public class AuthController {
 
   private final AuthenticationService authenticationService;
@@ -54,7 +58,8 @@ public class AuthController {
   }
 
   @GetMapping("/get-nonce")
-  public ResponseEntity<NonceResponse> findNonceByAddress(@RequestParam("address") String address,
+  public ResponseEntity<NonceResponse> findNonceByAddress(
+      @RequestParam("address") @PrefixedValid(CommonConstant.PREFIXED_ADDRESS) String address,
       @RequestParam("walletName") String walletName) {
     return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));
   }

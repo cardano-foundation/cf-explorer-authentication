@@ -25,4 +25,8 @@ public class CommonConstant {
   public static final Integer SLEEP_TIME = 1000;
 
   public static final String AUTHORITIES_KEY = "authorities";
+
+  public static final String PREFIXED_ADDRESS = "stake";
+
+  public static final int TX_HASH_LENGTH = 64;
 }
