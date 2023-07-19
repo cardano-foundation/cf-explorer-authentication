@@ -27,7 +27,7 @@ public interface UserService extends UserDetailsService {
    * description: get user info
    * @update:
    */
-  UserInfoResponse infoUser(HttpServletRequest httpServletRequest, ENetworkType network);
+  UserInfoResponse infoUser(HttpServletRequest httpServletRequest, String network);
 
   /*
    * @author: phuc.nguyen5

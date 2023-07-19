@@ -26,7 +26,7 @@ public interface PrivateNoteService {
    * @update:
    */
   BasePageResponse<PrivateNoteResponse> findAllNote(HttpServletRequest httpServletRequest,
-      ENetworkType network,
+      String network,
       Pageable pageable);
 
   /*

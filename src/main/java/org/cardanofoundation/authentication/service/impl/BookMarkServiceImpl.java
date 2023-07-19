@@ -64,7 +64,7 @@ public class BookMarkServiceImpl implements BookMarkService {
 
   @Override
   public BasePageResponse<BookMarkResponse> findBookMarkByType(
-      HttpServletRequest httpServletRequest, EBookMarkType bookMarkType, ENetworkType network,
+      HttpServletRequest httpServletRequest, String bookMarkType, String network,
       Pageable pageable) {
     BasePageResponse<BookMarkResponse> response = new BasePageResponse<>();
     String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
@@ -89,7 +89,7 @@ public class BookMarkServiceImpl implements BookMarkService {
 
   @Override
   public List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest,
-      ENetworkType network) {
+      String network) {
     String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
     UserEntity user = userService.findByAccountId(accountId);
     List<BookMarkEntity> bookMarks = bookMarkRepository.findAllKeyBookMarkByUser(user.getId(),

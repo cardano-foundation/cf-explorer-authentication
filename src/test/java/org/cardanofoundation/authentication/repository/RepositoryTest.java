@@ -106,7 +106,7 @@ class RepositoryTest {
     WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET.name())
         .user(user1).build();
     walletRepository.save(wallet);
     UserEntity userTest = userRepository.findUserByAddress(ADDRESS).orElse(null);
@@ -122,7 +122,7 @@ class RepositoryTest {
     WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET.name())
         .user(user1).build();
     WalletEntity walletTest = walletRepository.save(wallet);
     Assertions.assertNotNull(walletTest);
@@ -137,7 +137,7 @@ class RepositoryTest {
     WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET.name())
         .user(user1).build();
     walletRepository.save(wallet);
     Optional<WalletEntity> walletOpt = walletRepository.findWalletByAddress(ADDRESS);
@@ -153,7 +153,7 @@ class RepositoryTest {
     WalletEntity wallet = WalletEntity.builder().walletName("NAMI")
         .address(ADDRESS).nonce("8890825581941064700")
         .nonceEncode("$2a$10$lPoc5.JX3s78BbK14Fams.Nqz0hQIDmFDFSsAI4.zR3Nhy0alCPMq")
-        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET)
+        .expiryDateNonce(Instant.now()).networkId("1").networkType(ENetworkType.MAIN_NET.name())
         .user(user1).build();
     walletRepository.save(wallet);
     String address = walletRepository.findAddressByUserId(user1.getId());
@@ -230,8 +230,9 @@ class RepositoryTest {
         .avatar(null)
         .isDeleted(false).build();
     UserEntity userTest = userRepository.save(user);
-    BookMarkEntity bookMark = BookMarkEntity.builder().type(EBookMarkType.POOL).user(userTest)
-        .keyword("test.30.04").network(ENetworkType.MAIN_NET).build();
+    BookMarkEntity bookMark = BookMarkEntity.builder().type(EBookMarkType.POOL.name())
+        .user(userTest)
+        .keyword("test.30.04").network(ENetworkType.MAIN_NET.name()).build();
     BookMarkEntity bookMarkTest = bookMarkRepository.save(bookMark);
     Assertions.assertNotNull(bookMarkTest);
   }
@@ -243,7 +244,7 @@ class RepositoryTest {
         .isDeleted(false).build();
     UserEntity userTest = userRepository.save(user);
     PrivateNoteEntity privateNote = PrivateNoteEntity.builder().user(userTest).txHash("TestTxHash")
-        .note("Test").network(ENetworkType.MAIN_NET).build();
+        .note("Test").network(ENetworkType.MAIN_NET.name()).build();
     PrivateNoteEntity privateNoteTest = privateNoteRepository.save(privateNote);
     Assertions.assertNotNull(privateNoteTest);
   }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 
 @Getter
 @Setter
@@ -18,9 +19,10 @@ public class BookMarkRequest {
   private String keyword;
 
   @NotNull
-  private EBookMarkType type;
+  @EnumValid(enumClass = EBookMarkType.class)
+  private String type;
 
   @NotNull
-  private ENetworkType network;
-
+  @EnumValid(enumClass = ENetworkType.class)
+  private String network;
 }
