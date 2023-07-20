@@ -94,6 +94,9 @@ public class VerifyServiceImpl implements VerifyService {
 
   @Override
   public Boolean checkExpiredCode(String code) {
+    if (redisProvider.isTokenBlacklisted(code)) {
+      return false;
+    }
     return jwtProvider.validateVerifyCode(code);
   }
 }
