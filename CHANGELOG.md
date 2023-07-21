@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.8](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.7...v0.1.8) (2023-07-21)
+
+
+### Bug Fixes
+
+* add api check expired verify email ([5d523d2](https://github.com/cardano-foundation/cf-explorer-authentication/commit/5d523d2b180fb5d7c625e7faf1d393fa9db7c124))
+* add logic check code ([a9e0406](https://github.com/cardano-foundation/cf-explorer-authentication/commit/a9e04068a2172fedee31ba913e141690c77db664))
+
 ## [0.1.7](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.6...v0.1.7) (2023-07-19)
 
 
