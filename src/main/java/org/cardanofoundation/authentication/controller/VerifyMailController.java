@@ -45,4 +45,10 @@ public class VerifyMailController {
     return ResponseEntity.ok(
         verifyService.resetPassword(resetPasswordRequest));
   }
+
+  @GetMapping(value = "/expired-code")
+  public ResponseEntity<Boolean> checkExpiredCode(
+      @Valid @RequestParam("code") String code) {
+    return ResponseEntity.ok(verifyService.checkExpiredCode(code));
+  }
 }
