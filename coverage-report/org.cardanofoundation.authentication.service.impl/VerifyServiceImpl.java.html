@@ -91,5 +91,13 @@ public class VerifyServiceImpl implements VerifyService {
 <span class="nc" id="L91">    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));</span>
 <span class="nc" id="L92">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
+
+  @Override
+  public Boolean checkExpiredCode(String code) {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="nc" id="L98">      return false;</span>
+    }
+<span class="nc" id="L100">    return jwtProvider.validateVerifyCode(code);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -3,7 +3,7 @@ auth-service,org.cardanofoundation.authentication.controller,BookMarkController,
 auth-service,org.cardanofoundation.authentication.controller,AuthController,0,39,0,0,0,7,0,6,0,6
 auth-service,org.cardanofoundation.authentication.controller,UserController,7,26,0,0,1,4,1,4,1,4
 auth-service,org.cardanofoundation.authentication.controller,NoteController,0,35,0,0,0,7,0,5,0,5
-auth-service,org.cardanofoundation.authentication.controller,VerifyMailController,0,24,0,0,0,6,0,4,0,4
+auth-service,org.cardanofoundation.authentication.controller,VerifyMailController,6,24,0,0,1,6,1,4,1,4
 auth-service,org.cardanofoundation.authentication.config.redis.cluster,RedisClusterConfig,68,0,0,0,17,0,5,0,5,0
 auth-service,org.cardanofoundation.authentication.model.response.auth,NonceResponse,8,19,0,0,1,3,2,4,2,4
 auth-service,org.cardanofoundation.authentication.model.response.auth,RefreshTokenResponse.RefreshTokenResponseBuilder,13,23,0,0,0,1,2,4,2,4
@@ -23,7 +23,7 @@ auth-service,org.cardanofoundation.authentication.util,NonceUtils,32,34,0,0,7,9,
 auth-service,org.cardanofoundation.authentication.aop,UserAspect,66,0,2,0,16,0,6,0,5,0
 auth-service,org.cardanofoundation.authentication.service.impl,UserHistoryServiceImpl,25,0,0,0,6,0,3,0,3,0
 auth-service,org.cardanofoundation.authentication.service.impl,BookMarkServiceImpl,264,0,10,0,53,0,14,0,9,0
-auth-service,org.cardanofoundation.authentication.service.impl,VerifyServiceImpl,197,0,14,0,34,0,12,0,5,0
+auth-service,org.cardanofoundation.authentication.service.impl,VerifyServiceImpl,210,0,16,0,37,0,14,0,6,0
 auth-service,org.cardanofoundation.authentication.service.impl,RefreshTokenServiceImpl,69,0,2,0,15,0,8,0,7,0
 auth-service,org.cardanofoundation.authentication.service.impl,AuthenticationServiceImpl,177,231,10,8,34,47,10,10,4,7
 auth-service,org.cardanofoundation.authentication.service.impl,WalletServiceImpl,69,0,0,0,14,0,4,0,4,0
@@ -70,7 +70,7 @@ auth-service,org.cardanofoundation.authentication.config.properties,ThreadPoolPr
 auth-service,org.cardanofoundation.authentication.config.redis.sentinel,RedisProperties,435,0,86,0,11,0,68,0,25,0
 auth-service,org.cardanofoundation.authentication.config.redis.sentinel,RedisProperties.SentinelNode,115,0,22,0,3,0,20,0,9,0
 auth-service,org.cardanofoundation.authentication.config.redis.sentinel,RedisConfig,190,0,0,0,42,0,19,0,19,0
-auth-service,org.cardanofoundation.authentication.constant,AuthConstant,109,0,0,0,4,0,1,0,1,0
+auth-service,org.cardanofoundation.authentication.constant,AuthConstant,113,0,0,0,4,0,1,0,1,0
 auth-service,org.cardanofoundation.authentication.constant,CommonConstant,10,0,0,0,3,0,1,0,1,0
 auth-service,org.cardanofoundation.authentication,AuthServiceApplication,5,3,0,0,2,1,1,1,1,1
 auth-service,org.cardanofoundation.authentication.provider,RsaProvider,85,0,2,0,23,0,8,0,7,0
