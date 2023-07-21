@@ -28,4 +28,12 @@ public interface VerifyService {
    * @update:
    */
   MessageResponse forgotPassword(String email);
+
+  /*
+   * @author: phuc.nguyen5
+   * @since: 19/07/2023
+   * description: check expired verify email
+   * @update:
+   */
+  Boolean checkExpiredCode(String code);
 }
