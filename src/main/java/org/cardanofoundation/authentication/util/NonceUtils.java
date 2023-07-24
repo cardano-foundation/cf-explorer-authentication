@@ -6,13 +6,13 @@ import co.nstant.in.cbor.model.Array;
 import co.nstant.in.cbor.model.ByteString;
 import co.nstant.in.cbor.model.DataItem;
 import com.bloxbean.cardano.client.util.HexUtil;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import java.security.SecureRandom;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log4j2
@@ -21,7 +21,6 @@ public class NonceUtils {
   private static final SecureRandom random = new SecureRandom();
 
   /*
-   * @author: phuc.nguyen5
    * @since: 21/10/2022
    * description: gen nonce value using random function
    * @update: 04/11/2022
@@ -34,7 +33,6 @@ public class NonceUtils {
   }
 
   /*
-   * @author: phuc.nguyen5
    * @since: 07/11/2022
    * description: get nonce value from signature
    * @update:
