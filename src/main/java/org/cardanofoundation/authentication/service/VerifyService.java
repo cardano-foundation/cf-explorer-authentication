@@ -6,7 +6,6 @@ import org.cardanofoundation.authentication.model.response.MessageResponse;
 public interface VerifyService {
 
   /*
-   * @author: phuc.nguyen5
    * @since: 09/01/2023
    * description: process verify email
    * @update:
@@ -14,7 +13,6 @@ public interface VerifyService {
   MessageResponse checkVerifySignUpByEmail(String code);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 12/1/2023
    * description: process add new password
    * @update:
@@ -22,7 +20,6 @@ public interface VerifyService {
   MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 12/1/2023
    * description: process confirm reset password
    * @update:
@@ -30,7 +27,6 @@ public interface VerifyService {
   MessageResponse forgotPassword(String email);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 19/07/2023
    * description: check expired verify email
    * @update:

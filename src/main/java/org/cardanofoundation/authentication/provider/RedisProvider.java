@@ -1,11 +1,11 @@
 package org.cardanofoundation.authentication.provider;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,6 @@ public class RedisProvider {
   private final RedisTemplate<String, Object> redisTemplate;
 
   /*
-   * @author: phuc.nguyen5
    * @since: 06/12/2022
    * description: Add access token + accountId to redis after logout or refresh token
    * @update:
@@ -29,7 +28,6 @@ public class RedisProvider {
   }
 
   /*
-   * @author: phuc.nguyen5
    * @since: 06/12/2022
    * description: Check exist access token + accountId from redis
    * @update:

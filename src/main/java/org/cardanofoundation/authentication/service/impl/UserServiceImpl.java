@@ -15,7 +15,6 @@ import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.entity.UserHistoryEntity;
 import org.cardanofoundation.authentication.model.entity.WalletEntity;
 import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
-import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.enums.ERole;
 import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
@@ -191,7 +190,6 @@ public class UserServiceImpl implements UserService {
   }
 
   /*
-   * @author: phuc.nguyen5
    * @since: 22/12/2022
    * description: get role for user
    * @update:
