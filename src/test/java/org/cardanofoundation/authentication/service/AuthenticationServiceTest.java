@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ThreadPoolExecutor;
+import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.exception.AuthenticateException;
 import org.cardanofoundation.authentication.model.entity.RefreshTokenEntity;
 import org.cardanofoundation.authentication.model.entity.RoleEntity;
@@ -15,13 +17,22 @@ import org.cardanofoundation.authentication.model.entity.WalletEntity;
 import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
 import org.cardanofoundation.authentication.model.enums.ERole;
 import org.cardanofoundation.authentication.model.enums.EStatus;
+import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
+import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
+import org.cardanofoundation.authentication.model.response.MessageResponse;
+import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
+import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.RefreshTokenRepository;
+import org.cardanofoundation.authentication.repository.UserRepository;
 import org.cardanofoundation.authentication.repository.WalletRepository;
 import org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl;
+import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
@@ -37,6 +48,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -68,6 +80,21 @@ class AuthenticationServiceTest {
 
   @Mock
   private RedisProvider redisProvider;
+
+  @Mock
+  private UserRepository userRepository;
+
+  @Mock
+  private PasswordEncoder encoder;
+
+  @Mock
+  private ThreadPoolExecutor sendMailExecutor;
+
+  @Mock
+  private MailProvider mailProvider;
+
+  @Mock
+  private RefreshTokenRepository refreshTokenRepository;
 
   private final String SIGNATURE_TEST = "84582aa201276761646472657373581de18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909a166686173686564f453393534353735313438313233323636333232355840850ff657e23963414e7c1bf708928dc994ecafea29790089c810af1ac7486aae12a4ed736d16528051aeff1991ee8d2aef19fe3d375f3ad019925ff1530ed608";
 
@@ -182,23 +209,6 @@ class AuthenticationServiceTest {
   }
 
   @Test
-  void whenLoginUsingEmail_UserIsNotExist_ThrowException() {
-    SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setEmail(EMAIL);
-    signInRequest.setPassword(PASSWORD);
-    signInRequest.setType(0);
-    when(authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(EMAIL, PASSWORD)))
-        .thenThrow(new BusinessException(CommonErrorCode.USER_IS_NOT_EXIST));
-    BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
-      authenticationService.signIn(signInRequest);
-    });
-    String expectedCode = CommonErrorCode.USER_IS_NOT_EXIST.getServiceErrorCode();
-    String actualCode = exception.getErrorCode();
-    Assertions.assertEquals(expectedCode, actualCode);
-  }
-
-  @Test
   void whenLoginUsingEmail_EmailOrPasswordInValid_ThrowException() {
     SignInRequest signInRequest = new SignInRequest();
     signInRequest.setEmail(EMAIL);
@@ -206,7 +216,7 @@ class AuthenticationServiceTest {
     signInRequest.setType(0);
     when(authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(EMAIL, PASSWORD)))
-        .thenThrow(new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID));
+        .thenThrow(new AuthenticateException("Email or password invalid"));
     BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
       authenticationService.signIn(signInRequest);
     });
@@ -255,6 +265,49 @@ class AuthenticationServiceTest {
   }
 
   @Test
+  void whenSignUp_EmailIsNotExist_returnResponseSuccess() {
+    SignUpRequest signUpRequest = new SignUpRequest();
+    signUpRequest.setEmail("test5.6@gmail.com");
+    signUpRequest.setPassword(PASSWORD);
+    UserEntity user = UserEntity.builder().email("test5.6@gmail.com").build();
+    when(userService.checkExistEmailAndStatus("test5.6@gmail.com", EStatus.ACTIVE))
+        .thenReturn(false);
+    when(encoder.encode(PASSWORD)).thenReturn(
+        "$2a$10$qbpa.SGNi0y3Chv2ENMCT.5aTVwgm8oZesdt4xsDuyp2WztqHaY8u");
+    when(userRepository.findByEmailAndStatus("test5.6@gmail.com", EStatus.PENDING)).thenReturn(
+        Optional.empty());
+    when(userService.saveUser(signUpRequest)).thenReturn(user);
+    when(jwtProvider.generateCodeForVerify("test5.6@gmail.com")).thenReturn(JWT);
+    doNothing().when(sendMailExecutor)
+        .execute(new MailHandler(mailProvider, user, EUserAction.CREATED, JWT));
+    MessageResponse response = authenticationService.signUp(signUpRequest);
+    String expectedCode = CommonConstant.CODE_SUCCESS;
+    Assertions.assertEquals(expectedCode, response.getCode());
+  }
+
+  @Test
+  void whenSignUp_EmailIsNotExistWithStatusPending_returnResponseSuccess() {
+    SignUpRequest signUpRequest = new SignUpRequest();
+    signUpRequest.setEmail("test5.6@gmail.com");
+    signUpRequest.setPassword(PASSWORD);
+    UserEntity user = UserEntity.builder().email("test5.6@gmail.com").status(EStatus.PENDING)
+        .password(PASSWORD).build();
+    when(userService.checkExistEmailAndStatus("test5.6@gmail.com", EStatus.ACTIVE))
+        .thenReturn(false);
+    when(encoder.encode(PASSWORD)).thenReturn(
+        "$2a$10$qbpa.SGNi0y3Chv2ENMCT.5aTVwgm8oZesdt4xsDuyp2WztqHaY8u");
+    when(userRepository.findByEmailAndStatus("test5.6@gmail.com", EStatus.PENDING)).thenReturn(
+        Optional.of(user));
+    when(userRepository.save(user)).thenReturn(user);
+    when(jwtProvider.generateCodeForVerify("test5.6@gmail.com")).thenReturn(JWT);
+    doNothing().when(sendMailExecutor)
+        .execute(new MailHandler(mailProvider, user, EUserAction.CREATED, JWT));
+    MessageResponse response = authenticationService.signUp(signUpRequest);
+    String expectedCode = CommonConstant.CODE_SUCCESS;
+    Assertions.assertEquals(expectedCode, response.getCode());
+  }
+
+  @Test
   void whenRefreshToken_RefreshTokenIsNotExist_ThrowException() {
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
     when(refreshTokenService.findByRefToken(REFRESH_TOKEN)).thenReturn(Optional.empty());
@@ -278,5 +331,64 @@ class AuthenticationServiceTest {
     String expectedCode = CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
     Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  void whenRefreshToken_RefreshTokenIsNotExpired_returnResponseSuccess() {
+    UserEntity user = UserEntity.builder().email("test5.6@gmail.com").status(EStatus.ACTIVE)
+        .password(PASSWORD).build();
+    user.setId(1L);
+    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(user)
+        .expiryDate(Instant.now().plusMillis(3600)).token(REFRESH_TOKEN).build();
+    when(jwtProvider.parseJwt(any())).thenReturn(JWT);
+    when(refreshTokenService.findByRefToken(REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
+    when(refreshTokenService.verifyExpiration(refreshToken)).thenReturn(refreshToken);
+    when(walletRepository.findAddressByUserId(1L)).thenReturn(ADDRESS_WALLET);
+    doNothing().when(redisProvider).blacklistJwt(JWT, ADDRESS_WALLET);
+    when(jwtProvider.generateJwtToken(user, ADDRESS_WALLET)).thenReturn(JWT);
+    RefreshTokenResponse response = authenticationService.refreshToken(REFRESH_TOKEN, any());
+    Assertions.assertEquals(JWT, response.getAccessToken());
+  }
+
+  @Test
+  void whenSignOut_returnResponseSuccess() {
+    SignOutRequest request = new SignOutRequest();
+    request.setRefreshJwt(REFRESH_TOKEN);
+    request.setAccountId(ADDRESS_WALLET);
+    UserEntity user = UserEntity.builder().email("test5.6@gmail.com").status(EStatus.ACTIVE)
+        .password(PASSWORD).build();
+    user.setId(1L);
+    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(user)
+        .expiryDate(Instant.now().plusMillis(3600)).token(REFRESH_TOKEN).build();
+    when(jwtProvider.parseJwt(any())).thenReturn(JWT);
+    when(refreshTokenRepository.findByToken(REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
+    doNothing().when(redisProvider).blacklistJwt(JWT, ADDRESS_WALLET);
+    MessageResponse response = authenticationService.signOut(request, any());
+    String expectedCode = CommonConstant.CODE_SUCCESS;
+    Assertions.assertEquals(expectedCode, response.getCode());
+  }
+
+  @Test
+  void whenFindNonce_WalletIsNotExist_returnResponse() {
+    UserEntity user = UserEntity.builder().build();
+    WalletEntity wallet = WalletEntity.builder().user(user).address(ADDRESS_WALLET)
+        .walletName("NAMI").build();
+    when(walletRepository.findWalletByAddress(ADDRESS_WALLET)).thenReturn(Optional.empty());
+    when(userService.saveUser(ADDRESS_WALLET)).thenReturn(user);
+    when(walletService.saveWallet(ADDRESS_WALLET, user, "NAMI")).thenReturn(wallet);
+    NonceResponse response = authenticationService.findNonceByAddress(ADDRESS_WALLET, "NAMI");
+    String expectedCode = CommonConstant.CODE_FAILURE;
+    Assertions.assertEquals(expectedCode, response.getMessage());
+  }
+
+  @Test
+  void whenFindNonce_WalletIsExist_returnResponse() {
+    UserEntity user = UserEntity.builder().build();
+    WalletEntity wallet = WalletEntity.builder().user(user).address(ADDRESS_WALLET)
+        .expiryDateNonce(Instant.now().plusSeconds(60)).walletName("NAMI").build();
+    when(walletRepository.findWalletByAddress(ADDRESS_WALLET)).thenReturn(Optional.of(wallet));
+    NonceResponse response = authenticationService.findNonceByAddress(ADDRESS_WALLET, "NAMI");
+    String expectedCode = CommonConstant.CODE_SUCCESS;
+    Assertions.assertEquals(expectedCode, response.getMessage());
   }
 }
