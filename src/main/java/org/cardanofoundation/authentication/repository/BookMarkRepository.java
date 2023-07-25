@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> {
 
   /*
-   * @author: phuc.nguyen5
    * @since: 10/11/2022
    * description: find all bookmark by userId and type
    * @update: 05/12/2022
@@ -26,7 +25,6 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
       @Param("type") String type, @Param("network") String network, Pageable pageable);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 05/12/2022
    * description: get count bookmark
    * @update:
@@ -41,7 +39,6 @@ public interface BookMarkRepository extends JpaRepository<BookMarkEntity, Long> 
       @Param("type") String type, @Param("network") String network);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 30/01/2023
    * description: find all bookmark key by userId
    * @update:

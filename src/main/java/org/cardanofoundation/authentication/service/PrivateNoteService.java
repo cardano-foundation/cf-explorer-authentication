@@ -1,7 +1,6 @@
 package org.cardanofoundation.authentication.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.request.note.PrivateNoteRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.PrivateNoteResponse;
@@ -11,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 public interface PrivateNoteService {
 
   /*
-   * @author: phuc.nguyen5
    * @since: 6/12/2022
    * description: add note
    * @update:
@@ -20,7 +18,6 @@ public interface PrivateNoteService {
       HttpServletRequest httpServletRequest);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 6/12/2022
    * description: get all note
    * @update:
@@ -30,7 +27,6 @@ public interface PrivateNoteService {
       Pageable pageable);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 6/12/2022
    * description: delete note by id
    * @update:
@@ -38,7 +34,6 @@ public interface PrivateNoteService {
   MessageResponse deleteById(Long noteId);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 6/12/2022
    * description: edit note by id
    * @update:
