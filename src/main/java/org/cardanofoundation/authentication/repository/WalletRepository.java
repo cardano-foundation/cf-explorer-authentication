@@ -1,7 +1,7 @@
 package org.cardanofoundation.authentication.repository;
 
-import org.cardanofoundation.authentication.model.entity.WalletEntity;
 import java.util.Optional;
+import org.cardanofoundation.authentication.model.entity.WalletEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface WalletRepository extends JpaRepository<WalletEntity, Long> {
 
   /*
-   * @author: phuc.nguyen5
    * @since: 4/11/2022
    * description: find wallet by stake address
    * @update: 05/12/2022
@@ -22,7 +21,6 @@ public interface WalletRepository extends JpaRepository<WalletEntity, Long> {
   Optional<WalletEntity> findWalletByAddress(@Param("address") String address);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 19/05/2023
    * description: find address by userId
    * @update:

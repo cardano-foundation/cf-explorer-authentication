@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, Long> {
 
   /*
-   * @author: phuc.nguyen5
    * @since: 6/12/2022
    * description: get count note by user
    * @update:
@@ -21,7 +20,6 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
   Integer getCountNoteByUser(@Param("userId") Long userId, @Param("network") String network);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 6/12/2022
    * description: check exist note
    * @update:
@@ -31,7 +29,6 @@ public interface PrivateNoteRepository extends JpaRepository<PrivateNoteEntity, 
       @Param("network") String network);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 6/12/2022
    * description: get list note
    * @update:

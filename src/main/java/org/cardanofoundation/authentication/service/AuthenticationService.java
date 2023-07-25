@@ -12,7 +12,6 @@ import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 public interface AuthenticationService {
 
   /*
-   * @author: phuc.nguyen5
    * @since: 21/10/2022
    * description: process login with wallet or email
    * @update:
@@ -20,7 +19,6 @@ public interface AuthenticationService {
   SignInResponse signIn(SignInRequest signInRequest);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 21/10/2022
    * description: process register account
    * @update: 6/12/2022
@@ -28,7 +26,6 @@ public interface AuthenticationService {
   MessageResponse signUp(SignUpRequest signUpRequest);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 24/10/2022
    * description: process gen new access token by refresh token
    * @update: 13/12/2022
@@ -37,7 +34,6 @@ public interface AuthenticationService {
       HttpServletRequest httpServletRequest);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 24/10/2022
    * description: process logout account
    * @update: 8/11/2022
@@ -45,7 +41,6 @@ public interface AuthenticationService {
   MessageResponse signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest);
 
   /*
-   * @author: phuc.nguyen5
    * @since: 24/02/2023
    * description: get nonce value by public address from user table
    * @update:
