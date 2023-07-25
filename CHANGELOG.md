@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.9](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.8...v0.1.9) (2023-07-25)
+
+
+### Features
+
+* update unit test for authentication ([0e27e13](https://github.com/cardano-foundation/cf-explorer-authentication/commit/0e27e13e17073eb22fdb186cb5a46066ac7ae2f9))
+
+
+### Bug Fixes
+
+* remove commment [@author](https://github.com/author) ([2e4feae](https://github.com/cardano-foundation/cf-explorer-authentication/commit/2e4feae633025a95edca7a25d4f9dcd731416ba8))
+
 ## [0.1.8](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.7...v0.1.8) (2023-07-21)
 
 
