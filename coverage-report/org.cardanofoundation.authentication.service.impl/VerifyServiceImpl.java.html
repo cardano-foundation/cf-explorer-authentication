@@ -22,8 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-<span class="nc" id="L25">@RequiredArgsConstructor</span>
-<span class="nc" id="L26">@Log4j2</span>
+<span class="fc" id="L25">@RequiredArgsConstructor</span>
+<span class="fc" id="L26">@Log4j2</span>
 public class VerifyServiceImpl implements VerifyService {
 
   private final UserRepository userRepository;
@@ -42,54 +42,54 @@ public class VerifyServiceImpl implements VerifyService {
 
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
-<span class="nc bnc" id="L45" title="All 2 branches missed.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="nc" id="L46">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="fc" id="L46">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="nc" id="L48">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
-<span class="nc bnc" id="L49" title="All 2 branches missed.">    if (validateCode.equals(Boolean.FALSE)) {</span>
-<span class="nc" id="L50">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L48">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
+<span class="fc" id="L50">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="nc" id="L52">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
-<span class="nc" id="L53">    redisProvider.blacklistJwt(code, accountId);</span>
-<span class="nc" id="L54">    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.PENDING);</span>
-<span class="nc bnc" id="L55" title="All 2 branches missed.">    if (Objects.nonNull(user)) {</span>
-<span class="nc" id="L56">      userService.activeUser(accountId);</span>
+<span class="fc" id="L52">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
+<span class="fc" id="L53">    redisProvider.blacklistJwt(code, accountId);</span>
+<span class="fc" id="L54">    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.PENDING);</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">    if (Objects.nonNull(user)) {</span>
+<span class="fc" id="L56">      userService.activeUser(accountId);</span>
     } else {
-<span class="nc" id="L58">      return new MessageResponse(CommonErrorCode.VERIFY_CODE_NOT_PENDING);</span>
+<span class="fc" id="L58">      return new MessageResponse(CommonErrorCode.VERIFY_CODE_NOT_PENDING);</span>
     }
-<span class="nc" id="L60">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L60">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
-<span class="nc" id="L65">    String code = resetPasswordRequest.getCode();</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="nc" id="L67">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L65">    String code = resetPasswordRequest.getCode();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="fc" id="L67">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="nc" id="L69">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">    if (validateCode.equals(Boolean.FALSE)) {</span>
-<span class="nc" id="L71">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L69">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
+<span class="fc" id="L71">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="nc" id="L73">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
-<span class="nc" id="L74">    redisProvider.blacklistJwt(code, accountId);</span>
-<span class="nc" id="L75">    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.ACTIVE);</span>
-<span class="nc bnc" id="L76" title="All 2 branches missed.">    if (Objects.isNull(user)) {</span>
-<span class="nc" id="L77">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
+<span class="fc" id="L73">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
+<span class="fc" id="L74">    redisProvider.blacklistJwt(code, accountId);</span>
+<span class="fc" id="L75">    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.ACTIVE);</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">    if (Objects.isNull(user)) {</span>
+<span class="fc" id="L77">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
     }
-<span class="nc" id="L79">    user.setPassword(encoder.encode(resetPasswordRequest.getPassword()));</span>
-<span class="nc" id="L80">    userRepository.save(user);</span>
-<span class="nc" id="L81">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L79">    user.setPassword(encoder.encode(resetPasswordRequest.getPassword()));</span>
+<span class="fc" id="L80">    userRepository.save(user);</span>
+<span class="fc" id="L81">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public MessageResponse forgotPassword(String email) {
-<span class="nc" id="L86">    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.ACTIVE).orElse(null);</span>
-<span class="nc bnc" id="L87" title="All 2 branches missed.">    if (Objects.isNull(user)) {</span>
-<span class="nc" id="L88">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
+<span class="fc" id="L86">    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.ACTIVE).orElse(null);</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">    if (Objects.isNull(user)) {</span>
+<span class="fc" id="L88">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
     }
-<span class="nc" id="L90">    String code = jwtProvider.generateCodeForVerify(email);</span>
-<span class="nc" id="L91">    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));</span>
-<span class="nc" id="L92">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L90">    String code = jwtProvider.generateCodeForVerify(email);</span>
+<span class="fc" id="L91">    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));</span>
+<span class="fc" id="L92">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override

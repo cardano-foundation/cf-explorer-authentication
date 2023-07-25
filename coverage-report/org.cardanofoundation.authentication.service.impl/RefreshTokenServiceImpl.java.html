@@ -17,8 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-<span class="nc" id="L20">@RequiredArgsConstructor</span>
-<span class="nc" id="L21">@Log4j2</span>
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+<span class="fc" id="L21">@Log4j2</span>
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   @Value(&quot;${jwt.refreshExpirationMs}&quot;)
@@ -28,31 +28,31 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   @Override
   public Optional&lt;RefreshTokenEntity&gt; findByRefToken(String token) {
-<span class="nc" id="L31">    return refreshTokenRepository.findByToken(token);</span>
+<span class="fc" id="L31">    return refreshTokenRepository.findByToken(token);</span>
   }
 
   @Override
   public RefreshTokenEntity verifyExpiration(RefreshTokenEntity token) {
-<span class="nc bnc" id="L36" title="All 2 branches missed.">    if (token.getExpiryDate().compareTo(Instant.now()) &lt; 0) {</span>
-<span class="nc" id="L37">      refreshTokenRepository.delete(token);</span>
-<span class="nc" id="L38">      throw new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">    if (token.getExpiryDate().compareTo(Instant.now()) &lt; 0) {</span>
+<span class="fc" id="L37">      refreshTokenRepository.delete(token);</span>
+<span class="fc" id="L38">      throw new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);</span>
     }
 <span class="nc" id="L40">    return token;</span>
   }
 
   @Override
   public void revokeRefreshToken(String token) {
-<span class="nc" id="L45">    RefreshTokenEntity refreshToken = refreshTokenRepository.findByToken(token)</span>
-<span class="nc" id="L46">        .orElseThrow(() -&gt; new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_IS_NOT_EXIST));</span>
-<span class="nc" id="L47">    refreshTokenRepository.delete(refreshToken);</span>
-<span class="nc" id="L48">  }</span>
+<span class="fc" id="L45">    RefreshTokenEntity refreshToken = refreshTokenRepository.findByToken(token)</span>
+<span class="fc" id="L46">        .orElseThrow(() -&gt; new TokenRefreshException(CommonErrorCode.REFRESH_TOKEN_IS_NOT_EXIST));</span>
+<span class="fc" id="L47">    refreshTokenRepository.delete(refreshToken);</span>
+<span class="fc" id="L48">  }</span>
 
   @Override
   public RefreshTokenEntity addRefreshToken(UserEntity user) {
-<span class="nc" id="L52">    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(user)</span>
-<span class="nc" id="L53">        .expiryDate(Instant.now().plusMillis(refreshExpirationMs))</span>
-<span class="nc" id="L54">        .token(UUID.randomUUID().toString()).build();</span>
-<span class="nc" id="L55">    return refreshTokenRepository.save(refreshToken);</span>
+<span class="fc" id="L52">    RefreshTokenEntity refreshToken = RefreshTokenEntity.builder().user(user)</span>
+<span class="fc" id="L53">        .expiryDate(Instant.now().plusMillis(refreshExpirationMs))</span>
+<span class="fc" id="L54">        .token(UUID.randomUUID().toString()).build();</span>
+<span class="fc" id="L55">    return refreshTokenRepository.save(refreshToken);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -8,37 +8,37 @@ import org.cardanofoundation.authentication.model.response.UserResponse;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2023-07-21T07:26:11+0000&quot;,
+    date = &quot;2023-07-25T13:44:23+0000&quot;,
     comments = &quot;version: 1.4.2.Final, compiler: javac, environment: Java 18.0.2.1 (Eclipse Adoptium)&quot;
 )
-<span class="nc" id="L14">public class UserMapperImpl implements UserMapper {</span>
+<span class="fc" id="L14">public class UserMapperImpl implements UserMapper {</span>
 
     @Override
     public UserEntity requestToEntity(SignUpRequest request) {
-<span class="nc bnc" id="L18" title="All 2 branches missed.">        if ( request == null ) {</span>
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        if ( request == null ) {</span>
 <span class="nc" id="L19">            return null;</span>
         }
 
-<span class="nc" id="L22">        UserEntityBuilder userEntity = UserEntity.builder();</span>
+<span class="fc" id="L22">        UserEntityBuilder userEntity = UserEntity.builder();</span>
 
-<span class="nc" id="L24">        userEntity.email( request.getEmail() );</span>
-<span class="nc" id="L25">        userEntity.password( request.getPassword() );</span>
+<span class="fc" id="L24">        userEntity.email( request.getEmail() );</span>
+<span class="fc" id="L25">        userEntity.password( request.getPassword() );</span>
 
-<span class="nc" id="L27">        return userEntity.build();</span>
+<span class="fc" id="L27">        return userEntity.build();</span>
     }
 
     @Override
     public UserResponse entityToResponse(UserEntity user) {
-<span class="nc bnc" id="L32" title="All 2 branches missed.">        if ( user == null ) {</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if ( user == null ) {</span>
 <span class="nc" id="L33">            return null;</span>
         }
 
-<span class="nc" id="L36">        UserResponse userResponse = new UserResponse();</span>
+<span class="fc" id="L36">        UserResponse userResponse = new UserResponse();</span>
 
-<span class="nc" id="L38">        userResponse.setEmail( user.getEmail() );</span>
-<span class="nc" id="L39">        userResponse.setAvatar( user.getAvatar() );</span>
+<span class="fc" id="L38">        userResponse.setEmail( user.getEmail() );</span>
+<span class="fc" id="L39">        userResponse.setAvatar( user.getAvatar() );</span>
 
-<span class="nc" id="L41">        return userResponse;</span>
+<span class="fc" id="L41">        return userResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

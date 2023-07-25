@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RedisProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.provider</a> &gt; <span class="el_source">RedisProvider.java</span></div><h1>RedisProvider.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.provider;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,28 +17,26 @@ public class RedisProvider {
   private final RedisTemplate&lt;String, Object&gt; redisTemplate;
 
   /*
-   * @author: phuc.nguyen5
    * @since: 06/12/2022
    * description: Add access token + accountId to redis after logout or refresh token
    * @update:
    */
   public void blacklistJwt(String token, String accountId) {
-<span class="nc bnc" id="L26" title="All 2 branches missed.">    if (!isTokenBlacklisted(token)) {</span>
-<span class="nc" id="L27">      redisTemplate.opsForValue().set(RedisConstant.JWT + token, accountId);</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">    if (!isTokenBlacklisted(token)) {</span>
+<span class="nc" id="L26">      redisTemplate.opsForValue().set(RedisConstant.JWT + token, accountId);</span>
     }
-<span class="nc" id="L29">  }</span>
+<span class="nc" id="L28">  }</span>
 
   /*
-   * @author: phuc.nguyen5
    * @since: 06/12/2022
    * description: Check exist access token + accountId from redis
    * @update:
    */
   public boolean isTokenBlacklisted(String token) {
-<span class="nc bnc" id="L38" title="All 2 branches missed.">    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {</span>
-<span class="nc" id="L39">      throw new BusinessException(CommonErrorCode.INVALID_TOKEN);</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {</span>
+<span class="nc" id="L37">      throw new BusinessException(CommonErrorCode.INVALID_TOKEN);</span>
     }
-<span class="nc bnc" id="L41" title="All 2 branches missed.">    return redisTemplate.opsForValue().get(RedisConstant.JWT + token) != null;</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">    return redisTemplate.opsForValue().get(RedisConstant.JWT + token) != null;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

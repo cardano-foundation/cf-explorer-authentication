@@ -10,54 +10,54 @@ import org.cardanofoundation.authentication.model.response.PrivateNoteResponse;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2023-07-21T07:26:11+0000&quot;,
+    date = &quot;2023-07-25T13:44:23+0000&quot;,
     comments = &quot;version: 1.4.2.Final, compiler: javac, environment: Java 18.0.2.1 (Eclipse Adoptium)&quot;
 )
-<span class="nc" id="L16">public class NoteMapperImpl implements NoteMapper {</span>
+<span class="fc" id="L16">public class NoteMapperImpl implements NoteMapper {</span>
 
     @Override
     public PrivateNoteEntity requestToEntity(PrivateNoteRequest request) {
-<span class="nc bnc" id="L20" title="All 2 branches missed.">        if ( request == null ) {</span>
+<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        if ( request == null ) {</span>
 <span class="nc" id="L21">            return null;</span>
         }
 
-<span class="nc" id="L24">        PrivateNoteEntityBuilder privateNoteEntity = PrivateNoteEntity.builder();</span>
+<span class="fc" id="L24">        PrivateNoteEntityBuilder privateNoteEntity = PrivateNoteEntity.builder();</span>
 
-<span class="nc" id="L26">        privateNoteEntity.note( request.getNote() );</span>
-<span class="nc" id="L27">        privateNoteEntity.txHash( request.getTxHash() );</span>
-<span class="nc" id="L28">        privateNoteEntity.network( request.getNetwork() );</span>
+<span class="fc" id="L26">        privateNoteEntity.note( request.getNote() );</span>
+<span class="fc" id="L27">        privateNoteEntity.txHash( request.getTxHash() );</span>
+<span class="fc" id="L28">        privateNoteEntity.network( request.getNetwork() );</span>
 
-<span class="nc" id="L30">        return privateNoteEntity.build();</span>
+<span class="fc" id="L30">        return privateNoteEntity.build();</span>
     }
 
     @Override
     public List&lt;PrivateNoteResponse&gt; listEntityToResponse(List&lt;PrivateNoteEntity&gt; privateNotes) {
-<span class="nc bnc" id="L35" title="All 2 branches missed.">        if ( privateNotes == null ) {</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if ( privateNotes == null ) {</span>
 <span class="nc" id="L36">            return null;</span>
         }
 
-<span class="nc" id="L39">        List&lt;PrivateNoteResponse&gt; list = new ArrayList&lt;PrivateNoteResponse&gt;( privateNotes.size() );</span>
-<span class="nc bnc" id="L40" title="All 2 branches missed.">        for ( PrivateNoteEntity privateNoteEntity : privateNotes ) {</span>
-<span class="nc" id="L41">            list.add( entityToResponse( privateNoteEntity ) );</span>
-<span class="nc" id="L42">        }</span>
+<span class="fc" id="L39">        List&lt;PrivateNoteResponse&gt; list = new ArrayList&lt;PrivateNoteResponse&gt;( privateNotes.size() );</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        for ( PrivateNoteEntity privateNoteEntity : privateNotes ) {</span>
+<span class="fc" id="L41">            list.add( entityToResponse( privateNoteEntity ) );</span>
+<span class="fc" id="L42">        }</span>
 
-<span class="nc" id="L44">        return list;</span>
+<span class="fc" id="L44">        return list;</span>
     }
 
     @Override
     public PrivateNoteResponse entityToResponse(PrivateNoteEntity privateNote) {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        if ( privateNote == null ) {</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if ( privateNote == null ) {</span>
 <span class="nc" id="L50">            return null;</span>
         }
 
-<span class="nc" id="L53">        PrivateNoteResponse privateNoteResponse = new PrivateNoteResponse();</span>
+<span class="fc" id="L53">        PrivateNoteResponse privateNoteResponse = new PrivateNoteResponse();</span>
 
-<span class="nc" id="L55">        privateNoteResponse.setId( privateNote.getId() );</span>
-<span class="nc" id="L56">        privateNoteResponse.setTxHash( privateNote.getTxHash() );</span>
-<span class="nc" id="L57">        privateNoteResponse.setNote( privateNote.getNote() );</span>
-<span class="nc" id="L58">        privateNoteResponse.setCreatedDate( privateNote.getCreatedDate() );</span>
+<span class="fc" id="L55">        privateNoteResponse.setId( privateNote.getId() );</span>
+<span class="fc" id="L56">        privateNoteResponse.setTxHash( privateNote.getTxHash() );</span>
+<span class="fc" id="L57">        privateNoteResponse.setNote( privateNote.getNote() );</span>
+<span class="fc" id="L58">        privateNoteResponse.setCreatedDate( privateNote.getCreatedDate() );</span>
 
-<span class="nc" id="L60">        return privateNoteResponse;</span>
+<span class="fc" id="L60">        return privateNoteResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -26,7 +26,7 @@ import org.hibernate.annotations.Where;
 @Entity
 @Table(name = &quot;user&quot;)
 @Getter
-<span class="nc" id="L29">@Setter</span>
+<span class="pc" id="L29">@Setter</span>
 <span class="fc" id="L30">@NoArgsConstructor</span>
 <span class="fc" id="L31">@AllArgsConstructor</span>
 <span class="pc" id="L32">@Builder</span>
@@ -37,7 +37,7 @@ public class UserEntity extends BaseEntity {
 <span class="fc" id="L37">  private String email;</span>
 
   @Column(name = &quot;avatar&quot;)
-<span class="nc" id="L40">  private String avatar;</span>
+<span class="fc" id="L40">  private String avatar;</span>
 
   @Column(name = &quot;password&quot;, length = 256)
 <span class="nc" id="L43">  private String password;</span>

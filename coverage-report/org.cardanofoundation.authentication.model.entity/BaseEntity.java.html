@@ -19,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @MappedSuperclass
 @EntityListeners({AuditingEntityListener.class})
 @Getter
-<span class="nc" id="L22">@Setter</span>
+<span class="pc" id="L22">@Setter</span>
 <span class="fc" id="L23">public abstract class BaseEntity implements Serializable {</span>
 
   @Id
@@ -32,7 +32,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
   @Column(name = &quot;created_date&quot;, updatable = false, nullable = false)
   @CreatedDate
-<span class="nc" id="L35">  private Instant createdDate;</span>
+<span class="fc" id="L35">  private Instant createdDate;</span>
 
   @Column(name = &quot;modified_by&quot;)
   @LastModifiedBy

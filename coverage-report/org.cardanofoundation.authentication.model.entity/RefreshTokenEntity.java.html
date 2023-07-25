@@ -19,7 +19,7 @@ import org.hibernate.Hibernate;
 @Entity
 @Table(name = &quot;refresh_token&quot;)
 @Getter
-<span class="nc" id="L22">@Setter</span>
+<span class="pc" id="L22">@Setter</span>
 <span class="pc" id="L23">@Builder</span>
 <span class="fc" id="L24">@NoArgsConstructor</span>
 <span class="fc" id="L25">@AllArgsConstructor</span>
@@ -29,12 +29,12 @@ public class RefreshTokenEntity extends BaseEntity {
 <span class="fc" id="L29">  private String token;</span>
 
   @Column(name = &quot;expiry_date&quot;, nullable = false)
-<span class="nc" id="L32">  private Instant expiryDate;</span>
+<span class="fc" id="L32">  private Instant expiryDate;</span>
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = &quot;user_id&quot;)
   @EqualsAndHashCode.Exclude
-<span class="nc" id="L37">  private UserEntity user;</span>
+<span class="fc" id="L37">  private UserEntity user;</span>
 
   @Override
   public boolean equals(Object o) {

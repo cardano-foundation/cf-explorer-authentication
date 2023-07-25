@@ -103,8 +103,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
           new UsernamePasswordAuthenticationToken(accountId, password));
 <span class="fc" id="L104">    } catch (AuthenticationException e) {</span>
 <span class="fc" id="L105">      log.error(&quot;Exception authentication: &quot; + e.getMessage());</span>
-<span class="pc bpc" id="L106" title="1 of 2 branches missed.">      if (type == 0) {</span>
-<span class="nc" id="L107">        throw new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">      if (type == 0) {</span>
+<span class="fc" id="L107">        throw new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID);</span>
       } else {
 <span class="fc" id="L109">        throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);</span>
       }
@@ -129,65 +129,65 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public MessageResponse signUp(SignUpRequest signUpRequest) {
 <span class="fc" id="L131">    String email = signUpRequest.getEmail();</span>
-<span class="pc bpc" id="L132" title="1 of 2 branches missed.">    if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">    if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {</span>
 <span class="fc" id="L133">      throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);</span>
     }
-<span class="nc" id="L135">    String password = encoder.encode(signUpRequest.getPassword());</span>
-<span class="nc" id="L136">    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.PENDING).orElse(null);</span>
-<span class="nc bnc" id="L137" title="All 2 branches missed.">    if (Objects.nonNull(user)) {</span>
-<span class="nc" id="L138">      user.setPassword(password);</span>
-<span class="nc" id="L139">      userRepository.save(user);</span>
+<span class="fc" id="L135">    String password = encoder.encode(signUpRequest.getPassword());</span>
+<span class="fc" id="L136">    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.PENDING).orElse(null);</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">    if (Objects.nonNull(user)) {</span>
+<span class="fc" id="L138">      user.setPassword(password);</span>
+<span class="fc" id="L139">      userRepository.save(user);</span>
     } else {
-<span class="nc" id="L141">      signUpRequest.setPassword(password);</span>
-<span class="nc" id="L142">      user = userService.saveUser(signUpRequest);</span>
+<span class="fc" id="L141">      signUpRequest.setPassword(password);</span>
+<span class="fc" id="L142">      user = userService.saveUser(signUpRequest);</span>
     }
-<span class="nc" id="L144">    String verifyCode = jwtProvider.generateCodeForVerify(email);</span>
-<span class="nc" id="L145">    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));</span>
-<span class="nc" id="L146">    return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)</span>
-<span class="nc" id="L147">        .message(CommonConstant.RESPONSE_SUCCESS).build();</span>
+<span class="fc" id="L144">    String verifyCode = jwtProvider.generateCodeForVerify(email);</span>
+<span class="fc" id="L145">    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));</span>
+<span class="fc" id="L146">    return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)</span>
+<span class="fc" id="L147">        .message(CommonConstant.RESPONSE_SUCCESS).build();</span>
   }
 
   @Override
   public RefreshTokenResponse refreshToken(String refreshJwt,
       HttpServletRequest httpServletRequest) {
 <span class="fc" id="L153">    final String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
-<span class="pc" id="L154">    return refreshTokenService.findByRefToken(refreshJwt).map(refreshTokenService::verifyExpiration)</span>
+<span class="fc" id="L154">    return refreshTokenService.findByRefToken(refreshJwt).map(refreshTokenService::verifyExpiration)</span>
 <span class="fc" id="L155">        .map(refToken -&gt; {</span>
-<span class="nc" id="L156">          UserEntity user = refToken.getUser();</span>
-<span class="nc" id="L157">          String address = walletRepository.findAddressByUserId(user.getId());</span>
-<span class="nc bnc" id="L158" title="All 2 branches missed.">          String accountId = Objects.isNull(address) ? user.getEmail() : address;</span>
-<span class="nc" id="L159">          redisProvider.blacklistJwt(accessToken, accountId);</span>
-<span class="nc" id="L160">          return jwtProvider.generateJwtToken(user, accountId);</span>
-<span class="pc" id="L161">        }).map(newAccessToken -&gt; RefreshTokenResponse.builder().accessToken(newAccessToken)</span>
-<span class="nc" id="L162">            .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())</span>
-<span class="pc" id="L163">        .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.UNKNOWN_ERROR));</span>
+<span class="fc" id="L156">          UserEntity user = refToken.getUser();</span>
+<span class="fc" id="L157">          String address = walletRepository.findAddressByUserId(user.getId());</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">          String accountId = Objects.isNull(address) ? user.getEmail() : address;</span>
+<span class="fc" id="L159">          redisProvider.blacklistJwt(accessToken, accountId);</span>
+<span class="fc" id="L160">          return jwtProvider.generateJwtToken(user, accountId);</span>
+<span class="fc" id="L161">        }).map(newAccessToken -&gt; RefreshTokenResponse.builder().accessToken(newAccessToken)</span>
+<span class="fc" id="L162">            .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())</span>
+<span class="fc" id="L163">        .orElseThrow(() -&gt; new BusinessException(CommonErrorCode.UNKNOWN_ERROR));</span>
   }
 
   @Override
   public MessageResponse signOut(SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
-<span class="nc" id="L169">    String refreshJwt = signOutRequest.getRefreshJwt();</span>
-<span class="nc" id="L170">    String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
-<span class="nc" id="L171">    refreshTokenService.revokeRefreshToken(refreshJwt);</span>
-<span class="nc" id="L172">    redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());</span>
-<span class="nc" id="L173">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L169">    String refreshJwt = signOutRequest.getRefreshJwt();</span>
+<span class="fc" id="L170">    String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
+<span class="fc" id="L171">    refreshTokenService.revokeRefreshToken(refreshJwt);</span>
+<span class="fc" id="L172">    redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());</span>
+<span class="fc" id="L173">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public NonceResponse findNonceByAddress(String address, String walletName) {
-<span class="nc" id="L178">    Optional&lt;WalletEntity&gt; walletOpt = walletRepository.findWalletByAddress(address);</span>
-<span class="nc bnc" id="L179" title="All 2 branches missed.">    if (walletOpt.isPresent()) {</span>
-<span class="nc" id="L180">      WalletEntity wallet = walletOpt.get();</span>
-<span class="nc bnc" id="L181" title="All 2 branches missed.">      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) &lt; 0) {</span>
+<span class="fc" id="L178">    Optional&lt;WalletEntity&gt; walletOpt = walletRepository.findWalletByAddress(address);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">    if (walletOpt.isPresent()) {</span>
+<span class="fc" id="L180">      WalletEntity wallet = walletOpt.get();</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) &lt; 0) {</span>
 <span class="nc" id="L182">        wallet = walletService.updateNonce(wallet);</span>
       }
-<span class="nc" id="L184">      return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS)</span>
-<span class="nc" id="L185">          .nonce(wallet.getNonce()).build();</span>
+<span class="fc" id="L184">      return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS)</span>
+<span class="fc" id="L185">          .nonce(wallet.getNonce()).build();</span>
     }
-<span class="nc" id="L187">    UserEntity user = userService.saveUser(address);</span>
-<span class="nc" id="L188">    WalletEntity wallet = walletService.saveWallet(address, user, walletName);</span>
-<span class="nc" id="L189">    return NonceResponse.builder().message(CommonConstant.CODE_FAILURE)</span>
-<span class="nc" id="L190">        .nonce(wallet.getNonce()).build();</span>
+<span class="fc" id="L187">    UserEntity user = userService.saveUser(address);</span>
+<span class="fc" id="L188">    WalletEntity wallet = walletService.saveWallet(address, user, walletName);</span>
+<span class="fc" id="L189">    return NonceResponse.builder().message(CommonConstant.CODE_FAILURE)</span>
+<span class="fc" id="L190">        .nonce(wallet.getNonce()).build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

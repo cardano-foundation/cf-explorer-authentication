@@ -20,17 +20,17 @@ import org.hibernate.Hibernate;
 @Entity
 @Table(name = &quot;private_note&quot;)
 @Getter
-<span class="nc" id="L23">@Setter</span>
+<span class="pc" id="L23">@Setter</span>
 <span class="fc" id="L24">@NoArgsConstructor</span>
 <span class="fc" id="L25">@AllArgsConstructor</span>
 <span class="pc" id="L26">@Builder</span>
 public class PrivateNoteEntity extends BaseEntity {
 
   @Column(name = &quot;note&quot;)
-<span class="nc" id="L30">  private String note;</span>
+<span class="fc" id="L30">  private String note;</span>
 
   @Column(name = &quot;tx_hash&quot;, nullable = false)
-<span class="nc" id="L33">  private String txHash;</span>
+<span class="fc" id="L33">  private String txHash;</span>
 
   @EnumValid(enumClass = ENetworkType.class)
   @Column(name = &quot;network&quot;, nullable = false)
@@ -43,14 +43,14 @@ public class PrivateNoteEntity extends BaseEntity {
 
   @Override
   public boolean equals(Object o) {
-<span class="nc bnc" id="L46" title="All 2 branches missed.">    if (this == o) {</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">    if (this == o) {</span>
 <span class="nc" id="L47">      return true;</span>
     }
-<span class="nc bnc" id="L49" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
+<span class="pc bpc" id="L49" title="2 of 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
 <span class="nc" id="L50">      return false;</span>
     }
-<span class="nc" id="L52">    PrivateNoteEntity that = (PrivateNoteEntity) o;</span>
-<span class="nc bnc" id="L53" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
+<span class="fc" id="L52">    PrivateNoteEntity that = (PrivateNoteEntity) o;</span>
+<span class="pc bpc" id="L53" title="3 of 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
   }
 
   @Override

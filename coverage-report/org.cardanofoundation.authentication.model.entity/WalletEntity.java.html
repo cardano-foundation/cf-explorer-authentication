@@ -21,7 +21,7 @@ import org.hibernate.Hibernate;
 @Entity
 @Table(name = &quot;wallet&quot;)
 @Getter
-<span class="nc" id="L24">@Setter</span>
+<span class="pc" id="L24">@Setter</span>
 <span class="fc" id="L25">@NoArgsConstructor</span>
 <span class="fc" id="L26">@AllArgsConstructor</span>
 <span class="pc" id="L27">@Builder</span>
@@ -34,10 +34,10 @@ public class WalletEntity extends BaseEntity {
 <span class="nc" id="L34">  private String walletName;</span>
 
   @Column(name = &quot;nonce&quot;, nullable = false)
-<span class="nc" id="L37">  private String nonce;</span>
+<span class="fc" id="L37">  private String nonce;</span>
 
   @Column(name = &quot;nonce_encode&quot;, nullable = false)
-<span class="nc" id="L40">  private String nonceEncode;</span>
+<span class="fc" id="L40">  private String nonceEncode;</span>
 
   @Column(name = &quot;expiry_date_nonce&quot;, nullable = false)
 <span class="fc" id="L43">  private Instant expiryDateNonce;</span>
@@ -52,7 +52,7 @@ public class WalletEntity extends BaseEntity {
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = &quot;user_id&quot;, referencedColumnName = &quot;id&quot;)
   @EqualsAndHashCode.Exclude
-<span class="nc" id="L55">  private UserEntity user;</span>
+<span class="fc" id="L55">  private UserEntity user;</span>
 
   @Override
   public boolean equals(Object o) {

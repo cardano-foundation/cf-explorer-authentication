@@ -21,25 +21,25 @@ import org.hibernate.Hibernate;
 @Entity
 @Table(name = &quot;bookmark&quot;)
 @Getter
-<span class="nc" id="L24">@Setter</span>
+<span class="pc" id="L24">@Setter</span>
 <span class="fc" id="L25">@NoArgsConstructor</span>
 <span class="fc" id="L26">@AllArgsConstructor</span>
 <span class="pc" id="L27">@Builder</span>
 public class BookMarkEntity extends BaseEntity {
 
   @Column(name = &quot;url_page&quot;)
-<span class="nc" id="L31">  private String urlPage;</span>
+<span class="fc" id="L31">  private String urlPage;</span>
 
   @Column(name = &quot;keyword&quot;, nullable = false)
-<span class="nc" id="L34">  private String keyword;</span>
+<span class="fc" id="L34">  private String keyword;</span>
 
   @EnumValid(enumClass = EBookMarkType.class)
   @Column(name = &quot;type&quot;, nullable = false)
-<span class="nc" id="L38">  private String type;</span>
+<span class="fc" id="L38">  private String type;</span>
 
   @EnumValid(enumClass = ENetworkType.class)
   @Column(name = &quot;network&quot;, nullable = false)
-<span class="nc" id="L42">  private String network;</span>
+<span class="fc" id="L42">  private String network;</span>
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = &quot;user_id&quot;)
@@ -48,14 +48,14 @@ public class BookMarkEntity extends BaseEntity {
 
   @Override
   public boolean equals(Object o) {
-<span class="nc bnc" id="L51" title="All 2 branches missed.">    if (this == o) {</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">    if (this == o) {</span>
 <span class="nc" id="L52">      return true;</span>
     }
-<span class="nc bnc" id="L54" title="All 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
+<span class="pc bpc" id="L54" title="2 of 4 branches missed.">    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {</span>
 <span class="nc" id="L55">      return false;</span>
     }
-<span class="nc" id="L57">    BookMarkEntity that = (BookMarkEntity) o;</span>
-<span class="nc bnc" id="L58" title="All 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
+<span class="fc" id="L57">    BookMarkEntity that = (BookMarkEntity) o;</span>
+<span class="pc bpc" id="L58" title="3 of 4 branches missed.">    return getId() != null &amp;&amp; Objects.equals(getId(), that.getId());</span>
   }
 
   @Override

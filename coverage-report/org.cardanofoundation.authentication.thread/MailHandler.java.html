@@ -6,7 +6,7 @@ import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.provider.MailProvider;
 import lombok.extern.log4j.Log4j2;
 
-<span class="nc" id="L9">@Log4j2</span>
+<span class="fc" id="L9">@Log4j2</span>
 public class MailHandler implements Runnable {
 
   private MailProvider mailProvider;
@@ -18,12 +18,12 @@ public class MailHandler implements Runnable {
   private String code;
 
   public MailHandler(MailProvider mailProvider, UserEntity user, EUserAction emailType,
-<span class="nc" id="L21">      String code) {</span>
-<span class="nc" id="L22">    this.mailProvider = mailProvider;</span>
-<span class="nc" id="L23">    this.user = user;</span>
-<span class="nc" id="L24">    this.emailType = emailType;</span>
-<span class="nc" id="L25">    this.code = code;</span>
-<span class="nc" id="L26">  }</span>
+<span class="fc" id="L21">      String code) {</span>
+<span class="fc" id="L22">    this.mailProvider = mailProvider;</span>
+<span class="fc" id="L23">    this.user = user;</span>
+<span class="fc" id="L24">    this.emailType = emailType;</span>
+<span class="fc" id="L25">    this.code = code;</span>
+<span class="fc" id="L26">  }</span>
 
   @Override
   public void run() {
