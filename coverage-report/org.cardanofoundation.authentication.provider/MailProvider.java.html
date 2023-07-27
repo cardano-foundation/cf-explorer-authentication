@@ -19,7 +19,7 @@ public class MailProvider {
   @Value(&quot;${domain.client}&quot;)
   private String domainClient;
 
-  private final JavaMailSender mailSender;
+  private final JavaMailSender javaMailSender;
 
   private final MailProperties mail;
 
@@ -31,7 +31,7 @@ public class MailProvider {
         + &quot;&lt;h3&gt;&lt;a href=\&quot;[URL]\&quot; target=\&quot;_self\&quot;&gt;VERIFY&lt;/a&gt;&lt;/h3&gt;&quot;
         + &quot;Thank you,&lt;br /&gt;&quot;;
     try {
-<span class="nc" id="L34">      MimeMessage mailMessage = mailSender.createMimeMessage();</span>
+<span class="nc" id="L34">      MimeMessage mailMessage = javaMailSender.createMimeMessage();</span>
 <span class="nc" id="L35">      MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);</span>
 <span class="nc" id="L36">      helper.setFrom(mail.getFrom(), mail.getSender());</span>
 <span class="nc" id="L37">      helper.setTo(user.getEmail());</span>
@@ -51,11 +51,10 @@ public class MailProvider {
 <span class="nc" id="L51">      contentHtml = contentHtml.replace(&quot;[URL]&quot;, verifyURL);</span>
 <span class="nc" id="L52">      contentHtml = contentHtml + mail.getFooter();</span>
 <span class="nc" id="L53">      helper.setText(contentHtml, Boolean.TRUE);</span>
-<span class="nc" id="L54">      mailSender.send(mailMessage);</span>
+<span class="nc" id="L54">      javaMailSender.send(mailMessage);</span>
 <span class="nc" id="L55">    } catch (Exception e) {</span>
-<span class="nc" id="L56">      log.error(&quot;Error: send mail to verify failure&quot;);</span>
-<span class="nc" id="L57">      log.error(&quot;Error message: &quot; + e);</span>
-<span class="nc" id="L58">    }</span>
-<span class="nc" id="L59">  }</span>
+<span class="nc" id="L56">      log.error(&quot;Failed to send verification email&quot;, e);</span>
+<span class="nc" id="L57">    }</span>
+<span class="nc" id="L58">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
