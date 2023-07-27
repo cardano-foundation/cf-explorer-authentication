@@ -19,7 +19,7 @@ public class MailProvider {
   @Value("${domain.client}")
   private String domainClient;
 
-  private final JavaMailSender mailSender;
+  private final JavaMailSender javaMailSender;
 
   private final MailProperties mail;
 
@@ -31,7 +31,7 @@ public class MailProvider {
         + "<h3><a href=\"[URL]\" target=\"_self\">VERIFY</a></h3>"
         + "Thank you,<br />";
     try {
-      MimeMessage mailMessage = mailSender.createMimeMessage();
+      MimeMessage mailMessage = javaMailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);
       helper.setFrom(mail.getFrom(), mail.getSender());
       helper.setTo(user.getEmail());
@@ -51,10 +51,9 @@ public class MailProvider {
       contentHtml = contentHtml.replace("[URL]", verifyURL);
       contentHtml = contentHtml + mail.getFooter();
       helper.setText(contentHtml, Boolean.TRUE);
-      mailSender.send(mailMessage);
+      javaMailSender.send(mailMessage);
     } catch (Exception e) {
-      log.error("Error: send mail to verify failure");
-      log.error("Error message: " + e);
+      log.error("Failed to send verification email", e);
     }
   }
 }
