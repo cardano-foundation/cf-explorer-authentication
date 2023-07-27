@@ -57,13 +57,3 @@ spring:
 domain:
   client: ${SWAGGER_CLIENT_URL:http://localhost:7276}
   server: ${SWAGGER_SERVER_URL:http://localhost:8021}
-
-mail:
-  from: ${SWAGGER_SERVER_URL}
-  sender: 'Cardano Foundation - Iris'
-  subject-registration: 'Please verify your registration'
-  subject-reset-password: 'Do you want change password?'
-  footer: 'Cardano Foundation'
-  expirationMs: 86400000 #1 day
-  accessKey: ${SES_ACCESS_KEY_ID}
-  secretKey: ${SES_SECRET_ACCESS_KEY}

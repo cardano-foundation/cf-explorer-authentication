@@ -17,21 +17,25 @@ import org.springframework.stereotype.Component;
 public class MailProvider {
 
   @Value("${domain.client}")
-  private String domainClient;
+  private final String domainClient;
 
-  private final JavaMailSender mailSender;
+  private final JavaMailSender javaMailSender;
 
   private final MailProperties mail;
 
   public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code) {
-    log.info("start send verify mail to: " + user.getEmail());
+
+    log.info("From: " + mail.getFrom());
+    log.info("Sender: " + mail.getSender());
+    log.info("Footer: " + mail.getFooter());
+    log.info("Email: " + user.getEmail());
     String contentHtml
         = "Hi there,<br />"
         + "Please click the link below to verify account:<br />"
         + "<h3><a href=\"[URL]\" target=\"_self\">VERIFY</a></h3>"
         + "Thank you,<br />";
     try {
-      MimeMessage mailMessage = mailSender.createMimeMessage();
+      MimeMessage mailMessage = javaMailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);
       helper.setFrom(mail.getFrom(), mail.getSender());
       helper.setTo(user.getEmail());
@@ -51,10 +55,10 @@ public class MailProvider {
       contentHtml = contentHtml.replace("[URL]", verifyURL);
       contentHtml = contentHtml + mail.getFooter();
       helper.setText(contentHtml, Boolean.TRUE);
-      mailSender.send(mailMessage);
+      javaMailSender.send(mailMessage);
     } catch (Exception e) {
       log.error("Error: send mail to verify failure");
-      log.error("Error message: " + e);
+      log.error("Error message: " + e, e);
     }
   }
 }

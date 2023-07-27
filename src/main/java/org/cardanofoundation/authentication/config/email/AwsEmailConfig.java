@@ -1,50 +1,34 @@
 package org.cardanofoundation.authentication.config.email;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
+import org.cardanofoundation.authentication.util.SesSmtpCredentialGenerator;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.aws.mail.simplemail.SimpleEmailServiceJavaMailSender;
-import org.springframework.cloud.aws.mail.simplemail.SimpleEmailServiceMailSender;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Primary
-@Profile("aws")
+@Profile("ses")
 @Configuration
 public class AwsEmailConfig {
 
-    @Value("${cloud.aws.credentials.access-key}")
+    @Value("${spring.mail.aws.access-key}")
     private String accessKey;
 
-    @Value("${cloud.aws.credentials.secret-key}")
+    @Value("${spring.mail.aws.secret-key}")
     private String secretKey;
 
-    @Value("${cloud.aws.region.static}")
+    @Value("${spring.mail.aws.region}")
     private String region;
 
-    @Bean
-    public AmazonSimpleEmailService amazonSimpleEmailService() {
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-        return AmazonSimpleEmailServiceClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion(region)
-                .build();
-    }
-
-    @Bean
-    public MailSender mailSender(AmazonSimpleEmailService amazonSimpleEmailService) {
-        return new SimpleEmailServiceMailSender(amazonSimpleEmailService);
-    }
-
-    @Bean
-    public JavaMailSender javaMailSender(AmazonSimpleEmailService amazonSimpleEmailService) {
-        return new SimpleEmailServiceJavaMailSender(amazonSimpleEmailService);
+    public JavaMailSender javaMailSender(SesSmtpCredentialGenerator sesSmtpCredentialGenerator) {
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        javaMailSender.setUsername(accessKey);
+        javaMailSender.setPassword(sesSmtpCredentialGenerator.generateSMTPPassword(secretKey));
+        javaMailSender.setHost("email-smtp." + region + ".amazonaws.com");
+        javaMailSender.setPort(587);
+        return javaMailSender;
     }
 
 }
