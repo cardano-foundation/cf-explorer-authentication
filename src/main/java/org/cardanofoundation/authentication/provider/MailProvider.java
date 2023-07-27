@@ -24,11 +24,7 @@ public class MailProvider {
   private final MailProperties mail;
 
   public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code) {
-
-    log.info("From: " + mail.getFrom());
-    log.info("Sender: " + mail.getSender());
-    log.info("Footer: " + mail.getFooter());
-    log.info("Email: " + user.getEmail());
+    log.info("start send verify mail to: " + user.getEmail());
     String contentHtml
         = "Hi there,<br />"
         + "Please click the link below to verify account:<br />"
@@ -57,8 +53,7 @@ public class MailProvider {
       helper.setText(contentHtml, Boolean.TRUE);
       javaMailSender.send(mailMessage);
     } catch (Exception e) {
-      log.error("Error: send mail to verify failure");
-      log.error("Error message: " + e, e);
+      log.error("Failed to send verification email", e);
     }
   }
 }
