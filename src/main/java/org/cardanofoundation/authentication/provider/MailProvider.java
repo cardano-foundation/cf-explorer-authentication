@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class MailProvider {
 
   @Value("${domain.client}")
-  private final String domainClient;
+  private String domainClient;
 
   private final JavaMailSender javaMailSender;
 
