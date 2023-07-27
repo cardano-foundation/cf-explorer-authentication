@@ -3,6 +3,7 @@ spring:
     aws:
       access-key: ${SES_ACCESS_KEY_ID}
       secret-key: ${SES_SECRET_ACCESS_KEY}
+      region: ${AWS_REGION}
 
 mail:
   from: ${SES_EMAIL_FROM}
