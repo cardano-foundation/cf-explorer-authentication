@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.9...v0.1.10) (2023-07-27)
+
+
+### Features
+
+* adde SES Configuration To send emails ([3c594a9](https://github.com/cardano-foundation/cf-explorer-authentication/commit/3c594a987835414982067e9b18089ca325dc7f04))
+
 ## [0.1.9](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.8...v0.1.9) (2023-07-25)
 
 
