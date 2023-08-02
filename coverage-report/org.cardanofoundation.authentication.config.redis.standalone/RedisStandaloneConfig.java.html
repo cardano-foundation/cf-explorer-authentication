@@ -7,15 +7,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 
-<span class="nc" id="L15">@Log4j2</span>
+<span class="nc" id="L16">@Log4j2</span>
 @Configuration
 @Profile(&quot;standalone&quot;)
-<span class="nc" id="L18">public class RedisStandaloneConfig {</span>
+<span class="nc" id="L19">public class RedisStandaloneConfig {</span>
 
     @Value(&quot;${spring.redis.databaseIndex}&quot;)
     private Integer databaseIndex;
@@ -29,37 +30,48 @@ import org.springframework.data.redis.serializer.GenericToStringSerializer;
     @Value(&quot;${spring.redis.password}&quot;)
     private String password;
 
+
+    @Value(&quot;${spring.redis.standalone.useSsl}&quot;)
+    private boolean useSsl;
+
     @Bean(name = &quot;lettuceConnectionFactory&quot;)
     @Autowired
     LettuceConnectionFactory lettuceConnectionFactory() {
-<span class="nc" id="L35">        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(hostname, port);</span>
-<span class="nc" id="L36">        redisStandaloneConfiguration.setPassword(password);</span>
-<span class="nc" id="L37">        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);</span>
-<span class="nc" id="L38">        lettuceConnectionFactory.setDatabase(databaseIndex);</span>
-<span class="nc" id="L39">        return lettuceConnectionFactory;</span>
+<span class="nc" id="L40">        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(hostname, port);</span>
+<span class="nc" id="L41">        redisStandaloneConfiguration.setPassword(password);</span>
+        LettuceConnectionFactory lettuceConnectionFactory;
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (useSsl) {</span>
+<span class="nc" id="L45">            lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration, LettuceClientConfiguration.builder().useSsl().build());</span>
+        } else {
+<span class="nc" id="L47">            lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);</span>
+        }
+
+<span class="nc" id="L50">        lettuceConnectionFactory.setDatabase(databaseIndex);</span>
+<span class="nc" id="L51">        return lettuceConnectionFactory;</span>
     }
 
     @Bean
     @Autowired
     RedisTemplate&lt;String, ?&gt; redisTemplate(//NOSONAR
                                            final LettuceConnectionFactory lettuceConnectionFactory) {
-<span class="nc" id="L46">        var redisTemplate = new RedisTemplate&lt;String, Object&gt;();</span>
-<span class="nc" id="L47">        redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
-<span class="nc" id="L48">        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
-<span class="nc" id="L49">        redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());</span>
-<span class="nc" id="L50">        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L58">        var redisTemplate = new RedisTemplate&lt;String, Object&gt;();</span>
+<span class="nc" id="L59">        redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
+<span class="nc" id="L60">        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L61">        redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L62">        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
 
-<span class="nc" id="L52">        return redisTemplate;</span>
+<span class="nc" id="L64">        return redisTemplate;</span>
     }
 
     @Bean
     @Autowired
     RedisTemplate&lt;String, String&gt; redisTemplateString(//NOSONAR // TODO will remove in next version
                                                       final LettuceConnectionFactory lettuceConnectionFactory) {
-<span class="nc" id="L59">        var redisTemplate = new RedisTemplate&lt;String, String&gt;();</span>
-<span class="nc" id="L60">        redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
-<span class="nc" id="L61">        redisTemplate.setValueSerializer(new GenericToStringSerializer&lt;&gt;(Object.class));</span>
-<span class="nc" id="L62">        return redisTemplate;</span>
+<span class="nc" id="L71">        var redisTemplate = new RedisTemplate&lt;String, String&gt;();</span>
+<span class="nc" id="L72">        redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
+<span class="nc" id="L73">        redisTemplate.setValueSerializer(new GenericToStringSerializer&lt;&gt;(Object.class));</span>
+<span class="nc" id="L74">        return redisTemplate;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
