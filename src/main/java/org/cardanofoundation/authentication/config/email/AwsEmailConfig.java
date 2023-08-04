@@ -11,7 +11,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Slf4j
-
 @Profile("ses")
 @Configuration
 public class AwsEmailConfig {
