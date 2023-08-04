@@ -2,13 +2,13 @@
 
 import org.cardanofoundation.authentication.util.SesSmtpCredentialGenerator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-@Primary
 @Profile(&quot;ses&quot;)
 @Configuration
 <span class="nc" id="L14">public class AwsEmailConfig {</span>
@@ -22,13 +22,15 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
     @Value(&quot;${spring.mail.aws.region}&quot;)
     private String region;
 
+    @Primary
+    @Bean
     public JavaMailSender javaMailSender(SesSmtpCredentialGenerator sesSmtpCredentialGenerator) {
-<span class="nc" id="L26">        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();</span>
-<span class="nc" id="L27">        javaMailSender.setUsername(accessKey);</span>
-<span class="nc" id="L28">        javaMailSender.setPassword(sesSmtpCredentialGenerator.generateSMTPPassword(secretKey));</span>
-<span class="nc" id="L29">        javaMailSender.setHost(&quot;email-smtp.&quot; + region + &quot;.amazonaws.com&quot;);</span>
-<span class="nc" id="L30">        javaMailSender.setPort(587);</span>
-<span class="nc" id="L31">        return javaMailSender;</span>
+<span class="nc" id="L28">        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();</span>
+<span class="nc" id="L29">        javaMailSender.setUsername(accessKey);</span>
+<span class="nc" id="L30">        javaMailSender.setPassword(sesSmtpCredentialGenerator.generateSMTPPassword(secretKey));</span>
+<span class="nc" id="L31">        javaMailSender.setHost(&quot;email-smtp.&quot; + region + &quot;.amazonaws.com&quot;);</span>
+<span class="nc" id="L32">        javaMailSender.setPort(587);</span>
+<span class="nc" id="L33">        return javaMailSender;</span>
     }
 
 }
