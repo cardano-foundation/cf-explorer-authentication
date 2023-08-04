@@ -1,0 +1,16 @@
+spring:
+  mail:
+    aws:
+      access-key: ${SES_ACCESS_KEY_ID}
+      secret-key: ${SES_SECRET_ACCESS_KEY}
+      region: ${AWS_REGION}
+
+mail:
+  from: ${SES_EMAIL_FROM}
+  sender: 'Cardano Foundation - Iris'
+  subject-registration: 'Please verify your registration'
+  subject-reset-password: 'Do you want change password?'
+  footer: 'Cardano Foundation'
+  expirationMs: 86400000 #1 day
+  accessKey: ${SES_ACCESS_KEY_ID}
+  secretKey: ${SES_SECRET_ACCESS_KEY}

@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.1.11](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.10...v0.1.11) (2023-08-02)
+
+
+### Bug Fixes
+
+* attempting to force a release ([d976c37](https://github.com/cardano-foundation/cf-explorer-authentication/commit/d976c3722ee0ec00124572d762849f6cd0a4adf5))
+
+## [0.1.10](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.9...v0.1.10) (2023-07-27)
+
+
+### Features
+
+* adde SES Configuration To send emails ([3c594a9](https://github.com/cardano-foundation/cf-explorer-authentication/commit/3c594a987835414982067e9b18089ca325dc7f04))
+
+## [0.1.9](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.8...v0.1.9) (2023-07-25)
+
+
+### Features
+
+* update unit test for authentication ([0e27e13](https://github.com/cardano-foundation/cf-explorer-authentication/commit/0e27e13e17073eb22fdb186cb5a46066ac7ae2f9))
+
+
+### Bug Fixes
+
+* remove commment [@author](https://github.com/author) ([2e4feae](https://github.com/cardano-foundation/cf-explorer-authentication/commit/2e4feae633025a95edca7a25d4f9dcd731416ba8))
+
 ## [0.1.8](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.7...v0.1.8) (2023-07-21)
 
 

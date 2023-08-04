@@ -1,5 +1,11 @@
 package org.cardanofoundation.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -13,6 +19,7 @@ import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
 import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.service.AuthenticationService;
+import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,39 +34,85 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication Controller", description = "")
+@Tag(name = "Authentication Controller")
 @Validated
 public class AuthController {
 
   private final AuthenticationService authenticationService;
 
+  @Operation(description = "Log in to the system")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = SignInResponse.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(value = "/sign-in", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+  public ResponseEntity<SignInResponse> signIn(
+      @Valid @RequestBody SignInRequest signInRequest) {
     return ResponseEntity.ok(authenticationService.signIn(signInRequest));
   }
 
+  @Operation(description = "Register for a system account")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(value = "/sign-up", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MessageResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
     return ResponseEntity.ok(authenticationService.signUp(signUpRequest));
   }
 
+  @Operation(description = "Create a new JWT from the Refresh Token")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = RefreshTokenResponse.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @GetMapping("/refresh-token")
   public ResponseEntity<RefreshTokenResponse> refreshToken(
+      @Parameter(
+          name = "refreshJwt",
+          description = "Refresh Token ID",
+          example = "6e69d1a3-1416-4b5c-9304-d80e80d73839",
+          required = true)
       @Valid @RequestParam("refreshJwt") String refreshJwt,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(
         authenticationService.refreshToken(refreshJwt, httpServletRequest));
   }
 
+  @Operation(description = "Log out of the system")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(value = "/sign-out", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MessageResponse> signOut(@Valid @RequestBody SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));
   }
 
+  @Operation(description = "Retrieve a code for the wallet to create a signature for logging into the system")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = NonceResponse.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @GetMapping("/get-nonce")
   public ResponseEntity<NonceResponse> findNonceByAddress(
+      @Parameter(
+          name = "address",
+          description = "Wallet address",
+          example = "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p",
+          required = true)
       @RequestParam("address") @PrefixedValid(CommonConstant.PREFIXED_ADDRESS) String address,
+      @Parameter(
+          name = "walletName",
+          description = "Wallet name",
+          example = "NAMI",
+          required = true)
       @RequestParam("walletName") String walletName) {
     return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));
   }
