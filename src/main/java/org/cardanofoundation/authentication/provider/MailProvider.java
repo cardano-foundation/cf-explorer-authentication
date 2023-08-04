@@ -36,7 +36,7 @@ public class MailProvider {
       String username = javaMailSenderImpl.getUsername();
       log.info("username: " + username);
     }
-    
+
     log.info("start send verify mail to: " + user.getEmail());
     String contentHtml
         = "Hi there,<br />"

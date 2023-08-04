@@ -3,6 +3,7 @@ package org.cardanofoundation.authentication.config.email;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.authentication.util.SesSmtpCredentialGenerator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -10,7 +11,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Slf4j
-@Primary
+
 @Profile("ses")
 @Configuration
 public class AwsEmailConfig {
@@ -24,6 +25,8 @@ public class AwsEmailConfig {
     @Value("${spring.mail.aws.region}")
     private String region;
 
+    @Primary
+    @Bean
     public JavaMailSender javaMailSender(SesSmtpCredentialGenerator sesSmtpCredentialGenerator) {
         log.info("Creating JavaMailSender");
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
