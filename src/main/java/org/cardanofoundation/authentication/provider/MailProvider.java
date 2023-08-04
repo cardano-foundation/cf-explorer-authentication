@@ -8,6 +8,7 @@ import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,18 @@ public class MailProvider {
   private final MailProperties mail;
 
   public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code) {
+
+    log.info("mail.getSender: " + mail.getSender());
+    log.info("mail.getFrom: " + mail.getFrom());
+
+    log.info("javaMailSender: " + javaMailSender.getClass());
+
+    if (javaMailSender instanceof JavaMailSenderImpl) {
+      JavaMailSenderImpl javaMailSenderImpl = (JavaMailSenderImpl)javaMailSender;
+      String username = javaMailSenderImpl.getUsername();
+      log.info("username: " + username);
+    }
+    
     log.info("start send verify mail to: " + user.getEmail());
     String contentHtml
         = "Hi there,<br />"
