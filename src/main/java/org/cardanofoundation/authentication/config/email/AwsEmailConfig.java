@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-@Slf4j
 @Profile("ses")
 @Configuration
 public class AwsEmailConfig {
@@ -27,7 +26,6 @@ public class AwsEmailConfig {
     @Primary
     @Bean
     public JavaMailSender javaMailSender(SesSmtpCredentialGenerator sesSmtpCredentialGenerator) {
-        log.info("Creating JavaMailSender");
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         javaMailSender.setUsername(accessKey);
         javaMailSender.setPassword(sesSmtpCredentialGenerator.generateSMTPPassword(secretKey));
