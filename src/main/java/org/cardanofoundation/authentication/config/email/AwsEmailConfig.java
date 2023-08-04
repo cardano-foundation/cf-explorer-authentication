@@ -1,6 +1,5 @@
 package org.cardanofoundation.authentication.config.email;
 
-import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.authentication.util.SesSmtpCredentialGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
