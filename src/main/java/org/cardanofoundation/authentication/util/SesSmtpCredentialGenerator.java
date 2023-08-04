@@ -1,5 +1,7 @@
 package org.cardanofoundation.authentication.util;
 
+import org.springframework.stereotype.Component;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
@@ -9,6 +11,7 @@ import java.util.Base64;
  * Docs: https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html
  * Java Code gist: https://gist.github.com/sysadmiral/c85c09e6534428a8bb578ab420a40207
  */
+@Component
 public class SesSmtpCredentialGenerator {
 
     private static final String MESSAGE = "SendRawEmail"; // Used to generate the HMAC signature. Do not modify.
