@@ -48,7 +48,7 @@ public class BookMarkController {
 
   private final BookMarkService bookMarkService;
 
-  @Operation(description = "Add bookmark for the account")
+  @Operation(description = "Add a bookmark for the account")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = BookMarkResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

@@ -44,7 +44,7 @@ public class NoteController {
 
   private final PrivateNoteService privateNoteService;
 
-  @Operation(description = "Add transaction note for the account")
+  @Operation(description = "Add a transaction note for the account")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -59,7 +59,7 @@ public class NoteController {
         privateNoteService.addPrivateNote(privateNoteRequest, httpServletRequest));
   }
 
-  @Operation(description = "Get the list of transaction note for the account by network type")
+  @Operation(description = "Get the list of transaction notes for the account by network type")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = BasePageResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -80,7 +80,7 @@ public class NoteController {
         privateNoteService.findAllNote(httpServletRequest, network, pagination.toPageable()));
   }
 
-  @Operation(description = "Remove transaction note from the account")
+  @Operation(description = "Remove transaction note from account")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -98,7 +98,7 @@ public class NoteController {
     return ResponseEntity.ok(privateNoteService.deleteById(noteId));
   }
 
-  @Operation(description = "Edit transaction note from the account")
+  @Operation(description = "Edit transaction note of the account")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PrivateNoteResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

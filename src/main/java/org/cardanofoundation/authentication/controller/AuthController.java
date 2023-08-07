@@ -52,7 +52,7 @@ public class AuthController {
     return ResponseEntity.ok(authenticationService.signIn(signInRequest));
   }
 
-  @Operation(description = "Register for a system account")
+  @Operation(description = "Sign up for an account")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -63,7 +63,7 @@ public class AuthController {
     return ResponseEntity.ok(authenticationService.signUp(signUpRequest));
   }
 
-  @Operation(description = "Create a new JWT from the Refresh Token")
+  @Operation(description = "Generate a new JSON Web Token (JWT) using the refresh token")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = RefreshTokenResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -82,7 +82,7 @@ public class AuthController {
         authenticationService.refreshToken(refreshJwt, httpServletRequest));
   }
 
-  @Operation(description = "Log out of the system")
+  @Operation(description = "Log out from the system")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -94,7 +94,7 @@ public class AuthController {
     return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));
   }
 
-  @Operation(description = "Retrieve a code for the wallet to create a signature for logging into the system")
+  @Operation(description = "Get a wallet code to generate a signature for logging into the system")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = NonceResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
