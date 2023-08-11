@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.13](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.12...v0.1.13) (2023-08-11)
+
+
+### Bug Fixes
+
+* removed references to Iris ([e86a375](https://github.com/cardano-foundation/cf-explorer-authentication/commit/e86a3756f921bafe6e2a68c6144e92879f018e14))
+
 ## [0.1.12](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.11...v0.1.12) (2023-08-04)
 
 
