@@ -7,7 +7,7 @@ spring:
 
 mail:
   from: ${SES_EMAIL_FROM}
-  sender: 'Cardano Foundation - Iris'
+  sender: ${SES_EMAIL_FROM_NAME}
   subject-registration: 'Please verify your registration'
   subject-reset-password: 'Do you want change password?'
   footer: 'Cardano Foundation'
