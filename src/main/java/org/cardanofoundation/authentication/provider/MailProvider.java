@@ -19,6 +19,9 @@ public class MailProvider {
   @Value("${domain.client}")
   private String domainClient;
 
+  @Value("${domain.lang}")
+  private String lang;
+
   private final JavaMailSender javaMailSender;
 
   private final MailProperties mail;
@@ -35,7 +38,7 @@ public class MailProvider {
       MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);
       helper.setFrom(mail.getFrom(), mail.getSender());
       helper.setTo(user.getEmail());
-      StringBuilder verifyURL = new StringBuilder(domainClient);
+      StringBuilder verifyURL = new StringBuilder(domainClient).append(lang);
       switch (emailType) {
         case CREATED -> {
           verifyURL.append("/verify-email?code=").append(code);
