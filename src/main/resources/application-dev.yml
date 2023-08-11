@@ -57,6 +57,7 @@ spring:
 domain:
   client: ${SWAGGER_CLIENT_URL:http://localhost:7276}
   server: ${SWAGGER_SERVER_URL:http://localhost:8021}
+  lang: ${SERVER_LANGUAGE:/en}
 
 redis:
   databaseIndex: 0
