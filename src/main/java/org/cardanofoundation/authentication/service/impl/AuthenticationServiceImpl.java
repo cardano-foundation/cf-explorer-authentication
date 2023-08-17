@@ -31,6 +31,7 @@ import org.cardanofoundation.authentication.service.RefreshTokenService;
 import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.WalletService;
 import org.cardanofoundation.authentication.thread.MailHandler;
+import org.cardanofoundation.authentication.util.LocaleUtils;
 import org.cardanofoundation.authentication.util.NonceUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
@@ -127,7 +128,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Transactional(rollbackFor = RuntimeException.class)
   @Override
-  public MessageResponse signUp(SignUpRequest signUpRequest) {
+  public MessageResponse signUp(SignUpRequest signUpRequest,
+      HttpServletRequest httpServletRequest) {
     String email = signUpRequest.getEmail();
     if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {
       throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
@@ -142,7 +144,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       user = userService.saveUser(signUpRequest);
     }
     String verifyCode = jwtProvider.generateCodeForVerify(email);
-    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));
+    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED,
+        LocaleUtils.resolveLocale(httpServletRequest), verifyCode));
     return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
         .message(CommonConstant.RESPONSE_SUCCESS).build();
   }

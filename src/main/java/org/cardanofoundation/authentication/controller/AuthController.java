@@ -39,8 +39,9 @@ public class AuthController {
   }
 
   @PostMapping(value = "/sign-up", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));
+  public ResponseEntity<MessageResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(authenticationService.signUp(signUpRequest, httpServletRequest));
   }
 
   @GetMapping("/refresh-token")

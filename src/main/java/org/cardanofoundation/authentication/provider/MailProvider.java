@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.provider;
 
 import jakarta.mail.internet.MimeMessage;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
@@ -23,33 +24,38 @@ public class MailProvider {
 
   private final MailProperties mail;
 
-  public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code) {
+  private final LocaleProvider localeProvider;
+
+  public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code, Locale locale) {
     log.info("start send verify mail to: " + user.getEmail());
-    String contentHtml
-        = "Hi there,<br />"
-        + "Please click the link below to verify account:<br />"
-        + "<h3><a href=\"[URL]\" target=\"_self\">VERIFY</a></h3>"
-        + "Thank you,<br />";
+    String contentHtml = localeProvider.getValue("mail.base-content", locale);
     try {
       MimeMessage mailMessage = javaMailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);
-      helper.setFrom(mail.getFrom(), mail.getSender());
+      helper.setFrom(mail.getFrom(), localeProvider.getValue("mail.sender", locale));
       helper.setTo(user.getEmail());
       StringBuilder verifyURL = new StringBuilder(domainClient);
+      if (locale.equals(new Locale("en"))) {
+        verifyURL.append("/en");
+      } else if (locale.equals(new Locale("fr"))) {
+        verifyURL.append("/fr");
+      }
       switch (emailType) {
         case CREATED -> {
           verifyURL.append("/verify-email?code=").append(code);
-          helper.setSubject(mail.getSubjectRegistration());
+          String mess = localeProvider.getValue("mail.subject-registration", locale);
+          log.error(mess);
+          helper.setSubject(localeProvider.getValue("mail.subject-registration", locale));
         }
         case RESET_PASSWORD -> {
           verifyURL.append("/reset-password?code=").append(code);
-          helper.setSubject(mail.getSubjectResetPassword());
+          helper.setSubject(localeProvider.getValue("mail.subject-reset-password", locale));
         }
         default -> {
         }
       }
       contentHtml = contentHtml.replace("[URL]", verifyURL);
-      contentHtml = contentHtml + mail.getFooter();
+      contentHtml = contentHtml + localeProvider.getValue("mail.footer", locale);
       helper.setText(contentHtml, Boolean.TRUE);
       javaMailSender.send(mailMessage);
     } catch (Exception e) {

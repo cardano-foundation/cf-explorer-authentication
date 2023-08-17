@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,9 @@ public class VerifyMailController {
 
   @GetMapping(value = "/forgot-password")
   public ResponseEntity<MessageResponse> resetPassword(
-      @Valid @RequestParam("email") @Email String email) {
+      @Valid @RequestParam("email") @Email String email, HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(
-        verifyService.forgotPassword(email));
+        verifyService.forgotPassword(email, httpServletRequest));
   }
 
   @PutMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE)
