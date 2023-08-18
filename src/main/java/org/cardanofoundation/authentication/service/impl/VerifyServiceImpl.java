@@ -18,10 +18,10 @@ import org.cardanofoundation.authentication.repository.UserRepository;
 import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.cardanofoundation.authentication.thread.MailHandler;
-import org.cardanofoundation.authentication.util.LocaleUtils;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.LocaleResolver;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +41,8 @@ public class VerifyServiceImpl implements VerifyService {
   private final RedisProvider redisProvider;
 
   private final ThreadPoolExecutor sendMailExecutor;
+
+  private final LocaleResolver localeResolver;
 
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
@@ -91,7 +93,7 @@ public class VerifyServiceImpl implements VerifyService {
     }
     String code = jwtProvider.generateCodeForVerify(email);
     sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD,
-        LocaleUtils.resolveLocale(httpServletRequest), code));
+        localeResolver.resolveLocale(httpServletRequest), code));
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 

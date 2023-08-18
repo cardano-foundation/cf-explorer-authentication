@@ -31,7 +31,6 @@ import org.cardanofoundation.authentication.service.RefreshTokenService;
 import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.WalletService;
 import org.cardanofoundation.authentication.thread.MailHandler;
-import org.cardanofoundation.authentication.util.LocaleUtils;
 import org.cardanofoundation.authentication.util.NonceUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
@@ -44,6 +43,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.LocaleResolver;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +71,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final UserRepository userRepository;
 
   private final PasswordEncoder encoder;
+
+  private final LocaleResolver localeResolver;
 
   @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
       IgnoreRollbackException.class})
@@ -145,7 +147,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
     String verifyCode = jwtProvider.generateCodeForVerify(email);
     sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED,
-        LocaleUtils.resolveLocale(httpServletRequest), verifyCode));
+        localeResolver.resolveLocale(httpServletRequest), verifyCode));
     return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
         .message(CommonConstant.RESPONSE_SUCCESS).build();
   }
