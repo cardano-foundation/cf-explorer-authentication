@@ -2,8 +2,10 @@ package org.cardanofoundation.authentication.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.cardanofoundation.authentication.constant.CommonConstant;
@@ -28,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.LocaleResolver;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -56,6 +59,9 @@ class VerifyServiceTest {
 
   @Mock
   private ThreadPoolExecutor sendMailExecutor;
+
+  @Mock
+  private LocaleResolver localeResolver;
 
   private final String CODE = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzb3RhdGVrIiwianRpIjoiMiIsImlhdCI6MTY3Mjk5Nzc0MSwiZXhwIjoxNjczMDg0MTQxfQ.B62gXo6iqQfHMT62q17zdhwMF8I77-P6xblKcx7ZI3-gij6YckvFYVVuoIa_qXgTTFnEeRDBQEVo3o20D1w6pffBrgbvxvMbjhOG0ONS9Xs1UQChwQs7v3lxkqoKZ8dNf0Eib43HxLZhBEBIeXa1kln4sS8osWf5iEgno0od7z9KwWK1N2Coj0o-1HE453fFyRveDJgd0DvXohbHADMmjH9t0WkXJwUK26Lv1tkqPlkIzGBPgYnYEIygdayqqt4EtP6CtgI9QOzCYSZUUFzxo-VVDzA0J7DpQbYn8G2PAuAbCXCO6lTkvmXMiyZAoZshqRhBNb7uDI66dwOJLV3NzuunSa8QOO8eNUaDoHHvR_9_J-yHTFBicoM69JHQ7UzJVyFHGmh1M8lHsJ9y6DdAobtBSyJFBhFeDj7S8bgpIvIyNoHDsf24xdlqCngE1qBsxjfp0L_yMPBxsIhW3Juopwe1c6btWTEaRaVaxhKE5yKbRsTtAzDDkdEyg_--9eXH";
 
@@ -172,8 +178,9 @@ class VerifyServiceTest {
 
   @Test
   void whenForgotPassword_userInValid_throwException() {
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     when(userRepository.findByEmailAndStatus(EMAIL, EStatus.ACTIVE)).thenReturn(Optional.empty());
-    MessageResponse response = verifyService.forgotPassword(EMAIL);
+    MessageResponse response = verifyService.forgotPassword(EMAIL, httpServletRequest);
     String expectedCode = CommonConstant.CODE_FAILURE;
     String actualCode = response.getCode();
     Assertions.assertEquals(expectedCode, actualCode);
@@ -181,12 +188,13 @@ class VerifyServiceTest {
 
   @Test
   void whenForgotPassword_returnResponse() {
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     UserEntity user = UserEntity.builder().build();
     when(userRepository.findByEmailAndStatus(EMAIL, EStatus.ACTIVE)).thenReturn(Optional.of(user));
     when(jwtProvider.generateCodeForVerify(EMAIL)).thenReturn(CODE);
     doNothing().when(sendMailExecutor)
-        .execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, CODE));
-    MessageResponse response = verifyService.forgotPassword(EMAIL);
+        .execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, any(), CODE));
+    MessageResponse response = verifyService.forgotPassword(EMAIL, httpServletRequest);
     String expectedCode = CommonConstant.CODE_SUCCESS;
     String actualCode = response.getCode();
     Assertions.assertEquals(expectedCode, actualCode);
