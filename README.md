@@ -1,4 +1,4 @@
-# Iris Authentication
+# Explorer Authentication
 
 
 <p align="left">
@@ -7,9 +7,9 @@
 <img alt="Publish" src="https://github.com/cardano-foundation/cf-explorer-authentication/actions/workflows/publish.yaml/badge.svg?branch=main" />
 </p>
 
-The Iris Authentication API enables users to log in, with or without a wallet, to share personalized data such as bookmarks across devices.
+The Explorer Authentication API enables users to log in, with or without a wallet, to share personalized data such as bookmarks across devices.
 
-👉 Check the [Iris repository](https://github.com/cardano-foundation/cf-explorer) to understand how the microservices work together
+👉 Check the [Explorer repository](https://github.com/cardano-foundation/cf-explorer) to understand how the microservices work together
 
 ## 🧪 Test Reports
 
