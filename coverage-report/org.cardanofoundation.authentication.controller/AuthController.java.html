@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.controller</a> &gt; <span class="el_source">AuthController.java</span></div><h1>AuthController.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -13,6 +19,7 @@ import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
 import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.service.AuthenticationService;
+import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,42 +33,88 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(&quot;/api/v1/auth&quot;)
-<span class="fc" id="L29">@RequiredArgsConstructor</span>
-@Tag(name = &quot;Authentication Controller&quot;, description = &quot;&quot;)
+<span class="fc" id="L36">@RequiredArgsConstructor</span>
+@Tag(name = &quot;Authentication Controller&quot;)
 @Validated
 public class AuthController {
 
   private final AuthenticationService authenticationService;
 
+  @Operation(description = &quot;Log in to the system&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = SignInResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(value = &quot;/sign-in&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity&lt;SignInResponse&gt; signIn(@Valid @RequestBody SignInRequest signInRequest) {
-<span class="fc" id="L38">    return ResponseEntity.ok(authenticationService.signIn(signInRequest));</span>
+  public ResponseEntity&lt;SignInResponse&gt; signIn(
+      @Valid @RequestBody SignInRequest signInRequest) {
+<span class="fc" id="L52">    return ResponseEntity.ok(authenticationService.signIn(signInRequest));</span>
   }
 
+  @Operation(description = &quot;Sign up for an account&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(value = &quot;/sign-up&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity&lt;MessageResponse&gt; signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-<span class="fc" id="L43">    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));</span>
+<span class="fc" id="L63">    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));</span>
   }
 
+  @Operation(description = &quot;Generate a new JSON Web Token (JWT) using the refresh token&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = RefreshTokenResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @GetMapping(&quot;/refresh-token&quot;)
   public ResponseEntity&lt;RefreshTokenResponse&gt; refreshToken(
+      @Parameter(
+          name = &quot;refreshJwt&quot;,
+          description = &quot;Refresh Token ID&quot;,
+          example = &quot;6e69d1a3-1416-4b5c-9304-d80e80d73839&quot;,
+          required = true)
       @Valid @RequestParam(&quot;refreshJwt&quot;) String refreshJwt,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L50">    return ResponseEntity.ok(</span>
-<span class="fc" id="L51">        authenticationService.refreshToken(refreshJwt, httpServletRequest));</span>
+<span class="fc" id="L81">    return ResponseEntity.ok(</span>
+<span class="fc" id="L82">        authenticationService.refreshToken(refreshJwt, httpServletRequest));</span>
   }
 
+  @Operation(description = &quot;Log out from the system&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(value = &quot;/sign-out&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity&lt;MessageResponse&gt; signOut(@Valid @RequestBody SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L57">    return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));</span>
+<span class="fc" id="L94">    return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));</span>
   }
 
+  @Operation(description = &quot;Get a wallet code to generate a signature for logging into the system&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = NonceResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @GetMapping(&quot;/get-nonce&quot;)
   public ResponseEntity&lt;NonceResponse&gt; findNonceByAddress(
+      @Parameter(
+          name = &quot;address&quot;,
+          description = &quot;Wallet address&quot;,
+          example = &quot;stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p&quot;,
+          required = true)
       @RequestParam(&quot;address&quot;) @PrefixedValid(CommonConstant.PREFIXED_ADDRESS) String address,
+      @Parameter(
+          name = &quot;walletName&quot;,
+          description = &quot;Wallet name&quot;,
+          example = &quot;NAMI&quot;,
+          required = true)
       @RequestParam(&quot;walletName&quot;) String walletName) {
-<span class="fc" id="L64">    return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));</span>
+<span class="fc" id="L117">    return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

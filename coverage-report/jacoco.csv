@@ -15,8 +15,8 @@ auth-service,org.cardanofoundation.authentication.config,WebConfig,0,38,0,0,0,4,
 auth-service,org.cardanofoundation.authentication.config,AuthTokenFilter,86,16,2,0,15,2,4,2,3,2
 auth-service,org.cardanofoundation.authentication.config,ExceptionHandlerFilter,107,0,2,0,31,0,5,0,4,0
 auth-service,org.cardanofoundation.authentication.config,RsaConfig,99,0,0,0,17,0,19,0,19,0
+auth-service,org.cardanofoundation.authentication.config,OpenApiConfig,43,0,0,0,14,0,2,0,2,0
 auth-service,org.cardanofoundation.authentication.config,AuthEntryPointJwt,17,0,0,0,5,0,3,0,3,0
-auth-service,org.cardanofoundation.authentication.config,OpenApiConfig,48,0,0,0,7,0,2,0,2,0
 auth-service,org.cardanofoundation.authentication.config,ThreadPoolConfig,31,0,0,0,4,0,2,0,2,0
 auth-service,org.cardanofoundation.authentication.config,WebSecurityConfig,73,0,0,0,14,0,5,0,5,0
 auth-service,org.cardanofoundation.authentication.util,SesSmtpCredentialGenerator,59,0,0,0,13,0,2,0,2,0

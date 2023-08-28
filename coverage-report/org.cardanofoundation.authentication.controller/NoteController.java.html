@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NoteController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.controller</a> &gt; <span class="el_source">NoteController.java</span></div><h1>NoteController.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -12,6 +18,7 @@ import org.cardanofoundation.authentication.model.response.PrivateNoteResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
 import org.cardanofoundation.authentication.service.PrivateNoteService;
 import org.cardanofoundation.explorer.common.annotation.EnumValid;
+import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -30,39 +37,89 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(&quot;/api/v1/note&quot;)
-<span class="fc" id="L33">@RequiredArgsConstructor</span>
-@Tag(name = &quot;Private Note Controller&quot;, description = &quot;&quot;)
+<span class="fc" id="L40">@RequiredArgsConstructor</span>
+@Tag(name = &quot;Private Note Controller&quot;)
 @Validated
 public class NoteController {
 
   private final PrivateNoteService privateNoteService;
 
+  @Operation(description = &quot;Add a transaction note for the account&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(&quot;/add&quot;)
   public ResponseEntity&lt;MessageResponse&gt; addNote(
       @Valid @RequestBody PrivateNoteRequest privateNoteRequest,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L44">    return ResponseEntity.ok(</span>
-<span class="fc" id="L45">        privateNoteService.addPrivateNote(privateNoteRequest, httpServletRequest));</span>
+<span class="fc" id="L58">    return ResponseEntity.ok(</span>
+<span class="fc" id="L59">        privateNoteService.addPrivateNote(privateNoteRequest, httpServletRequest));</span>
   }
 
+  @Operation(description = &quot;Get the list of transaction notes for the account by network type&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = BasePageResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @GetMapping(&quot;/find-all&quot;)
   public ResponseEntity&lt;BasePageResponse&lt;PrivateNoteResponse&gt;&gt; findAllNote(
+      @Parameter(
+          name = &quot;network&quot;,
+          description = &quot;Network type&quot;,
+          example = &quot;MAIN_NET&quot;,
+          required = true)
       @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L53">    return ResponseEntity.ok(</span>
-<span class="fc" id="L54">        privateNoteService.findAllNote(httpServletRequest, network, pagination.toPageable()));</span>
+<span class="fc" id="L79">    return ResponseEntity.ok(</span>
+<span class="fc" id="L80">        privateNoteService.findAllNote(httpServletRequest, network, pagination.toPageable()));</span>
   }
 
+  @Operation(description = &quot;Remove transaction note from account&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @DeleteMapping(&quot;/delete/{noteId}&quot;)
-  public ResponseEntity&lt;MessageResponse&gt; deleteById(@PathVariable @Min(1) Long noteId) {
-<span class="fc" id="L59">    return ResponseEntity.ok(privateNoteService.deleteById(noteId));</span>
+  public ResponseEntity&lt;MessageResponse&gt; deleteById(
+      @Parameter(
+          name = &quot;noteId&quot;,
+          description = &quot;Transaction note ID&quot;,
+          example = &quot;1&quot;,
+          required = true)
+      @PathVariable @Min(1) Long noteId) {
+<span class="fc" id="L98">    return ResponseEntity.ok(privateNoteService.deleteById(noteId));</span>
   }
 
+  @Operation(description = &quot;Edit transaction note of the account&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = PrivateNoteResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PutMapping(&quot;/edit&quot;)
-  public ResponseEntity&lt;PrivateNoteResponse&gt; editNote(@RequestParam(&quot;note&quot;) String note,
+  public ResponseEntity&lt;PrivateNoteResponse&gt; editNote(
+      @Parameter(
+          name = &quot;note&quot;,
+          description = &quot;Transaction note content&quot;,
+          example = &quot;I love this transaction&quot;,
+          required = true)
+      @RequestParam(&quot;note&quot;) String note,
+      @Parameter(
+          name = &quot;noteId&quot;,
+          description = &quot;Transaction note ID&quot;,
+          example = &quot;1&quot;,
+          required = true)
       @RequestParam(&quot;noteId&quot;) @Min(1) Long noteId) {
-<span class="fc" id="L65">    return ResponseEntity.ok(privateNoteService.editById(noteId, note));</span>
+<span class="fc" id="L122">    return ResponseEntity.ok(privateNoteService.editById(noteId, note));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

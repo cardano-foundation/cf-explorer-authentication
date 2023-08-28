@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BookMarkController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.controller</a> &gt; <span class="el_source">BookMarkController.java</span></div><h1>BookMarkController.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -16,6 +23,7 @@ import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
 import org.cardanofoundation.authentication.service.BookMarkService;
 import org.cardanofoundation.explorer.common.annotation.EnumValid;
+import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
 import org.cardanofoundation.explorer.common.validation.pagination.Pagination;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationDefault;
 import org.cardanofoundation.explorer.common.validation.pagination.PaginationValid;
@@ -33,47 +41,103 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(&quot;/api/v1/bookmark&quot;)
-<span class="fc" id="L36">@RequiredArgsConstructor</span>
-@Tag(name = &quot;BookMark Controller&quot;, description = &quot;&quot;)
+<span class="fc" id="L44">@RequiredArgsConstructor</span>
+@Tag(name = &quot;BookMark Controller&quot;)
 @Validated
 public class BookMarkController {
 
   private final BookMarkService bookMarkService;
 
+  @Operation(description = &quot;Add a bookmark for the account&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = BookMarkResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(&quot;/add&quot;)
   public ResponseEntity&lt;BookMarkResponse&gt; addBookMark(
       @Valid @RequestBody BookMarkRequest bookMarkRequest, HttpServletRequest httpServletRequest) {
-<span class="fc" id="L46">    return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));</span>
+<span class="fc" id="L61">    return ResponseEntity.ok(bookMarkService.addBookMark(bookMarkRequest, httpServletRequest));</span>
   }
 
+  @Operation(description = &quot;Get the list of bookmarks for the account by bookmark type and network type&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = BasePageResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @GetMapping(&quot;/find-all&quot;)
   public ResponseEntity&lt;BasePageResponse&lt;BookMarkResponse&gt;&gt; findBookMarkByType(
+      @Parameter(
+          name = &quot;type&quot;,
+          description = &quot;Bookmark type&quot;,
+          example = &quot;POOL&quot;,
+          required = true)
       @RequestParam(&quot;type&quot;) @EnumValid(enumClass = EBookMarkType.class) String type,
+      @Parameter(
+          name = &quot;network&quot;,
+          description = &quot;Network type&quot;,
+          example = &quot;MAIN_NET&quot;,
+          required = true)
       @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
       @ParameterObject @PaginationValid @PaginationDefault(size = 10, page = 0) Pagination pagination,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L55">    return ResponseEntity.ok(</span>
-<span class="fc" id="L56">        bookMarkService.findBookMarkByType(httpServletRequest, type, network,</span>
-<span class="fc" id="L57">            pagination.toPageable()));</span>
+<span class="fc" id="L87">    return ResponseEntity.ok(</span>
+<span class="fc" id="L88">        bookMarkService.findBookMarkByType(httpServletRequest, type, network,</span>
+<span class="fc" id="L89">            pagination.toPageable()));</span>
   }
 
+  @Operation(description = &quot;Remove bookmark from the account&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @DeleteMapping(&quot;/delete/{bookMarkId}&quot;)
-  public ResponseEntity&lt;MessageResponse&gt; deleteById(@PathVariable @Min(1) Long bookMarkId) {
-<span class="fc" id="L62">    return ResponseEntity.ok(bookMarkService.deleteById(bookMarkId));</span>
+  public ResponseEntity&lt;MessageResponse&gt; deleteById(
+      @Parameter(
+          name = &quot;bookMarkId&quot;,
+          description = &quot;Bookmark ID&quot;,
+          example = &quot;1&quot;,
+          required = true)
+      @PathVariable @Min(1) Long bookMarkId) {
+<span class="fc" id="L107">    return ResponseEntity.ok(bookMarkService.deleteById(bookMarkId));</span>
   }
 
+  @Operation(description = &quot;Get the list of bookmarks for the account by network type&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(array = @ArraySchema(schema = @Schema(implementation = BookMarkResponse.class)))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @GetMapping(&quot;/find-all-key&quot;)
   public ResponseEntity&lt;List&lt;BookMarkResponse&gt;&gt; findKeyBookMark(
+      @Parameter(
+          name = &quot;network&quot;,
+          description = &quot;Network type&quot;,
+          example = &quot;MAIN_NET&quot;,
+          required = true)
       @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L69">    return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest, network));</span>
+<span class="fc" id="L126">    return ResponseEntity.ok(bookMarkService.findKeyBookMark(httpServletRequest, network));</span>
   }
 
+  @Operation(description = &quot;Add bookmark list for the account&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = AddBookMarkResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   @PostMapping(&quot;/add-list&quot;)
   public ResponseEntity&lt;AddBookMarkResponse&gt; addBookMarks(
       @Valid @RequestBody BookMarksRequest bookMarksRequest,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L76">    return ResponseEntity.ok(bookMarkService.addBookMarks(bookMarksRequest, httpServletRequest));</span>
+<span class="fc" id="L140">    return ResponseEntity.ok(bookMarkService.addBookMarks(bookMarksRequest, httpServletRequest));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

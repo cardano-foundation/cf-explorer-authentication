@@ -5,7 +5,7 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
-import java.util.Arrays;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,12 +18,22 @@ import org.springframework.context.annotation.Configuration;
 
   @Bean
   public OpenAPI openAPI() {
-<span class="nc" id="L21">    return new OpenAPI().servers(Arrays.asList(new Server().url(domain))).info(</span>
-<span class="nc" id="L22">        new Info().title(&quot;Authentication APIs&quot;).description(&quot;Sample OpenAPI 3.0&quot;).contact(</span>
-<span class="nc" id="L23">                new Contact().email(&quot;potal.sotatek@sotatek.com&quot;).name(&quot;Sotatek&quot;)</span>
-<span class="nc" id="L24">                    .url(&quot;https://www.sotatek.com/&quot;)).license(</span>
-<span class="nc" id="L25">                new License().name(&quot;Apache 2.0&quot;).url(&quot;http://www.apache.org/licenses/LICENSE-2.0.html&quot;))</span>
-<span class="nc" id="L26">            .version(&quot;1.0.0&quot;));</span>
+<span class="nc" id="L21">    return new OpenAPI()</span>
+<span class="nc" id="L22">        .servers(Collections.singletonList(new Server().url(domain)))</span>
+<span class="nc" id="L23">        .info(</span>
+            new Info()
+<span class="nc" id="L25">                .title(&quot;Explorer Authentication APIs&quot;)</span>
+<span class="nc" id="L26">                .description(&quot;Explorer Sample OpenAPI 3.0&quot;)</span>
+<span class="nc" id="L27">                .contact(</span>
+                    new Contact()
+<span class="nc" id="L29">                        .email(&quot;info@cardano.com&quot;)</span>
+<span class="nc" id="L30">                        .name(&quot;Cardano Foundation - Iris&quot;)</span>
+<span class="nc" id="L31">                        .url(&quot;http://www.cardanofoundation.org&quot;))</span>
+<span class="nc" id="L32">                .license(</span>
+                    new License()
+<span class="nc" id="L34">                        .name(&quot;Apache 2.0&quot;)</span>
+<span class="nc" id="L35">                        .url(&quot;http://www.apache.org/licenses/LICENSE-2.0.html&quot;))</span>
+<span class="nc" id="L36">                .version(&quot;1.0.0&quot;));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
