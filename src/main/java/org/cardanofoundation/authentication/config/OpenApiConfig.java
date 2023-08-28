@@ -22,8 +22,8 @@ public class OpenApiConfig {
         .servers(Collections.singletonList(new Server().url(domain)))
         .info(
             new Info()
-                .title("Iris Authentication APIs")
-                .description("Iris Sample OpenAPI 3.0")
+                .title("Explorer Authentication APIs")
+                .description("Explorer Sample OpenAPI 3.0")
                 .contact(
                     new Contact()
                         .email("info@cardano.com")
