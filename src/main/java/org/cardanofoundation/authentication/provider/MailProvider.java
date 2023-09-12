@@ -5,6 +5,7 @@ import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
+import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,15 +37,13 @@ public class MailProvider {
       helper.setTo(user.getEmail());
       StringBuilder verifyURL = new StringBuilder(domainClient);
       if (locale.equals(new Locale("en"))) {
-        verifyURL.append("/en");
+        verifyURL.append(CommonConstant.ENGLISH_URL);
       } else if (locale.equals(new Locale("fr"))) {
-        verifyURL.append("/fr");
+        verifyURL.append(CommonConstant.FRENCH_URL);
       }
       switch (emailType) {
         case CREATED -> {
           verifyURL.append("/verify-email?code=").append(code);
-          String mess = localeProvider.getValue("mail.subject-registration", locale);
-          log.error(mess);
           helper.setSubject(localeProvider.getValue("mail.subject-registration", locale));
         }
         case RESET_PASSWORD -> {
