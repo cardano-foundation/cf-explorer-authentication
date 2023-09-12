@@ -2,8 +2,10 @@ package org.cardanofoundation.authentication.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -49,6 +51,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.LocaleResolver;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -95,6 +98,9 @@ class AuthenticationServiceTest {
 
   @Mock
   private RefreshTokenRepository refreshTokenRepository;
+
+  @Mock
+  private LocaleResolver localeResolver;
 
   private final String SIGNATURE_TEST = "84582aa201276761646472657373581de18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909a166686173686564f453393534353735313438313233323636333232355840850ff657e23963414e7c1bf708928dc994ecafea29790089c810af1ac7486aae12a4ed736d16528051aeff1991ee8d2aef19fe3d375f3ad019925ff1530ed608";
 
@@ -254,10 +260,11 @@ class AuthenticationServiceTest {
     SignUpRequest signUpRequest = new SignUpRequest();
     signUpRequest.setEmail("test5.6@gmail.com");
     signUpRequest.setPassword(PASSWORD);
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     when(userService.checkExistEmailAndStatus("test5.6@gmail.com", EStatus.ACTIVE))
         .thenReturn(true);
     BusinessException exception = Assertions.assertThrows(BusinessException.class, () -> {
-      authenticationService.signUp(signUpRequest);
+      authenticationService.signUp(signUpRequest, httpServletRequest);
     });
     String expectedCode = CommonErrorCode.EMAIL_IS_ALREADY_EXIST.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
@@ -269,6 +276,7 @@ class AuthenticationServiceTest {
     SignUpRequest signUpRequest = new SignUpRequest();
     signUpRequest.setEmail("test5.6@gmail.com");
     signUpRequest.setPassword(PASSWORD);
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     UserEntity user = UserEntity.builder().email("test5.6@gmail.com").build();
     when(userService.checkExistEmailAndStatus("test5.6@gmail.com", EStatus.ACTIVE))
         .thenReturn(false);
@@ -279,8 +287,8 @@ class AuthenticationServiceTest {
     when(userService.saveUser(signUpRequest)).thenReturn(user);
     when(jwtProvider.generateCodeForVerify("test5.6@gmail.com")).thenReturn(JWT);
     doNothing().when(sendMailExecutor)
-        .execute(new MailHandler(mailProvider, user, EUserAction.CREATED, JWT));
-    MessageResponse response = authenticationService.signUp(signUpRequest);
+        .execute(new MailHandler(mailProvider, user, EUserAction.CREATED, any(), JWT));
+    MessageResponse response = authenticationService.signUp(signUpRequest, httpServletRequest);
     String expectedCode = CommonConstant.CODE_SUCCESS;
     Assertions.assertEquals(expectedCode, response.getCode());
   }
@@ -290,6 +298,7 @@ class AuthenticationServiceTest {
     SignUpRequest signUpRequest = new SignUpRequest();
     signUpRequest.setEmail("test5.6@gmail.com");
     signUpRequest.setPassword(PASSWORD);
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     UserEntity user = UserEntity.builder().email("test5.6@gmail.com").status(EStatus.PENDING)
         .password(PASSWORD).build();
     when(userService.checkExistEmailAndStatus("test5.6@gmail.com", EStatus.ACTIVE))
@@ -301,8 +310,8 @@ class AuthenticationServiceTest {
     when(userRepository.save(user)).thenReturn(user);
     when(jwtProvider.generateCodeForVerify("test5.6@gmail.com")).thenReturn(JWT);
     doNothing().when(sendMailExecutor)
-        .execute(new MailHandler(mailProvider, user, EUserAction.CREATED, JWT));
-    MessageResponse response = authenticationService.signUp(signUpRequest);
+        .execute(new MailHandler(mailProvider, user, EUserAction.CREATED, any(), JWT));
+    MessageResponse response = authenticationService.signUp(signUpRequest, httpServletRequest);
     String expectedCode = CommonConstant.CODE_SUCCESS;
     Assertions.assertEquals(expectedCode, response.getCode());
   }

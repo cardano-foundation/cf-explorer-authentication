@@ -43,6 +43,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.LocaleResolver;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +71,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final UserRepository userRepository;
 
   private final PasswordEncoder encoder;
+
+  private final LocaleResolver localeResolver;
 
   @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
       IgnoreRollbackException.class})
@@ -127,7 +130,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Transactional(rollbackFor = RuntimeException.class)
   @Override
-  public MessageResponse signUp(SignUpRequest signUpRequest) {
+  public MessageResponse signUp(SignUpRequest signUpRequest,
+      HttpServletRequest httpServletRequest) {
     String email = signUpRequest.getEmail();
     if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {
       throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
@@ -142,7 +146,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       user = userService.saveUser(signUpRequest);
     }
     String verifyCode = jwtProvider.generateCodeForVerify(email);
-    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));
+    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED,
+        localeResolver.resolveLocale(httpServletRequest), verifyCode));
     return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
         .message(CommonConstant.RESPONSE_SUCCESS).build();
   }

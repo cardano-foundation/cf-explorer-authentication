@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.LocaleResolver;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,8 @@ public class VerifyServiceImpl implements VerifyService {
   private final RedisProvider redisProvider;
 
   private final ThreadPoolExecutor sendMailExecutor;
+
+  private final LocaleResolver localeResolver;
 
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
@@ -82,13 +86,14 @@ public class VerifyServiceImpl implements VerifyService {
   }
 
   @Override
-  public MessageResponse forgotPassword(String email) {
+  public MessageResponse forgotPassword(String email, HttpServletRequest httpServletRequest) {
     UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.ACTIVE).orElse(null);
     if (Objects.isNull(user)) {
       return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
     }
     String code = jwtProvider.generateCodeForVerify(email);
-    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));
+    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD,
+        localeResolver.resolveLocale(httpServletRequest), code));
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 

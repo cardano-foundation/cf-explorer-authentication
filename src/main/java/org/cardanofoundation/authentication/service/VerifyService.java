@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 
@@ -24,7 +25,7 @@ public interface VerifyService {
    * description: process confirm reset password
    * @update:
    */
-  MessageResponse forgotPassword(String email);
+  MessageResponse forgotPassword(String email, HttpServletRequest httpServletRequest);
 
   /*
    * @since: 19/07/2023

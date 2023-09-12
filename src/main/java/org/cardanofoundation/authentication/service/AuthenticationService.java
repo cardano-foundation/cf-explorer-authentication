@@ -23,7 +23,7 @@ public interface AuthenticationService {
    * description: process register account
    * @update: 6/12/2022
    */
-  MessageResponse signUp(SignUpRequest signUpRequest);
+  MessageResponse signUp(SignUpRequest signUpRequest, HttpServletRequest httpServletRequest);
 
   /*
    * @since: 24/10/2022

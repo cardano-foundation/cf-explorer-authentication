@@ -29,4 +29,8 @@ public class CommonConstant {
   public static final String PREFIXED_ADDRESS = "stake";
 
   public static final int TX_HASH_LENGTH = 64;
+
+  public static final String ENGLISH_URL = "/en";
+
+  public static final String FRENCH_URL = "/fr";
 }
