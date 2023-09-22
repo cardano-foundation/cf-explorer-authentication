@@ -1,66 +1,6 @@
-infrastructure:
-  host: localhost
-
-spring:
-  datasource:
-    url: jdbc:postgresql://${infrastructure.host}:5432/auth?currentSchema=authentication
-    name: cardano-authentication
-    username: postgres
-    password: 123456
-    driver-class-name: org.postgresql.Driver
-    tomcat:
-      max-wait: 10000
-      max-active: 50
-      test-on-borrow: true
-    hikari:
-      pool-name: authentication-pool
-      minimum-idle: 1 #minimum number of idle connections maintained by HikariCP in a connection pool
-      maximum-pool-size: 10 #maximum pool size
-      idle-timeout: 300000 #maximum idle time for connection
-      max-lifetime: 900000 #maximum lifetime in milliseconds of a connection in the pool after it is closed.
-      connection-timeout: 50000 #maximum number of milliseconds that a client will wait for a connection
-      auto-commit: false #default auto-commit behavior.
-      connection-init-sql: SELECT 1
-      data-source-properties:
-        cachePrepStmts: true
-        prepStmtCacheSize: 250
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
-        useLocalSessionState: true
-        rewriteBatchedStatements: true
-        cacheResultSetMetadata: true
-        cacheServerConfiguration: true
-        elideSetAutoCommits: true
-        maintainTimeStats: false
-  jpa:
-    open-in-view: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: authentication
-        show_sql: true
-        format_sql: true
-
-  ## Flyway config
-  flyway:
-    enabled: false
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-    group: true
-    sql-migration-prefix: V
-    sql-migration-separator: __
-    sql-migration-suffixes: .sql
-    baseline-on-migrate: true
-
 domain:
   client: http://localhost:3000
   server: http://localhost:8021
-  lang: /en
 
 server:
   port: 8021
@@ -78,3 +18,15 @@ redis:
   sentinels:
     - host: ${REDIS_SENTINEL_HOST:localhost}
       port: 26379
+
+keycloak:
+  realm: ${KEYCLOAK_REALM_NAME:cardano_authen}
+  auth-server-url: ${KEYCLOAK_SERVER_URL:http://10.4.21.151:8080/}
+  ssl-required: external
+  resource: ${KEYCLOAK_CLIENT_ID:client_test}
+  credentials:
+    secret: ${KEYCLOAK_CLIENT_SECRET:LuJVyHvOipnRFFAWO7AnUFWkyKCJ3ax4}
+  use-resource-role-mappings: ${KEYCLOAK_ROLE_MAPPING:true}
+  bearer-only: ${KEYCLOAK_BEARER_ONLY:true}
+
+timeToLiveRedisSignOut: ${TIME_TO_LIVE_REDIS_SIGN_OUT:48}

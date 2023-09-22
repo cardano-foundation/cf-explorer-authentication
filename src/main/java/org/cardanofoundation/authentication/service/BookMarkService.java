@@ -3,8 +3,6 @@ package org.cardanofoundation.authentication.service;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.cardanofoundation.authentication.model.request.bookmark.BookMarkRequest;
-import org.cardanofoundation.authentication.model.request.bookmark.BookMarksRequest;
-import org.cardanofoundation.authentication.model.response.AddBookMarkResponse;
 import org.cardanofoundation.authentication.model.response.BookMarkResponse;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
@@ -30,10 +28,10 @@ public interface BookMarkService {
 
   /*
    * @since: 10/11/2022
-   * description: delete bookmark by id
+   * description: delete bookmark
    * @update: 10/1/2023
    */
-  MessageResponse deleteById(Long bookMarkId);
+  MessageResponse deleteBookMark(String type, String network, String keyword, HttpServletRequest httpServletRequest);
 
   /*
    * @since: 30/01/2023
@@ -42,12 +40,4 @@ public interface BookMarkService {
    */
   List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest,
       String network);
-
-  /*
-   * @since: 31/01/2023
-   * description: add bookmark list
-   * @update:
-   */
-  AddBookMarkResponse addBookMarks(BookMarksRequest bookMarksRequest,
-      HttpServletRequest httpServletRequest);
 }

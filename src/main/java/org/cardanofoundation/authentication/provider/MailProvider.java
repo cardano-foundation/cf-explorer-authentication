@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,14 +26,14 @@ public class MailProvider {
 
   private final LocaleProvider localeProvider;
 
-  public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code, Locale locale) {
-    log.info("start send verify mail to: " + user.getEmail());
+  public void sendVerifyEmail(String email, EUserAction emailType, String code, Locale locale) {
+    log.info("start send verify mail to: " + email);
     String contentHtml = localeProvider.getValue("mail.base-content", locale);
     try {
       MimeMessage mailMessage = javaMailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);
       helper.setFrom(mail.getFrom(), localeProvider.getValue("mail.sender", locale));
-      helper.setTo(user.getEmail());
+      helper.setTo(email);
       StringBuilder verifyURL = new StringBuilder(domainClient);
       if (locale.equals(new Locale("en"))) {
         verifyURL.append(CommonConstant.ENGLISH_URL);

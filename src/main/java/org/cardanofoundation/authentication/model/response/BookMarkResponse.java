@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.model.response;
 
+import lombok.Builder;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import java.time.Instant;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class BookMarkResponse {
 
   private Long id;
@@ -16,9 +18,9 @@ public class BookMarkResponse {
 
   private String keyword;
 
-  private EBookMarkType type;
+  private String type;
 
-  private ENetworkType network;
+  private String network;
 
   private Instant createdDate;
 }

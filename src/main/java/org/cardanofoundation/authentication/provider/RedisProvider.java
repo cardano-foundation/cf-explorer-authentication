@@ -1,11 +1,13 @@
 package org.cardanofoundation.authentication.provider;
 
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @RequiredArgsConstructor
 public class RedisProvider {
+
+  @Value("${timeToLiveRedisSignOut}")
+  private int timeToLiveRedisSignOut;
 
   private final RedisTemplate<String, Object> redisTemplate;
 
@@ -23,7 +28,8 @@ public class RedisProvider {
    */
   public void blacklistJwt(String token, String accountId) {
     if (!isTokenBlacklisted(token)) {
-      redisTemplate.opsForValue().set(RedisConstant.JWT + token, accountId);
+      redisTemplate.opsForValue()
+          .set(RedisConstant.JWT + token, accountId, timeToLiveRedisSignOut, TimeUnit.HOURS);
     }
   }
 

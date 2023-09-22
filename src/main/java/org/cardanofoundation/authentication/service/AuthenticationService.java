@@ -14,21 +14,21 @@ public interface AuthenticationService {
   /*
    * @since: 21/10/2022
    * description: process login with wallet or email
-   * @update:
+   * @update: 20/09/2023
    */
   SignInResponse signIn(SignInRequest signInRequest);
 
   /*
    * @since: 21/10/2022
    * description: process register account
-   * @update: 6/12/2022
+   * @update: 20/09/2023
    */
   MessageResponse signUp(SignUpRequest signUpRequest, HttpServletRequest httpServletRequest);
 
   /*
    * @since: 24/10/2022
    * description: process gen new access token by refresh token
-   * @update: 13/12/2022
+   * @update: 20/09/2023
    */
   RefreshTokenResponse refreshToken(String refreshJwt,
       HttpServletRequest httpServletRequest);
@@ -36,7 +36,7 @@ public interface AuthenticationService {
   /*
    * @since: 24/10/2022
    * description: process logout account
-   * @update: 8/11/2022
+   * @update: 20/09/2023
    */
   MessageResponse signOut(SignOutRequest signOutRequest, HttpServletRequest httpServletRequest);
 

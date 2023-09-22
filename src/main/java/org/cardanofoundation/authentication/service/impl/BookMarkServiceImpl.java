@@ -1,30 +1,28 @@
 package org.cardanofoundation.authentication.service.impl;
 
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.mapper.BookMarkMapper;
-import org.cardanofoundation.authentication.model.entity.BookMarkEntity;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
-import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.request.bookmark.BookMarkRequest;
-import org.cardanofoundation.authentication.model.request.bookmark.BookMarksRequest;
-import org.cardanofoundation.authentication.model.response.AddBookMarkResponse;
 import org.cardanofoundation.authentication.model.response.BookMarkResponse;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
-import org.cardanofoundation.authentication.repository.BookMarkRepository;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.service.BookMarkService;
-import org.cardanofoundation.authentication.service.UserService;
-import org.springframework.data.domain.Page;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,33 +31,44 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class BookMarkServiceImpl implements BookMarkService {
 
-  private final UserService userService;
-
   private final JwtProvider jwtProvider;
 
-  private final BookMarkRepository bookMarkRepository;
+  private final KeycloakProvider keycloakProvider;
 
-  private static final BookMarkMapper bookMarkMapper = BookMarkMapper.INSTANCE;
 
   @Override
   public BookMarkResponse addBookMark(BookMarkRequest bookMarkRequest,
       HttpServletRequest httpServletRequest) {
     String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
-    UserEntity user = userService.findByAccountId(accountId);
-    if (Objects.nonNull(
-        bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
-            bookMarkRequest.getType(), bookMarkRequest.getNetwork()))) {
-      throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);
+    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();
+    Map<String, List<String>> attributes = user.getAttributes();
+    String bookmarkKey =
+        CommonConstant.ATTRIBUTE_BOOKMARK + bookMarkRequest.getNetwork() + "_"
+            + bookMarkRequest.getType();
+    List<String> bookmarkList = null;
+    if (Objects.nonNull(attributes) && Objects.nonNull(attributes.get(bookmarkKey))) {
+      bookmarkList = attributes.get(bookmarkKey);
+      if (bookmarkList.stream().anyMatch(key -> key.contains(bookMarkRequest.getKeyword()))) {
+        throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);
+      }
     }
-    Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId(),
-        bookMarkRequest.getNetwork());
-    if (countCurrent >= CommonConstant.LIMIT_BOOKMARK) {
+    if (Objects.nonNull(bookmarkList) && bookmarkList.size() >= CommonConstant.LIMIT_BOOKMARK) {
       throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);
     }
-    BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
-    bookMark.setUser(user);
-    BookMarkEntity bookMarkRes = bookMarkRepository.save(bookMark);
-    return bookMarkMapper.entityToResponse(bookMarkRes);
+    if (Objects.isNull(attributes)) {
+      attributes = new HashMap<>();
+    }
+    if (Objects.isNull(bookmarkList)) {
+      bookmarkList = new ArrayList<>();
+    }
+    Instant addTime = Instant.now();
+    bookmarkList.add(
+        bookMarkRequest.getKeyword() + CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME + addTime);
+    attributes.put(bookmarkKey, bookmarkList);
+    user.setAttributes(attributes);
+    keycloakProvider.getResource().get(user.getId()).update(user);
+    return BookMarkResponse.builder().type(bookMarkRequest.getType()).createdDate(addTime)
+        .keyword(bookMarkRequest.getKeyword()).network(bookMarkRequest.getNetwork()).build();
   }
 
   @Override
@@ -68,58 +77,78 @@ public class BookMarkServiceImpl implements BookMarkService {
       Pageable pageable) {
     BasePageResponse<BookMarkResponse> response = new BasePageResponse<>();
     String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
-    UserEntity user = userService.findByAccountId(accountId);
-    Page<BookMarkEntity> bookMarkPage = bookMarkRepository.findAllBookMarkByUserAndType(
-        user.getId(),
-        bookMarkType, network, pageable);
-    if (!bookMarkPage.isEmpty()) {
-      response.setData(bookMarkMapper.listEntityToResponse(bookMarkPage.getContent()));
+    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();
+    Map<String, List<String>> attributes = user.getAttributes();
+    String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + "_" + bookMarkType;
+    List<BookMarkResponse> bookMarkResponseList = new ArrayList<>();
+    List<String> bookmarkList = new ArrayList<>();
+    if (Objects.nonNull(attributes) && Objects.nonNull(attributes.get(bookmarkKey))) {
+      bookmarkList = attributes.get(bookmarkKey);
+      bookmarkList.forEach(value -> bookMarkResponseList.add(
+          BookMarkResponse.builder().keyword(
+                  StringUtils.substringBefore(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))
+              .createdDate(Instant.parse(
+                  StringUtils.substringAfter(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME)))
+              .type(bookMarkType)
+              .network(network)
+              .build()));
     }
-    response.setTotalItems(bookMarkPage.getTotalElements());
+    response.setTotalItems(bookmarkList.size());
+    response.setData(bookMarkResponseList);
     return response;
   }
 
   @Override
-  public MessageResponse deleteById(Long bookMarkId) {
-    BookMarkEntity bookMark = bookMarkRepository.findById(bookMarkId)
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
-    bookMarkRepository.delete(bookMark);
-    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
+  public MessageResponse deleteBookMark(String type, String network, String keyword,
+      HttpServletRequest httpServletRequest) {
+    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
+    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();
+    Map<String, List<String>> attributes = user.getAttributes();
+    String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + "_" + type;
+    boolean deleteFlag = false;
+    if (Objects.nonNull(attributes) && Objects.nonNull(attributes.get(bookmarkKey))) {
+      List<String> bookmarkList = attributes.get(bookmarkKey);
+      for (String val : bookmarkList) {
+        if (val.contains(keyword)) {
+          bookmarkList.remove(val);
+          deleteFlag = true;
+          break;
+        }
+      }
+      attributes.put(bookmarkKey, bookmarkList);
+      user.setAttributes(attributes);
+      keycloakProvider.getResource().get(accountId).update(user);
+    }
+    return deleteFlag ? new MessageResponse(CommonConstant.CODE_SUCCESS,
+        CommonConstant.RESPONSE_SUCCESS) : new MessageResponse(CommonErrorCode.UNKNOWN_ERROR);
   }
 
   @Override
   public List<BookMarkResponse> findKeyBookMark(HttpServletRequest httpServletRequest,
       String network) {
+    List<BookMarkResponse> response = new ArrayList<>();
     String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
-    UserEntity user = userService.findByAccountId(accountId);
-    List<BookMarkEntity> bookMarks = bookMarkRepository.findAllKeyBookMarkByUser(user.getId(),
-        network);
-    return bookMarkMapper.listEntityToResponse(bookMarks);
-  }
-
-  @Override
-  public AddBookMarkResponse addBookMarks(BookMarksRequest bookMarksRequest,
-      HttpServletRequest httpServletRequest) {
-    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);
-    UserEntity user = userService.findByAccountId(accountId);
-    AtomicReference<Integer> pass = new AtomicReference<>(0);
-    AtomicReference<Integer> fail = new AtomicReference<>(0);
-    bookMarksRequest.getBookMarks().forEach(bookMarkRequest -> {
-      if (Objects.isNull(
-          bookMarkRepository.checkExistBookMark(user.getId(), bookMarkRequest.getKeyword(),
-              bookMarkRequest.getType(), bookMarkRequest.getNetwork()))) {
-        Integer countCurrent = bookMarkRepository.getCountBookMarkByUser(user.getId(),
-            bookMarkRequest.getNetwork());
-        if (countCurrent < CommonConstant.LIMIT_BOOKMARK) {
-          BookMarkEntity bookMark = bookMarkMapper.requestToEntity(bookMarkRequest);
-          bookMark.setUser(user);
-          bookMarkRepository.save(bookMark);
-          pass.getAndSet(pass.get() + 1);
-        } else {
-          fail.getAndSet(fail.get() + 1);
+    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();
+    Map<String, List<String>> attributes = user.getAttributes();
+    List<String> bookMarkKeys = Arrays.asList(EBookMarkType.STAKE_KEY.name(),
+        EBookMarkType.POOL.name(), EBookMarkType.ADDRESS.name(), EBookMarkType.BLOCK.name(),
+        EBookMarkType.EPOCH.name(), EBookMarkType.TRANSACTION.name());
+    if (Objects.nonNull(attributes)) {
+      bookMarkKeys.forEach(key -> {
+        String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + "_" + key;
+        List<String> bookmarkList = attributes.get(bookmarkKey);
+        if (Objects.nonNull(bookmarkList)) {
+          bookmarkList.forEach(value -> response.add(
+              BookMarkResponse.builder().keyword(
+                      StringUtils.substringBefore(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))
+                  .createdDate(Instant.parse(StringUtils.substringAfter(value,
+                      CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME)))
+                  .network(network)
+                  .type(key)
+                  .build()));
         }
-      }
-    });
-    return AddBookMarkResponse.builder().passNumber(pass.get()).failNumber(fail.get()).build();
+      });
+    }
+    return response;
   }
 }

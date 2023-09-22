@@ -4,10 +4,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
+@Getter
 public enum EUserAction {
-  CREATED("Created"), UPDATED("Updated"), LOGIN("Login"), LOGOUT("Logout"), TRANSFERS_WALLET(
-      "Transfers wallet"), RESET_PASSWORD("Reset password admin");
+  CREATED("Created"), RESET_PASSWORD("Reset password");
 
   private final String action;
   private static final Map<String, EUserAction> userActionMap = Arrays.stream(values())
@@ -17,7 +18,4 @@ public enum EUserAction {
     this.action = action;
   }
 
-  public String getAction() {
-    return this.action;
-  }
 }

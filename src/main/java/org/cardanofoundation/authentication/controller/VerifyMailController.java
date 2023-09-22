@@ -50,7 +50,7 @@ public class VerifyMailController {
     return ResponseEntity.ok(verifyService.checkVerifySignUpByEmail(code));
   }
 
-  @Operation(description = "Forgot password, need to create a new password")
+  @Operation(description = "Initiate the password reset process")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -68,7 +68,7 @@ public class VerifyMailController {
         verifyService.forgotPassword(email, httpServletRequest));
   }
 
-  @Operation(description = "Update new password for the account")
+  @Operation(description = "Set a new password for the account")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MessageResponse.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
