@@ -31,7 +31,6 @@ import org.cardanofoundation.authentication.service.AuthenticationService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.authentication.util.NonceUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.json.JSONObject;
 import org.keycloak.admin.client.Keycloak;
@@ -40,7 +39,6 @@ import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -57,8 +55,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final KeycloakProvider keycloakProvider;
 
-  @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
-      IgnoreRollbackException.class})
   @Override
   public SignInResponse signIn(SignInRequest signInRequest) {
     log.info("login is running...");
@@ -107,7 +103,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .refreshToken(response.getRefreshToken()).build();
   }
 
-  @Transactional(rollbackFor = RuntimeException.class)
   @Override
   public MessageResponse signUp(SignUpRequest signUpRequest) {
     Response response;
