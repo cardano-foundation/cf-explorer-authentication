@@ -11,8 +11,8 @@ import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ class VerifyMailControllerTest {
   private VerifyService verifyService;
 
   @MockBean
-  private UserService userService;
+  private KeycloakProvider keycloakProvider;
 
   @MockBean
   private JwtProvider jwtProvider;

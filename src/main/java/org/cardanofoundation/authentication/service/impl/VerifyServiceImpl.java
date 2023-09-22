@@ -1,24 +1,22 @@
 package org.cardanofoundation.authentication.service.impl;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
-import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.authentication.repository.UserRepository;
-import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,19 +24,15 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class VerifyServiceImpl implements VerifyService {
 
-  private final UserRepository userRepository;
-
-  private final UserService userService;
-
   private final MailProvider mailProvider;
-
-  private final PasswordEncoder encoder;
 
   private final JwtProvider jwtProvider;
 
   private final RedisProvider redisProvider;
 
   private final ThreadPoolExecutor sendMailExecutor;
+
+  private final KeycloakProvider keycloakProvider;
 
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
@@ -51,11 +45,12 @@ public class VerifyServiceImpl implements VerifyService {
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
     redisProvider.blacklistJwt(code, accountId);
-    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.PENDING);
+    UserRepresentation user = keycloakProvider.getUser(accountId);
     if (Objects.nonNull(user)) {
-      userService.activeUser(accountId);
+      user.setEnabled(true);
+      keycloakProvider.getResource().get(user.getId()).update(user);
     } else {
-      return new MessageResponse(CommonErrorCode.VERIFY_CODE_NOT_PENDING);
+      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
     }
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
@@ -72,23 +67,23 @@ public class VerifyServiceImpl implements VerifyService {
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
     redisProvider.blacklistJwt(code, accountId);
-    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.ACTIVE);
-    if (Objects.isNull(user)) {
-      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
-    }
-    user.setPassword(encoder.encode(resetPasswordRequest.getPassword()));
-    userRepository.save(user);
+    UserRepresentation user = keycloakProvider.getUser(accountId);
+    user.setCredentials(
+        Collections.singletonList(
+            keycloakProvider.createPasswordCredentials(resetPasswordRequest.getPassword())));
+    keycloakProvider.getResource().get(user.getId()).update(user);
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Override
   public MessageResponse forgotPassword(String email) {
-    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.ACTIVE).orElse(null);
+    UserRepresentation user = keycloakProvider.getUser(email);
     if (Objects.isNull(user)) {
       return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
     }
     String code = jwtProvider.generateCodeForVerify(email);
-    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));
+    sendMailExecutor.execute(
+        new MailHandler(mailProvider, email, EUserAction.RESET_PASSWORD, code));
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 

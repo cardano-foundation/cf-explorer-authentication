@@ -4,7 +4,6 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -23,8 +22,8 @@ public class MailProvider {
 
   private final MailProperties mail;
 
-  public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code) {
-    log.info("start send verify mail to: " + user.getEmail());
+  public void sendVerifyEmail(String email, EUserAction emailType, String code) {
+    log.info("start send verify mail to: " + email);
     String contentHtml
         = "Hi there,<br />"
         + "Please click the link below to verify account:<br />"
@@ -34,7 +33,7 @@ public class MailProvider {
       MimeMessage mailMessage = javaMailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);
       helper.setFrom(mail.getFrom(), mail.getSender());
-      helper.setTo(user.getEmail());
+      helper.setTo(email);
       StringBuilder verifyURL = new StringBuilder(domainClient);
       switch (emailType) {
         case CREATED -> {

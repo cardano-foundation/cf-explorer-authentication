@@ -10,15 +10,7 @@ import lombok.Setter;
 @Builder
 public class UserInfoResponse {
 
-  private String address;
-
-  private String email;
-
-  private String avatar;
-
-  private Integer sizeNote;
-
-  private Integer sizeBookmark;
+  private String username;
 
   private Instant lastLogin;
 }

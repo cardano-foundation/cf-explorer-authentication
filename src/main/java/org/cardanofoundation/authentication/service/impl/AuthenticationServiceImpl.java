@@ -1,18 +1,20 @@
 package org.cardanofoundation.authentication.service.impl;
 
+import com.mashape.unirest.http.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ThreadPoolExecutor;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.model.entity.RefreshTokenEntity;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
-import org.cardanofoundation.authentication.model.entity.WalletEntity;
-import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
-import org.cardanofoundation.authentication.model.enums.EStatus;
+import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
@@ -22,25 +24,21 @@ import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
 import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.authentication.repository.UserRepository;
-import org.cardanofoundation.authentication.repository.WalletRepository;
 import org.cardanofoundation.authentication.service.AuthenticationService;
-import org.cardanofoundation.authentication.service.RefreshTokenService;
-import org.cardanofoundation.authentication.service.UserService;
-import org.cardanofoundation.authentication.service.WalletService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.authentication.util.NonceUtils;
 import org.cardanofoundation.explorer.common.exceptions.BusinessException;
 import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.json.JSONObject;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,27 +47,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-  private final UserService userService;
-
-  private final AuthenticationManager authenticationManager;
-
   private final JwtProvider jwtProvider;
 
-  private final RefreshTokenService refreshTokenService;
-
-  private final WalletService walletService;
-
   private final RedisProvider redisProvider;
-
-  private final WalletRepository walletRepository;
 
   private final MailProvider mailProvider;
 
   private final ThreadPoolExecutor sendMailExecutor;
 
-  private final UserRepository userRepository;
-
-  private final PasswordEncoder encoder;
+  private final KeycloakProvider keycloakProvider;
 
   @Transactional(rollbackFor = {RuntimeException.class}, noRollbackFor = {
       IgnoreRollbackException.class})
@@ -78,9 +64,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     log.info("login is running...");
     String accountId = "";
     String password = "";
-    String address = "";
-    WalletEntity wallet = null;
-    Integer type = signInRequest.getType();
+    int type = signInRequest.getType();
     if (type == 0) {
       log.info("login with email and password...");
       accountId = signInRequest.getEmail();
@@ -89,19 +73,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       log.info("login with cardano wallet...");
       accountId = signInRequest.getAddress();
       password = NonceUtils.getNonceFromSignature(signInRequest.getSignature());
-      wallet = walletRepository.findWalletByAddress(signInRequest.getAddress())
-          .orElseThrow(() -> new BusinessException(CommonErrorCode.WALLET_IS_NOT_EXIST));
-      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
-        log.error("error: nonce value is expired");
-        walletService.updateNonce(wallet);
-        throw new IgnoreRollbackException(CommonErrorCode.NONCE_EXPIRED);
-      }
     }
-    Authentication authentication;
+    AccessTokenResponse response;
     try {
-      authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(accountId, password));
-    } catch (AuthenticationException e) {
+      Keycloak keycloak = keycloakProvider.keycloakBuilderWhenLogin(accountId, password);
+      response = keycloak.tokenManager().getAccessToken();
+    } catch (Exception e) {
       log.error("Exception authentication: " + e.getMessage());
       if (type == 0) {
         throw new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID);
@@ -109,84 +86,126 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);
       }
     }
-    UserEntity user = userService.findByAccountId(accountId);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    String accessToken = jwtProvider.generateJwtToken(authentication, accountId);
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    RefreshTokenEntity refreshToken = refreshTokenService.addRefreshToken(user);
-    if (type == 0) {
-      address = user.getStakeKey();
-    } else {
-      address = signInRequest.getAddress();
-      walletService.updateNonce(wallet);
+    UserRepresentation user = keycloakProvider.getUser(accountId);
+    UsersResource usersResource = keycloakProvider.getResource();
+    Map<String, List<String>> attributes = user.getAttributes();
+    if (Objects.isNull(attributes)) {
+      attributes = new HashMap<>();
     }
-    return SignInResponse.builder().token(accessToken).address(address)
-        .email(userDetails.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
-        .refreshToken(refreshToken.getToken()).build();
+    if (type == 1) {
+      String nonce = NonceUtils.createNonce();
+      attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));
+      user.setCredentials(
+          Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));
+    }
+    attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));
+    user.setAttributes(attributes);
+    usersResource.get(user.getId()).update(user);
+
+    return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
+        .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
+        .refreshToken(response.getRefreshToken()).build();
   }
 
   @Transactional(rollbackFor = RuntimeException.class)
   @Override
   public MessageResponse signUp(SignUpRequest signUpRequest) {
+    Response response;
     String email = signUpRequest.getEmail();
-    if (Boolean.TRUE.equals(userService.checkExistEmailAndStatus(email, EStatus.ACTIVE))) {
+    UserRepresentation userExist = keycloakProvider.getUser(email);
+    if (Objects.nonNull(userExist) && userExist.isEnabled()) {
       throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
     }
-    String password = encoder.encode(signUpRequest.getPassword());
-    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.PENDING).orElse(null);
-    if (Objects.nonNull(user)) {
-      user.setPassword(password);
-      userRepository.save(user);
+    UsersResource usersResource = keycloakProvider.getResource();
+    CredentialRepresentation encodePassword = keycloakProvider.createPasswordCredentials(
+        signUpRequest.getPassword());
+    if (Objects.nonNull(userExist)) {
+      userExist.setCredentials(Collections.singletonList(encodePassword));
+      usersResource.get(userExist.getId()).update(userExist);
+      response = Response.status(Status.CREATED).build();
     } else {
-      signUpRequest.setPassword(password);
-      user = userService.saveUser(signUpRequest);
+      UserRepresentation newUser = new UserRepresentation();
+      newUser.setUsername(email);
+      newUser.setEmail(email);
+      newUser.setCredentials(Collections.singletonList(encodePassword));
+      newUser.setEnabled(false);
+      newUser.setEmailVerified(true);
+      response = usersResource.create(newUser);
     }
-    String verifyCode = jwtProvider.generateCodeForVerify(email);
-    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.CREATED, verifyCode));
-    return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
-        .message(CommonConstant.RESPONSE_SUCCESS).build();
+    if (response.getStatus() == 201) {
+      String verifyCode = jwtProvider.generateCodeForVerify(email);
+      sendMailExecutor.execute(
+          new MailHandler(mailProvider, email, EUserAction.CREATED, verifyCode));
+      return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
+          .message(CommonConstant.RESPONSE_SUCCESS).build();
+    }
+    return new MessageResponse(CommonErrorCode.UNKNOWN_ERROR);
   }
 
   @Override
   public RefreshTokenResponse refreshToken(String refreshJwt,
       HttpServletRequest httpServletRequest) {
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    return refreshTokenService.findByRefToken(refreshJwt).map(refreshTokenService::verifyExpiration)
-        .map(refToken -> {
-          UserEntity user = refToken.getUser();
-          String address = walletRepository.findAddressByUserId(user.getId());
-          String accountId = Objects.isNull(address) ? user.getEmail() : address;
-          redisProvider.blacklistJwt(accessToken, accountId);
-          return jwtProvider.generateJwtToken(user, accountId);
-        }).map(newAccessToken -> RefreshTokenResponse.builder().accessToken(newAccessToken)
-            .refreshToken(refreshJwt).tokenType(CommonConstant.TOKEN_TYPE).build())
-        .orElseThrow(() -> new BusinessException(CommonErrorCode.UNKNOWN_ERROR));
+    if (redisProvider.isTokenBlacklisted(refreshJwt)) {
+      throw new BusinessException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
+    }
+    try {
+      JsonNode jsonNode = keycloakProvider.refreshToken(refreshJwt);
+      JSONObject jsonObj = jsonNode.getObject();
+      if (Objects.nonNull(jsonObj)) {
+        redisProvider.blacklistJwt(accessToken, RedisConstant.JWT);
+        return RefreshTokenResponse.builder().accessToken(jsonObj.get("access_token").toString())
+            .refreshToken(jsonObj.get("refresh_token").toString())
+            .tokenType(CommonConstant.TOKEN_TYPE).build();
+      }
+    } catch (Exception ex) {
+      log.error(
+          "Error: when generate access token from refresh token by keycloak: " + ex.getMessage());
+      throw new BusinessException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
+    }
+    return null;
   }
 
   @Override
   public MessageResponse signOut(SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
-    String refreshJwt = signOutRequest.getRefreshJwt();
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    refreshTokenService.revokeRefreshToken(refreshJwt);
-    redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());
+    if (!redisProvider.isTokenBlacklisted(accessToken)) {
+      redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());
+    }
+    if (!redisProvider.isTokenBlacklisted(signOutRequest.getRefreshJwt())) {
+      redisProvider.blacklistJwt(signOutRequest.getRefreshJwt(), signOutRequest.getAccountId());
+    }
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Override
   public NonceResponse findNonceByAddress(String address, String walletName) {
-    Optional<WalletEntity> walletOpt = walletRepository.findWalletByAddress(address);
-    if (walletOpt.isPresent()) {
-      WalletEntity wallet = walletOpt.get();
-      if (wallet.getExpiryDateNonce().compareTo(Instant.now()) < 0) {
-        wallet = walletService.updateNonce(wallet);
-      }
+    UserRepresentation userExist = keycloakProvider.getUser(address);
+    String nonce = NonceUtils.createNonce();
+    if (Objects.nonNull(userExist)) {
+      userExist.setCredentials(
+          Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));
+      Map<String, List<String>> attributes = userExist.getAttributes();
+      attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));
+      userExist.setAttributes(attributes);
+      keycloakProvider.getResource().get(userExist.getId()).update(userExist);
       return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS)
-          .nonce(wallet.getNonce()).build();
+          .nonce(nonce).build();
     }
-    UserEntity user = userService.saveUser(address);
-    WalletEntity wallet = walletService.saveWallet(address, user, walletName);
+    UsersResource usersResource = keycloakProvider.getResource();
+    UserRepresentation newUser = new UserRepresentation();
+    newUser.setUsername(address);
+    newUser.setCredentials(
+        Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));
+    newUser.setEnabled(true);
+    newUser.setEmailVerified(true);
+    Map<String, List<String>> attributes = new HashMap<>();
+    attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));
+    attributes.put(CommonConstant.ATTRIBUTE_WALLET_NAME, List.of(walletName));
+    newUser.setAttributes(attributes);
+    usersResource.create(newUser);
     return NonceResponse.builder().message(CommonConstant.CODE_FAILURE)
-        .nonce(wallet.getNonce()).build();
+        .nonce(nonce).build();
   }
 }

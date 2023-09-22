@@ -75,13 +75,24 @@
 		<version.spring-boot-starter-aop>3.0.4</version.spring-boot-starter-aop>
 		<version.pitest>1.14.2</version.pitest>
 		<version.pitest-junit5>1.1.1</version.pitest-junit5>
+		<version.keycloak>15.0.2</version.keycloak>
+		<version.jjwt>0.11.5</version.jjwt>
+		<version.bcprov-jdk15on>1.70</version.bcprov-jdk15on>
+		<version.hibernate-validator>8.0.0.Final</version.hibernate-validator>
+		<version.eddsa>0.3.0</version.eddsa>
+		<version.springdoc-webmvc-ui>2.1.0</version.springdoc-webmvc-ui>
+		<version.github-classgraph>4.8.157</version.github-classgraph>
+		<version.explorer-common>0.1.2-SNAPSHOT</version.explorer-common>
+		<version.mapstruct>1.5.3.Final</version.mapstruct>
+		<version.springdoc-openapi-common>1.7.0</version.springdoc-openapi-common>
+		<version.lettuce-core>6.2.3.RELEASE</version.lettuce-core>
+		<version.jakarta-persistence-api>3.1.0</version.jakarta-persistence-api>
+		<version.jakarta-servlet-api>6.0.0</version.jakarta-servlet-api>
+		<version.snakeyaml>2.0</version.snakeyaml>
+		<version.unirest-java>1.4.9</version.unirest-java>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
@@ -97,11 +108,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -137,39 +143,39 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.11.5</version>
+			<version>${version.jjwt}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.11.5</version>
+			<version>${version.jjwt}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.11.5</version>
+			<version>${version.jjwt}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.70</version>
+			<version>${version.bcprov-jdk15on}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>8.0.0.Final</version>
+			<version>${version.hibernate-validator}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.1.0</version>
+			<version>${version.springdoc-webmvc-ui}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.classgraph</groupId>
 			<artifactId>classgraph</artifactId>
-			<version>4.8.157</version>
+			<version>${version.github-classgraph}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.bloxbean.cardano</groupId>
@@ -184,31 +190,22 @@
 		<dependency>
 			<groupId>net.i2p.crypto</groupId>
 			<artifactId>eddsa</artifactId>
-			<version>0.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<version>${version.eddsa}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cardanofoundation.explorer</groupId>
 			<artifactId>common</artifactId>
-			<version>0.1.2-SNAPSHOT</version>
+			<version>${version.explorer-common}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
-			<version>1.5.3.Final</version>
+			<version>${version.mapstruct}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-common</artifactId>
-			<version>1.7.0</version>
+			<version>${version.springdoc-openapi-common}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -222,7 +219,7 @@
 		<dependency>
 			<groupId>io.lettuce</groupId>
 			<artifactId>lettuce-core</artifactId>
-			<version>6.2.3.RELEASE</version>
+			<version>${version.lettuce-core}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -232,23 +229,50 @@
 		<dependency>
 			<groupId>jakarta.persistence</groupId>
 			<artifactId>jakarta.persistence-api</artifactId>
-			<version>3.1.0</version>
+			<version>${version.jakarta-persistence-api}</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<version>6.0.0</version>
+			<version>${version.jakarta-servlet-api}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>2.0</version>
+			<version>${version.snakeyaml}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-starter</artifactId>
+			<version>${version.keycloak}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>${version.keycloak}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mashape.unirest</groupId>
+			<artifactId>unirest-java</artifactId>
+			<version>${version.unirest-java}</version>
+		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.keycloak.bom</groupId>
+				<artifactId>keycloak-adapter-bom</artifactId>
+				<version>${version.keycloak}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
