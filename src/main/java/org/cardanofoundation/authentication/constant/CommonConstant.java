@@ -33,4 +33,8 @@ public class CommonConstant {
   public static final String ATTRIBUTE_BOOKMARK = "BOOKMARK_";
 
   public static final String ATTRIBUTE_BOOKMARK_ADD_TIME = "{AddedOn=";
+
+  public static final String ENGLISH_URL = "/en";
+
+  public static final String FRENCH_URL = "/fr";
 }

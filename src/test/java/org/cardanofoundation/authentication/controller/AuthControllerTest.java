@@ -79,9 +79,10 @@ class AuthControllerTest {
     SignUpRequest request = new SignUpRequest();
     request.setEmail("test@gmail.com");
     request.setPassword("@nhPhuc96");
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     MessageResponse res = MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
         .message(CommonConstant.RESPONSE_SUCCESS).build();
-    given(authenticationService.signUp(request)).willReturn(res);
+    given(authenticationService.signUp(request, httpServletRequest)).willReturn(res);
     mockMvc.perform(post("/api/v1/auth/sign-up")
             .content(asJsonString(request))
             .contentType(MediaType.APPLICATION_JSON))

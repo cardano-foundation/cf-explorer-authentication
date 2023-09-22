@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -18,6 +19,7 @@ import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.LocaleResolver;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,8 @@ public class VerifyServiceImpl implements VerifyService {
   private final ThreadPoolExecutor sendMailExecutor;
 
   private final KeycloakProvider keycloakProvider;
+
+  private final LocaleResolver localeResolver;
 
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
@@ -76,14 +80,15 @@ public class VerifyServiceImpl implements VerifyService {
   }
 
   @Override
-  public MessageResponse forgotPassword(String email) {
+  public MessageResponse forgotPassword(String email, HttpServletRequest httpServletRequest) {
     UserRepresentation user = keycloakProvider.getUser(email);
     if (Objects.isNull(user)) {
       return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);
     }
     String code = jwtProvider.generateCodeForVerify(email);
     sendMailExecutor.execute(
-        new MailHandler(mailProvider, email, EUserAction.RESET_PASSWORD, code));
+        new MailHandler(mailProvider, email, EUserAction.RESET_PASSWORD,
+            localeResolver.resolveLocale(httpServletRequest), code));
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
