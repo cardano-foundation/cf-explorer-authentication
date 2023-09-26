@@ -100,7 +100,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));
     user.setAttributes(attributes);
     usersResource.get(user.getId()).update(user);
-
+    redisProvider.setValue(user.getId() + "_" + Instant.now(), response.getToken());
+    redisProvider.setValue(user.getId() + "_" + Instant.now(), response.getRefreshToken());
     return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
         .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(response.getRefreshToken()).build();
