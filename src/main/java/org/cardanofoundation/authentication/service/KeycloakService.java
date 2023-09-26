@@ -18,4 +18,11 @@ public interface KeycloakService {
    * @update:
    */
   UserInfoResponse infoUser(HttpServletRequest httpServletRequest);
+
+  /*
+   * @since: 25/09/2023
+   * description: log out when assign, un assign role for user
+   * @update:
+   */
+  Boolean roleMapping(String resourcePath);
 }

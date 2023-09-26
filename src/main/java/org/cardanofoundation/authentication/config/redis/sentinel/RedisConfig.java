@@ -35,6 +35,7 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Slf4j
@@ -123,6 +124,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
     redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+    redisTemplate.setDefaultSerializer(new StringRedisSerializer());
     return redisTemplate;
   }
 

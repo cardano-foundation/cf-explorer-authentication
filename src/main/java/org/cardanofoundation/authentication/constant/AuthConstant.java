@@ -25,7 +25,8 @@ public final class AuthConstant {
   };
 
   public static final String[] USER_WHITELIST = {
-      BASE_USER_PATH + "exist-email"
+      BASE_USER_PATH + "exist-email",
+      BASE_USER_PATH + "role-mapping"
   };
 
   public static final String[] DOCUMENT_WHITELIST = {

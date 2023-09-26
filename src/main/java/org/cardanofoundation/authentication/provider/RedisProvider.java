@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.provider;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -43,5 +44,41 @@ public class RedisProvider {
       throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
     }
     return redisTemplate.opsForValue().get(RedisConstant.JWT + token) != null;
+  }
+
+  /*
+   * @since: 25/09/2023
+   * description: get all key using prefix key
+   * @update:
+   */
+  public Set<String> getKeys(String pattern) {
+    return redisTemplate.keys(pattern);
+  }
+
+  /*
+   * @since: 25/09/2023
+   * description: get value from key
+   * @update:
+   */
+  public String getValue(String key) {
+    return (String) redisTemplate.opsForValue().get(key);
+  }
+
+  /*
+   * @since: 25/09/2023
+   * description: set key + value redis
+   * @update:
+   */
+  public void setValue(String key, String val) {
+    redisTemplate.opsForValue().set(key, val, timeToLiveRedisSignOut, TimeUnit.HOURS);
+  }
+
+  /*
+   * @since: 25/09/2023
+   * description: delete key + value redis
+   * @update:
+   */
+  public void remove(String key) {
+    redisTemplate.delete(key);
   }
 }
