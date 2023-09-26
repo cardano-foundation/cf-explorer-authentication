@@ -16,6 +16,8 @@ import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,5 +59,10 @@ public class UserController {
           required = true)
       @RequestParam("email") @Email String email) {
     return ResponseEntity.ok(keycloakService.checkExistEmail(email));
+  }
+
+  @PostMapping("/role-mapping")
+  public ResponseEntity<Boolean> roleMapping(@RequestBody String resourcePath) {
+    return ResponseEntity.ok(keycloakService.roleMapping(resourcePath));
   }
 }
