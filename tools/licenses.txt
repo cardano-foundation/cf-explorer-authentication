@@ -6,3 +6,19 @@ EPL 2.0
 EDL 1.0
 Eclipse Public License v2.0
 BSD License 3
+New BSD
+Eclipse Public License - v 2.0
+Bouncy Castle Licence
+The MIT License \\(MIT\\)
+GNU Lesser General Public License v3.0
+CC0 1.0 Universal
+Eclipse Public License 1.0
+GNU Library General Public License v2.1 or later
+Eclipse Distribution License - v 1.0
+GPL2 w/ CPE
+Eclipse Distribution License v. 1.0
+Eclipse Public License v. 2.0
+The JSON License
+GNU Lesser General Public License
+Simplified BSD
+MIT-0
