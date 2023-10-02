@@ -27,12 +27,6 @@ logging:
   level:
     root: info
 
-rsa:
-  key:
-    public-key-auth-path: /key/auth/public_key
-    private-key-mail-path: /key/mail/private_key
-    public-key-mail-path: /key/mail/public_key
-
 mail:
   from: 'test.sotatek1@gmail.com'
   sender: 'Sotatek'
