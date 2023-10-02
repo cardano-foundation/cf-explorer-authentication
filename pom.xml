@@ -82,7 +82,7 @@
 		<version.eddsa>0.3.0</version.eddsa>
 		<version.springdoc-webmvc-ui>2.1.0</version.springdoc-webmvc-ui>
 		<version.github-classgraph>4.8.157</version.github-classgraph>
-		<version.explorer-common>0.1.2-SNAPSHOT</version.explorer-common>
+		<version.explorer-common>0.1.2-SNAPSHOT-PR38</version.explorer-common>
 		<version.mapstruct>1.5.3.Final</version.mapstruct>
 		<version.springdoc-openapi-common>1.7.0</version.springdoc-openapi-common>
 		<version.lettuce-core>6.2.3.RELEASE</version.lettuce-core>

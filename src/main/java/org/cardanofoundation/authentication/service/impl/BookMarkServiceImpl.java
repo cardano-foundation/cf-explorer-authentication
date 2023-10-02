@@ -81,10 +81,15 @@ public class BookMarkServiceImpl implements BookMarkService {
     Map<String, List<String>> attributes = user.getAttributes();
     String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + "_" + bookMarkType;
     List<BookMarkResponse> bookMarkResponseList = new ArrayList<>();
-    List<String> bookmarkList = new ArrayList<>();
+    List<String> bookmarkList;
+    int size = 0;
     if (Objects.nonNull(attributes) && Objects.nonNull(attributes.get(bookmarkKey))) {
       bookmarkList = attributes.get(bookmarkKey);
-      bookmarkList.forEach(value -> bookMarkResponseList.add(
+      size = bookmarkList.size();
+      int start = (int) pageable.getOffset();
+      int end = Math.min((start + pageable.getPageSize()), size);
+      List<String> bookmarkPage = bookmarkList.subList(start, end);
+      bookmarkPage.forEach(value -> bookMarkResponseList.add(
           BookMarkResponse.builder().keyword(
                   StringUtils.substringBefore(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))
               .createdDate(Instant.parse(
@@ -93,7 +98,7 @@ public class BookMarkServiceImpl implements BookMarkService {
               .network(network)
               .build()));
     }
-    response.setTotalItems(bookmarkList.size());
+    response.setTotalItems(size);
     response.setData(bookMarkResponseList);
     return response;
   }

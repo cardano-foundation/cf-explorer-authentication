@@ -3,6 +3,7 @@ package org.cardanofoundation.authentication.controller;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,6 +62,16 @@ class UserControllerTest {
     mockMvc.perform(get("/api/v1/user/exist-email")
             .param("email", "Test@gmail.com")
             .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andDo(print());
+  }
+
+  @Test
+  void whenCallRoleMapping() throws Exception {
+    given(keycloakService.roleMapping("resourcePathTest")).willReturn(true);
+    mockMvc.perform(post("/api/v1/user/role-mapping")
+            .content("resourcePathTest")
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
   }

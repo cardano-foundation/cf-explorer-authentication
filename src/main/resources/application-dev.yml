@@ -27,3 +27,9 @@ keycloak:
   bearer-only: ${KEYCLOAK_BEARER_ONLY:true}
 
 timeToLiveRedisSignOut: ${TIME_TO_LIVE_REDIS_SIGN_OUT:48}
+
+rsa:
+  key:
+    public-auth: ${RSA_PUBLIC_KEY_AUTH}
+    private-mail: ${RSA_PRIVATE_KEY_MAIL}
+    public-mail: ${RSA_PUBLIC_KEY_MAIL}
