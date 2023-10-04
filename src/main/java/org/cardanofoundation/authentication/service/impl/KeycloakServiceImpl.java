@@ -2,11 +2,14 @@ package org.cardanofoundation.authentication.service.impl;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.model.enums.EResourceType;
+import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
@@ -41,16 +44,30 @@ public class KeycloakServiceImpl implements KeycloakService {
   }
 
   @Override
-  public Boolean roleMapping(String resourcePath) {
-    String[] resourceArr = resourcePath.split("/");
+  public Boolean roleMapping(EventModel model) {
+    String resourceType = model.getResourceType();
+    String[] resourceArr = model.getResourcePath().split("/");
     Set<String> keys = redisProvider.getKeys(resourceArr[1] + "*");
     if (Objects.nonNull(keys) && !keys.isEmpty()) {
-      keys.forEach(key -> {
-        String val = redisProvider.getValue(key);
-        redisProvider.blacklistJwt(val, resourceArr[1]);
-        redisProvider.remove(key);
-      });
+      if (resourceType.equals(EResourceType.REALM_ROLE.name())) {
+        Set<String> userPrefixKeys = new HashSet<>();
+        keys.forEach(key -> userPrefixKeys.add(redisProvider.getValue(key)));
+        Set<String> userKeys = new HashSet<>();
+        userPrefixKeys.forEach(
+            userPrefixKey -> userKeys.addAll(redisProvider.getKeys(userPrefixKey + "*")));
+        setInValidToken(userKeys);
+      } else {
+        setInValidToken(keys);
+      }
     }
     return true;
+  }
+
+  private void setInValidToken(Set<String> keys) {
+    keys.forEach(key -> {
+      String val = redisProvider.getValue(key);
+      redisProvider.blacklistJwt(val, key);
+      redisProvider.remove(key);
+    });
   }
 }

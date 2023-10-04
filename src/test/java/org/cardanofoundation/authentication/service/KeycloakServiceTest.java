@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.Set;
 import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.model.enums.EResourceType;
+import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
@@ -80,13 +82,17 @@ class KeycloakServiceTest {
   @Test
   void whenRoleMapping_returnResponse() {
     String resourcePath = "users/5363d283-2232-4a74-8e38-7c6f419d3218/role-mappings/realm";
+    String resourceType = EResourceType.REALM_ROLE_MAPPING.name();
+    EventModel model = new EventModel();
+    model.setResourceType(resourceType);
+    model.setResourcePath(resourcePath);
     Set<String> keys = new HashSet<>();
     keys.add("5363d283-2232-4a74-8e38-7c6f419d3218:");
     when(redisProvider.getKeys("5363d283-2232-4a74-8e38-7c6f419d3218*")).thenReturn(keys);
     when(redisProvider.getValue("5363d283-2232-4a74-8e38-7c6f419d3218:")).thenReturn("JWT:");
     doNothing().when(redisProvider).blacklistJwt("JWT:", "5363d283-2232-4a74-8e38-7c6f419d3218");
     doNothing().when(redisProvider).remove("5363d283-2232-4a74-8e38-7c6f419d3218:");
-    Boolean response = keycloakService.roleMapping(resourcePath);
+    Boolean response = keycloakService.roleMapping(model);
     Assertions.assertTrue(response);
   }
 }

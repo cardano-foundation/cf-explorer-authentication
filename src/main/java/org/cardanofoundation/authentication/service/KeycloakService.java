@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 
 public interface KeycloakService {
@@ -24,5 +25,5 @@ public interface KeycloakService {
    * description: log out when assign, un assign role for user
    * @update:
    */
-  Boolean roleMapping(String resourcePath);
+  Boolean roleMapping(EventModel model);
 }

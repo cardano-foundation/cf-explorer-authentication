@@ -99,6 +99,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     usersResource.get(user.getId()).update(user);
     redisProvider.setValue(user.getId() + "_" + Instant.now(), response.getToken());
     redisProvider.setValue(user.getId() + "_" + Instant.now(), response.getRefreshToken());
+    List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
+    roles.forEach(role -> {
+      String roleId = keycloakProvider.getRoleIdByRoleName(role);
+      redisProvider.setValue(roleId + "_" + Instant.now(), user.getId());
+    });
     return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
         .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(response.getRefreshToken()).build();

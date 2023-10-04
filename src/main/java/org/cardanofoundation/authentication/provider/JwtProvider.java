@@ -49,7 +49,8 @@ public class JwtProvider {
     Map<String, List<String>> realmAccessMap = (Map<String, List<String>>) claims.get(
         "realm_access");
     if (Objects.nonNull(realmAccessMap)) {
-      return realmAccessMap.get("roles");
+      List<String> allRoles = realmAccessMap.get("roles");
+      return allRoles.stream().filter(role -> role.startsWith("ROLE_")).toList();
     }
     return Collections.emptyList();
   }

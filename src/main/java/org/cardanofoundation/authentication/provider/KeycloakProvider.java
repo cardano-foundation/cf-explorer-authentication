@@ -12,8 +12,11 @@ import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Component;
 
@@ -81,5 +84,12 @@ public class KeycloakProvider {
     passwordCredentials.setType(CredentialRepresentation.PASSWORD);
     passwordCredentials.setValue(password);
     return passwordCredentials;
+  }
+
+  public String getRoleIdByRoleName(String roleName) {
+    RealmResource realmResource = getInstance().realm(keycloakProperties.getRealm());
+    RolesResource rolesResource = realmResource.roles();
+    RoleRepresentation roleRepresentation = rolesResource.get(roleName).toRepresentation();
+    return roleRepresentation.getId();
   }
 }
