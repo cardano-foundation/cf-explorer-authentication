@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
@@ -68,9 +69,12 @@ class UserControllerTest {
 
   @Test
   void whenCallRoleMapping() throws Exception {
-    given(keycloakService.roleMapping("resourcePathTest")).willReturn(true);
+    EventModel model = new EventModel();
+    model.setResourcePath("test");
+    model.setResourceType("test");
+    given(keycloakService.roleMapping(model)).willReturn(true);
     mockMvc.perform(post("/api/v1/user/role-mapping")
-            .content("resourcePathTest")
+            .content(asJsonString(model))
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
