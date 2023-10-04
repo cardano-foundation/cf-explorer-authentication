@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.service.KeycloakService;
 import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
@@ -62,7 +63,7 @@ public class UserController {
   }
 
   @PostMapping("/role-mapping")
-  public ResponseEntity<Boolean> roleMapping(@RequestBody String resourcePath) {
-    return ResponseEntity.ok(keycloakService.roleMapping(resourcePath));
+  public ResponseEntity<Boolean> roleMapping(@RequestBody EventModel model) {
+    return ResponseEntity.ok(keycloakService.roleMapping(model));
   }
 }
