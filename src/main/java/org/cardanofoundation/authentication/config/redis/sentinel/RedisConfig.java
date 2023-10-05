@@ -1,19 +1,20 @@
 package org.cardanofoundation.authentication.config.redis.sentinel;
 
-import org.cardanofoundation.authentication.config.redis.sentinel.RedisProperties.SentinelNode;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.authentication.config.redis.sentinel.RedisProperties.SentinelNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -43,17 +44,13 @@ import redis.clients.jedis.JedisPoolConfig;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @EnableCaching
 @Profile("sentinel")
-public class RedisConfig extends CachingConfigurerSupport {
+@RequiredArgsConstructor
+public class RedisConfig implements CachingConfigurer {
 
   /**
    * Redis properties config
    */
-  RedisProperties redisProperties;
-
-  @Autowired
-  RedisConfig(RedisProperties redisProperties) {
-    this.redisProperties = redisProperties;
-  }
+  private final RedisProperties redisProperties;
 
 
   @Bean
@@ -123,8 +120,10 @@ public class RedisConfig extends CachingConfigurerSupport {
       final LettuceConnectionFactory lettuceConnectionFactory) {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
-    redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
-    redisTemplate.setDefaultSerializer(new StringRedisSerializer());
+    redisTemplate.setKeySerializer(new StringRedisSerializer());
+    redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
+    redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
     return redisTemplate;
   }
 
