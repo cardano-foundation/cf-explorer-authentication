@@ -2,6 +2,7 @@ package org.cardanofoundation.authentication.service.impl;
 
 import com.mashape.unirest.http.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -100,12 +101,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));
     user.setAttributes(attributes);
     usersResource.get(user.getId()).update(user);
-    redisProvider.setValue(user.getId() + "_" + Instant.now(), response.getToken());
-    redisProvider.setValue(user.getId() + "_" + Instant.now(), response.getRefreshToken());
+    redisProvider.setValue(user.getId() + Timestamp.from(Instant.now()).getTime(),
+        response.getToken());
+    redisProvider.setValue(user.getId() + Timestamp.from(Instant.now()).getTime(),
+        response.getRefreshToken());
     List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
     roles.forEach(role -> {
       String roleId = keycloakProvider.getRoleIdByRoleName(role);
-      redisProvider.setValue(roleId + "_" + Instant.now(), user.getId());
+      redisProvider.setValue(roleId + Timestamp.from(Instant.now()).getTime(), user.getId());
     });
     return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
         .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
