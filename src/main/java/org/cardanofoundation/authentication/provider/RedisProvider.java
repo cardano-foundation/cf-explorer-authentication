@@ -43,7 +43,7 @@ public class RedisProvider {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {
       throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
     }
-    return redisTemplate.opsForValue().get(RedisConstant.JWT + token) != null;
+    return redisTemplate.hasKey(RedisConstant.JWT + token);
   }
 
 

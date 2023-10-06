@@ -45,11 +45,14 @@ public class KeycloakServiceImpl implements KeycloakService {
 
   @Override
   public Boolean roleMapping(EventModel model) {
+    log.info("resource type: " + model.getResourceType());
+    log.info("resource path: " + model.getResourcePath());
     String resourceType = model.getResourceType();
     String[] resourceArr = model.getResourcePath().split("/");
     Set<String> keys = redisProvider.getKeys(resourceArr[1] + "*");
     if (Objects.nonNull(keys) && !keys.isEmpty()) {
       if (resourceType.equals(EResourceType.REALM_ROLE.name())) {
+        log.info("role id: " + resourceArr[1]);
         Set<String> userPrefixKeys = new HashSet<>();
         keys.forEach(key -> userPrefixKeys.add(redisProvider.getValue(key)));
         Set<String> userKeys = new HashSet<>();
@@ -57,6 +60,7 @@ public class KeycloakServiceImpl implements KeycloakService {
             userPrefixKey -> userKeys.addAll(redisProvider.getKeys(userPrefixKey + "*")));
         setInValidToken(userKeys);
       } else {
+        log.info("user id: " + resourceArr[1] );
         setInValidToken(keys);
       }
     }
@@ -68,6 +72,7 @@ public class KeycloakServiceImpl implements KeycloakService {
       String val = redisProvider.getValue(key);
       redisProvider.blacklistJwt(val, key);
       redisProvider.remove(key);
+      log.info("black list: " + key);
     });
   }
 }
