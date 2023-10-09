@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -101,14 +102,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));
     user.setAttributes(attributes);
     usersResource.get(user.getId()).update(user);
-    redisProvider.setValue(user.getId() + Timestamp.from(Instant.now()).getTime(),
+    redisProvider.setValue(user.getId() + "_" + UUID.randomUUID(),
         response.getToken());
-    redisProvider.setValue(user.getId() + Timestamp.from(Instant.now()).getTime(),
+    redisProvider.setValue(user.getId() + "_" + UUID.randomUUID(),
         response.getRefreshToken());
     List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
     roles.forEach(role -> {
       String roleId = keycloakProvider.getRoleIdByRoleName(role);
-      redisProvider.setValue(roleId + Timestamp.from(Instant.now()).getTime(), user.getId());
+      redisProvider.setValue(roleId + "_" + UUID.randomUUID(), user.getId());
     });
     return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
         .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
