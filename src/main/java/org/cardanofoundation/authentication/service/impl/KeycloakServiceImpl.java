@@ -65,9 +65,11 @@ public class KeycloakServiceImpl implements KeycloakService {
 
   private void setInValidToken(Set<String> keys) {
     keys.forEach(key -> {
+      log.info("key: " + key);
       String val = redisProvider.getValue(key);
       redisProvider.blacklistJwt(val, key);
       redisProvider.remove(key);
+      log.info("value success: " + val);
     });
   }
 }
