@@ -54,7 +54,12 @@ public class KeycloakServiceImpl implements KeycloakService {
       if (resourceType.equals(EResourceType.REALM_ROLE.name())) {
         log.info("role id: " + resourceArr[1]);
         Set<String> userPrefixKeys = new HashSet<>();
-        keys.forEach(key -> userPrefixKeys.add(redisProvider.getValue(key)));
+        keys.forEach(key -> {
+          String val = redisProvider.getValue(key);
+          if (Objects.nonNull(val)) {
+            userPrefixKeys.add(val);
+          }
+        });
         Set<String> userKeys = new HashSet<>();
         userPrefixKeys.forEach(
             userPrefixKey -> userKeys.addAll(redisProvider.getKeys(userPrefixKey + "*")));
@@ -70,9 +75,11 @@ public class KeycloakServiceImpl implements KeycloakService {
   private void setInValidToken(Set<String> keys) {
     keys.forEach(key -> {
       String val = redisProvider.getValue(key);
-      redisProvider.blacklistJwt(val, key);
-      redisProvider.remove(key);
-      log.info("black list: " + key);
+      if (Objects.nonNull(val)) {
+        redisProvider.blacklistJwt(val, key);
+        redisProvider.remove(key);
+        log.info("black list: " + key);
+      }
     });
   }
 }
