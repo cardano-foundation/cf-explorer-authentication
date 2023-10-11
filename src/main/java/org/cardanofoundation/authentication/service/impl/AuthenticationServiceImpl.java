@@ -102,14 +102,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));
     user.setAttributes(attributes);
     usersResource.get(user.getId()).update(user);
-    redisProvider.setValue(user.getId() + "_" + UUID.randomUUID(),
+
+    //add user id to token and refresh token
+    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()),
         response.getToken());
-    redisProvider.setValue(user.getId() + "_" + UUID.randomUUID(),
+    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()),
         response.getRefreshToken());
+
+    //when user login successfully then will add user_id to each role group it contain
     List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
     roles.forEach(role -> {
       String roleId = keycloakProvider.getRoleIdByRoleName(role);
-      redisProvider.setValue(roleId + "_" + UUID.randomUUID(), user.getId());
+      redisProvider.addValueToMap(redisProvider.getRoleKeyByRoleId(roleId),user.getId(),"");
     });
     return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
         .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
