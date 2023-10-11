@@ -92,7 +92,7 @@ jobs:
           steps.metadata.outputs.DEVELOP_SNAPSHOT_OK == 'true' ||
           github.event_name == 'pull_request'
         with:
-          context: .
+          context: ./keycloak-event-listener
           push: true
           tags: |
             ${{ env.DOCKER_LATEST_IMAGE_TAG }}
