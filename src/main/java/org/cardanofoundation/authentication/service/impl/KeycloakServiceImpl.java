@@ -48,15 +48,15 @@ public class KeycloakServiceImpl implements KeycloakService {
         .lastLogin(Instant.parse(user.firstAttribute(CommonConstant.ATTRIBUTE_LOGIN_TIME))).build();
   }
 
-  //REAM_ROLE: delete one role -> logout all user has this role
-  //REAM_ROLE_MAPPING: assign or unassign a role of user
+  // REAM_ROLE: delete one role -> logout all user has this role
+  // REAM_ROLE_MAPPING: assign or unassign a role of user
 
-  //REAM_ROLE: roles-by-id/{role_id} //delete role only
+  // REAM_ROLE: roles-by-id/{role_id} //delete role only
   @Override
   public Boolean roleMapping(EventModel model) {
     log.info("resource type: " + model.getResourceType());// REAM_ROLE , REAM_ROLE_MAPPING
     log.info("resource path: "
-        + model.getResourcePath());//(users/{user_id}) re or (users/{user_id}/role_mapping/realm) add role
+        + model.getResourcePath());// (users/{user_id}) re or (users/{user_id}/role_mapping/realm) add role
     String resourceType = model.getResourceType();
     String[] resourceArr = model.getResourcePath().split("/");
     if (resourceArr.length > 0) {
@@ -64,7 +64,7 @@ public class KeycloakServiceImpl implements KeycloakService {
       if (resourceType.equals(EResourceType.REALM_ROLE.name())
           && !resourceType.isEmpty()) {// delete role of system then remove all token of user has this role
         log.info("role id: " + resourceArr[1]);
-        //get user prefix keys from role id
+        // get user prefix keys from role id
         Set<String> userIds = redisProvider.getAllHashKeyOfKey(
             redisProvider.getRoleKeyByRoleId(resourceArr[1]));
 
@@ -74,7 +74,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                 redisProvider.getKeys(redisProvider.getUserPatternKey(userId))));
         setInValidToken(userKeys);
 
-      } else { //REAM_ROLE_MAPPING: assign or unassign a role of user
+      } else { // REAM_ROLE_MAPPING: assign or unassign a role of user
         if (!resourceType.isEmpty()) {
           log.warn("user id: {}", resourceArr[1]);
           Set<String> userKeys = redisProvider.getKeys(

@@ -54,7 +54,7 @@ public class RedisProvider {
     if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {
       throw new BusinessException(CommonErrorCode.INVALID_TOKEN);
     }
-    return redisTemplate.hasKey(RedisConstant.JWT + token);
+    return Boolean.TRUE.equals(redisTemplate.hasKey(RedisConstant.JWT + token));
   }
 
 
