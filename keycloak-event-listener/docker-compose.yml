@@ -19,10 +19,10 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_USERNAME: keycloak-user
       KC_DB_PASSWORD: keycloak-pw
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin@pw
-      SECRET_CODE: secretxyz
-      FORWARD_EVENT_URL: http://10.4.10.231:8021/api/v1/user/role-mapping
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin@pw}
+      SECRET_CODE: ${SECRET_CODE:-secretxyz}
+      FORWARD_EVENT_URL: ${FORWARD_EVENT_URL:-http://10.4.10.231:8021/api/v1/user/role-mapping}
     ports:
       - ${KEYCLOAK_PORT:-8081}:8080
     depends_on:
