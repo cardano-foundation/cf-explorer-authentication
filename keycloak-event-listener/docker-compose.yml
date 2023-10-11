@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: keycloak-user
       POSTGRES_PASSWORD: keycloak-pw
     ports:
-      - 54345:5432
+      - ${KEYCLOAK_POSTGRES_PORT:-54345}:5432
   keycloak:
     container_name: cardano-keycloak-event
     image: keycloak_authentication
@@ -24,7 +24,7 @@ services:
       SECRET_CODE: secretxyz
       FORWARD_EVENT_URL: http://10.4.10.231:8021/api/v1/user/role-mapping
     ports:
-      - 8081:8080
+      - ${KEYCLOAK_PORT:-8081}:8080
     depends_on:
       - postgres
     command: 'start-dev'
