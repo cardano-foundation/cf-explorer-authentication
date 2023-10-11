@@ -7,13 +7,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.service.KeycloakService;
 import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +35,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "User Controller")
 @Validated
+@Log4j2
 public class UserController {
 
   private final KeycloakService keycloakService;
+
+
+  @Value("secretCode")
+  private String secretCode;
 
   @Operation(description = "Get account information")
   @ApiResponses(value = {
@@ -64,6 +76,11 @@ public class UserController {
 
   @PostMapping("/role-mapping")
   public ResponseEntity<Boolean> roleMapping(@RequestBody EventModel model) {
-    return ResponseEntity.ok(keycloakService.roleMapping(model));
+    log.info("abc");
+    if (!model.getSecretCode().equals(secretCode)) {
+      log.warn("Secret code is not correct!");
+      return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+    return new ResponseEntity<>(keycloakService.roleMapping(model), HttpStatus.CREATED);
   }
 }

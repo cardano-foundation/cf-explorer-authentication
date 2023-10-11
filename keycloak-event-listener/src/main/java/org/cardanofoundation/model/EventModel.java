@@ -1,4 +1,4 @@
-package org.cardanofoundation.authentication.model.request.event;
+package org.cardanofoundation.model;
 
 import lombok.Getter;
 import lombok.Setter;

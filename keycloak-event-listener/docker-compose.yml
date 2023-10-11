@@ -1,0 +1,30 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    container_name: cardano-keycloak-postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak-user
+      POSTGRES_PASSWORD: keycloak-pw
+    ports:
+      - 54345:5432
+  keycloak:
+    container_name: cardano-keycloak-event
+    image: keycloak_authentication
+    build:
+      context: .
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak-user
+      KC_DB_PASSWORD: keycloak-pw
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin@pw
+      SECRET_CODE: secretxyz
+      FORWARD_EVENT_URL: http://10.4.10.231:8021/api/v1/user/role-mapping
+    ports:
+      - 8081:8080
+    depends_on:
+      - postgres
+    command: 'start-dev'
