@@ -41,7 +41,7 @@ public class UserController {
   private final KeycloakService keycloakService;
 
 
-  @Value("secretCode")
+  @Value("${secret-code}")
   private String secretCode;
 
   @Operation(description = "Get account information")
