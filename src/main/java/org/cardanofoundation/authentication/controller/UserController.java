@@ -76,9 +76,8 @@ public class UserController {
 
   @PostMapping("/role-mapping")
   public ResponseEntity<Boolean> roleMapping(@RequestBody EventModel model) {
-    log.info("abc");
     if (!model.getSecretCode().equals(secretCode)) {
-      log.warn("Secret code is not correct!");
+      log.warn("Secret code is not correct! setup `{}`, received `{}` !", secretCode, model.getSecretCode());
       return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>(keycloakService.roleMapping(model), HttpStatus.CREATED);
