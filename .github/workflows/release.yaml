@@ -2,7 +2,7 @@ name: Create a new Release
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
 
   workflow_dispatch:
 
