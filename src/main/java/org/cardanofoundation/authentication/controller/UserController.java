@@ -7,13 +7,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
+
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
+=======
+import lombok.extern.log4j.Log4j2;
+
+>>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
 import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.service.KeycloakService;
 import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +38,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "User Controller")
 @Validated
+@Log4j2
 public class UserController {
 
   private final KeycloakService keycloakService;
+
+
+  @Value("${secret-code}")
+  private String secretCode;
 
   @Operation(description = "Get account information")
   @ApiResponses(value = {
@@ -64,6 +79,14 @@ public class UserController {
 
   @PostMapping("/role-mapping")
   public ResponseEntity<Boolean> roleMapping(@RequestBody EventModel model) {
+<<<<<<< HEAD
     return ResponseEntity.ok(keycloakService.roleMapping(model));
+=======
+    if (!model.getSecretCode().equals(secretCode)) {
+      log.warn("Secret code is not correct! setup `{}`, received `{}` !", secretCode, model.getSecretCode());
+      return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+    return new ResponseEntity<>(keycloakService.roleMapping(model), HttpStatus.CREATED);
+>>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
   }
 }

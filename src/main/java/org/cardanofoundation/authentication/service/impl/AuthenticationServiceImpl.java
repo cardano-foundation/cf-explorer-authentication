@@ -2,6 +2,7 @@ package org.cardanofoundation.authentication.service.impl;
 
 import com.mashape.unirest.http.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +41,10 @@ import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
+<<<<<<< HEAD
+=======
+import org.springframework.web.servlet.LocaleResolver;
+>>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +61,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final KeycloakProvider keycloakProvider;
 
+<<<<<<< HEAD
+=======
+  private final LocaleResolver localeResolver;
+
+>>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
   @Override
   public SignInResponse signIn(SignInRequest signInRequest) {
     log.info("login is running...");
@@ -98,12 +108,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));
     user.setAttributes(attributes);
     usersResource.get(user.getId()).update(user);
+<<<<<<< HEAD
     redisProvider.setValue(user.getId() + "_" + UUID.randomUUID(), response.getToken());
     redisProvider.setValue(user.getId() + "_" + UUID.randomUUID(), response.getRefreshToken());
     List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
     roles.forEach(role -> {
       String roleId = keycloakProvider.getRoleIdByRoleName(role);
       redisProvider.setValue(roleId + "_" + UUID.randomUUID(), user.getId());
+=======
+
+    //add user id to token and refresh token
+    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()),
+        response.getToken());
+    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()),
+        response.getRefreshToken());
+
+    //when user login successfully then will add user_id to each role group it contain
+    List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
+    roles.forEach(role -> {
+      String roleId = keycloakProvider.getRoleIdByRoleName(role);
+      redisProvider.addValueToMap(redisProvider.getRoleKeyByRoleId(roleId),user.getId(),"");
+>>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
     });
     return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
         .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
@@ -111,7 +136,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  public MessageResponse signUp(SignUpRequest signUpRequest) {
+  public MessageResponse signUp(SignUpRequest signUpRequest,
+      HttpServletRequest httpServletRequest) {
     Response response;
     String email = signUpRequest.getEmail();
     UserRepresentation userExist = keycloakProvider.getUser(email);
@@ -137,7 +163,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (response.getStatus() == 201) {
       String verifyCode = jwtProvider.generateCodeForVerify(email);
       sendMailExecutor.execute(
-          new MailHandler(mailProvider, email, EUserAction.CREATED, verifyCode));
+          new MailHandler(mailProvider, email, EUserAction.CREATED,
+              localeResolver.resolveLocale(httpServletRequest), verifyCode));
       return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
           .message(CommonConstant.RESPONSE_SUCCESS).build();
     }

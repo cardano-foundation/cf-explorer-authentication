@@ -40,3 +40,5 @@ thread-pool:
   max-size: 20
   queue-size: 100
   timeout: 10
+
+secret-code: ${SECRET_CODE:secretxyz}

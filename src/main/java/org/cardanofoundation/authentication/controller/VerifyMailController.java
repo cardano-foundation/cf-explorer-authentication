@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
@@ -62,9 +63,9 @@ public class VerifyMailController {
           description = "Email address used to create the account",
           example = "phuc.viet@gmail.com",
           required = true)
-      @Valid @RequestParam("email") @Email String email) {
+      @Valid @RequestParam("email") @Email String email, HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(
-        verifyService.forgotPassword(email));
+        verifyService.forgotPassword(email, httpServletRequest));
   }
 
   @Operation(description = "Set a new password for the account")

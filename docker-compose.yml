@@ -39,7 +39,11 @@ services:
       - RSA_PUBLIC_KEY_AUTH=${RSA_PUBLIC_KEY_AUTH}
       - RSA_PRIVATE_KEY_MAIL=${RSA_PRIVATE_KEY_MAIL}
       - RSA_PUBLIC_KEY_MAIL=${RSA_PUBLIC_KEY_MAIL}
+<<<<<<< HEAD
 
+=======
+      - SECRET_CODE=${SECRET_CODE}
+>>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
     ports:
       - "${PORT}:8080"
     volumes:
