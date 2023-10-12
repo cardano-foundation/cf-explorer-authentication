@@ -1,9 +1,5 @@
 package org.cardanofoundation.authentication.config.redis.sentinel;
 
-<<<<<<< HEAD:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfig.java
-import java.time.Duration;
-=======
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfiguration.java
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,11 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-<<<<<<< HEAD:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfig.java
-import org.cardanofoundation.authentication.config.redis.sentinel.RedisProperties.SentinelNode;
-=======
 
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfiguration.java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
@@ -42,13 +34,8 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-<<<<<<< HEAD:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfig.java
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-=======
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfiguration.java
 import redis.clients.jedis.JedisPoolConfig;
 
 @Slf4j
@@ -56,11 +43,7 @@ import redis.clients.jedis.JedisPoolConfig;
 @EnableCaching
 @Profile("sentinel")
 @RequiredArgsConstructor
-<<<<<<< HEAD:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfig.java
-public class RedisConfig implements CachingConfigurer {
-=======
 public class RedisConfiguration implements CachingConfigurer {
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfiguration.java
 
   /**
    * Redis properties config
@@ -138,11 +121,7 @@ public class RedisConfiguration implements CachingConfigurer {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
     redisTemplate.setKeySerializer(new StringRedisSerializer());
-<<<<<<< HEAD:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfig.java
-    redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
-=======
     redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0:src/main/java/org/cardanofoundation/authentication/config/redis/sentinel/RedisConfiguration.java
     redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
     redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
     return redisTemplate;

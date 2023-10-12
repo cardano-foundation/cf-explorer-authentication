@@ -33,7 +33,3 @@ rsa:
     public-auth: ${RSA_PUBLIC_KEY_AUTH}
     private-mail: ${RSA_PRIVATE_KEY_MAIL}
     public-mail: ${RSA_PUBLIC_KEY_MAIL}
-<<<<<<< HEAD
-
-=======
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0

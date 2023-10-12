@@ -12,11 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
 
 import lombok.RequiredArgsConstructor;
-<<<<<<< HEAD
-=======
 import lombok.extern.log4j.Log4j2;
 
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
 import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.service.KeycloakService;
@@ -79,14 +76,10 @@ public class UserController {
 
   @PostMapping("/role-mapping")
   public ResponseEntity<Boolean> roleMapping(@RequestBody EventModel model) {
-<<<<<<< HEAD
-    return ResponseEntity.ok(keycloakService.roleMapping(model));
-=======
     if (!model.getSecretCode().equals(secretCode)) {
       log.warn("Secret code is not correct! setup `{}`, received `{}` !", secretCode, model.getSecretCode());
       return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>(keycloakService.roleMapping(model), HttpStatus.CREATED);
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
   }
 }

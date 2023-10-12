@@ -20,12 +20,12 @@ redis:
       port: 26379
 
 keycloak:
-  realm: ${KEYCLOAK_REALM_NAME:cardano_1}
+  realm: ${KEYCLOAK_REALM_NAME:cardano_authen}
   auth-server-url: ${KEYCLOAK_SERVER_URL:http://10.4.21.151:8080/}
   ssl-required: external
-  resource: ${KEYCLOAK_CLIENT_ID:client_1}
+  resource: ${KEYCLOAK_CLIENT_ID:client_test}
   credentials:
-    secret: ${KEYCLOAK_CLIENT_SECRET:mJvV0GtwiKUlpBZuNQ4Rmhxo3iY3JsRx}
+    secret: ${KEYCLOAK_CLIENT_SECRET:LuJVyHvOipnRFFAWO7AnUFWkyKCJ3ax4}
   use-resource-role-mappings: ${KEYCLOAK_ROLE_MAPPING:true}
   bearer-only: ${KEYCLOAK_BEARER_ONLY:true}
 
@@ -35,8 +35,4 @@ rsa:
   key:
     public-auth: ${RSA_PUBLIC_KEY_AUTH}
     private-mail: ${RSA_PRIVATE_KEY_MAIL}
-<<<<<<< HEAD
     public-mail: ${RSA_PUBLIC_KEY_MAIL}
-=======
-    public-mail: ${RSA_PUBLIC_KEY_MAIL}
->>>>>>> df4fc1c9403092c4b3ed48417ab5c44a63c526c0
