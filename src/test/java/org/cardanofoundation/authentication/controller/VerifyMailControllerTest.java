@@ -1,18 +1,20 @@
 package org.cardanofoundation.authentication.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.gson.Gson;
+import jakarta.servlet.http.HttpServletRequest;
 import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,7 @@ class VerifyMailControllerTest {
   private VerifyService verifyService;
 
   @MockBean
-  private UserService userService;
+  private KeycloakProvider keycloakProvider;
 
   @MockBean
   private JwtProvider jwtProvider;
@@ -61,7 +63,8 @@ class VerifyMailControllerTest {
   void whenCallForgotPassword() throws Exception {
     MessageResponse res = MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
         .message(CommonConstant.RESPONSE_SUCCESS).build();
-    given(verifyService.forgotPassword("Test@gmail.com")).willReturn(res);
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+    given(verifyService.forgotPassword("Test@gmail.com", httpServletRequest)).willReturn(res);
     mockMvc.perform(get("/api/v1/verify/forgot-password")
             .param("email", "Test@gmail.com")
             .accept(MediaType.APPLICATION_JSON))

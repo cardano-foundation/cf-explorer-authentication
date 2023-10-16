@@ -27,20 +27,6 @@ logging:
   level:
     root: info
 
-rsa:
-  key:
-    private-key-auth-path: /key/auth/private_key
-    public-key-auth-path: /key/auth/public_key
-    private-key-mail-path: /key/mail/private_key
-    public-key-mail-path: /key/mail/public_key
-
-jwt:
-  expirationMs: 86400000 #1 day
-  refreshExpirationMs: 172800000 #2 days
-
-nonce:
-  expirationMs: 345600000 #4 days
-
 mail:
   from: 'test.sotatek1@gmail.com'
   sender: 'Sotatek'
@@ -54,3 +40,5 @@ thread-pool:
   max-size: 20
   queue-size: 100
   timeout: 10
+
+secret-code: ${SECRET_CODE:secretxyz}

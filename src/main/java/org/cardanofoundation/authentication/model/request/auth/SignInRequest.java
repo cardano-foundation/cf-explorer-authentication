@@ -1,5 +1,6 @@
 package org.cardanofoundation.authentication.model.request.auth;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +15,7 @@ public class SignInRequest {
 
   private String signature;
 
+  @Email
   private String email;
 
   private String password;

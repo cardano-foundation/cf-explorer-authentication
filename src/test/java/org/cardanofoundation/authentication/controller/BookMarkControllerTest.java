@@ -15,15 +15,13 @@ import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.request.bookmark.BookMarkRequest;
-import org.cardanofoundation.authentication.model.request.bookmark.BookMarksRequest;
-import org.cardanofoundation.authentication.model.response.AddBookMarkResponse;
 import org.cardanofoundation.authentication.model.response.BookMarkResponse;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.BookMarkService;
-import org.cardanofoundation.authentication.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,13 +44,13 @@ class BookMarkControllerTest {
   private BookMarkService bookMarkService;
 
   @MockBean
-  private UserService userService;
-
-  @MockBean
   private JwtProvider jwtProvider;
 
   @MockBean
   private RedisProvider redisProvider;
+
+  @MockBean
+  private KeycloakProvider keycloakProvider;
 
   @Test
   void whenCallAdd() throws Exception {
@@ -61,10 +59,8 @@ class BookMarkControllerTest {
     request.setNetwork(ENetworkType.MAIN_NET.name());
     request.setType(EBookMarkType.POOL.name());
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-    BookMarkResponse res = new BookMarkResponse();
-    res.setKeyword("1");
-    res.setNetwork(ENetworkType.MAIN_NET);
-    res.setType(EBookMarkType.POOL);
+    BookMarkResponse res = BookMarkResponse.builder().keyword("1")
+        .network(ENetworkType.MAIN_NET.name()).type(EBookMarkType.POOL.name()).build();
     given(bookMarkService.addBookMark(request, httpServletRequest)).willReturn(res);
     mockMvc.perform(post("/api/v1/bookmark/add")
             .content(asJsonString(request))
@@ -76,10 +72,8 @@ class BookMarkControllerTest {
   @Test
   void whenCallFindAll() throws Exception {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-    BookMarkResponse bookMarkResponse = new BookMarkResponse();
-    bookMarkResponse.setKeyword("1");
-    bookMarkResponse.setNetwork(ENetworkType.MAIN_NET);
-    bookMarkResponse.setType(EBookMarkType.POOL);
+    BookMarkResponse bookMarkResponse = BookMarkResponse.builder().keyword("1")
+        .network(ENetworkType.MAIN_NET.name()).type(EBookMarkType.POOL.name()).build();
     BasePageResponse<BookMarkResponse> res = new BasePageResponse<>();
     res.setData(List.of(bookMarkResponse));
     given(bookMarkService.findBookMarkByType(httpServletRequest, EBookMarkType.POOL.name(),
@@ -97,10 +91,16 @@ class BookMarkControllerTest {
 
   @Test
   void whenDelete() throws Exception {
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     MessageResponse res = MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
         .message(CommonConstant.RESPONSE_SUCCESS).build();
-    given(bookMarkService.deleteById(1L)).willReturn(res);
-    mockMvc.perform(delete("/api/v1/bookmark/delete/1")
+    given(
+        bookMarkService.deleteBookMark(EBookMarkType.POOL.name(), ENetworkType.MAIN_NET.name(), "1",
+            httpServletRequest)).willReturn(res);
+    mockMvc.perform(delete("/api/v1/bookmark/delete")
+            .param("type", EBookMarkType.POOL.name())
+            .param("network", ENetworkType.MAIN_NET.name())
+            .param("keyword", "1")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
@@ -109,35 +109,15 @@ class BookMarkControllerTest {
   @Test
   void whenCallFindAllKey() throws Exception {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-    BookMarkResponse bookMarkResponse = new BookMarkResponse();
-    bookMarkResponse.setKeyword("1");
-    bookMarkResponse.setNetwork(ENetworkType.MAIN_NET);
-    bookMarkResponse.setType(EBookMarkType.POOL);
+    BookMarkResponse bookMarkResponse = BookMarkResponse.builder().keyword("1")
+        .network(ENetworkType.MAIN_NET.name()).type(EBookMarkType.POOL.name()).build();
     List<BookMarkResponse> res = List.of(bookMarkResponse);
-    given(bookMarkService.findKeyBookMark(httpServletRequest, ENetworkType.MAIN_NET.name())).willReturn(
+    given(bookMarkService.findKeyBookMark(httpServletRequest,
+        ENetworkType.MAIN_NET.name())).willReturn(
         res);
     mockMvc.perform(get("/api/v1/bookmark/find-all-key")
             .param("network", String.valueOf(ENetworkType.MAIN_NET))
             .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andDo(print());
-  }
-
-  @Test
-  void whenCallAddList() throws Exception {
-    BookMarkRequest bookMarkReq = new BookMarkRequest();
-    bookMarkReq.setKeyword("1");
-    bookMarkReq.setNetwork(ENetworkType.MAIN_NET.name());
-    bookMarkReq.setType(EBookMarkType.POOL.name());
-    List<BookMarkRequest> bookMarksReq = List.of(bookMarkReq);
-    BookMarksRequest request = new BookMarksRequest();
-    request.setBookMarks(bookMarksReq);
-    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-    AddBookMarkResponse res = AddBookMarkResponse.builder().passNumber(1).failNumber(2).build();
-    given(bookMarkService.addBookMarks(request, httpServletRequest)).willReturn(res);
-    mockMvc.perform(post("/api/v1/bookmark/add-list")
-            .content(asJsonString(request))
-            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
   }
