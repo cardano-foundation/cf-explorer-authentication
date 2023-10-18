@@ -1,20 +1,25 @@
 package org.cardanofoundation.authentication.service.impl;
 
-import com.mashape.unirest.http.JsonNode;
-import jakarta.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.LocaleResolver;
+
+import com.mashape.unirest.http.JsonNode;
 import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
@@ -40,8 +45,6 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.LocaleResolver;
 
 @Service
 @RequiredArgsConstructor
@@ -122,7 +125,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public MessageResponse signUp(SignUpRequest signUpRequest,
-      HttpServletRequest httpServletRequest) {
+                                HttpServletRequest httpServletRequest) {
     Response response;
     String email = signUpRequest.getEmail();
     UserRepresentation userExist = keycloakProvider.getUser(email);
@@ -158,7 +161,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public RefreshTokenResponse refreshToken(String refreshJwt,
-      HttpServletRequest httpServletRequest) {
+                                           HttpServletRequest httpServletRequest) {
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
     if (redisProvider.isTokenBlacklisted(refreshJwt)) {
       throw new BusinessException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
@@ -182,7 +185,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public MessageResponse signOut(SignOutRequest signOutRequest,
-      HttpServletRequest httpServletRequest) {
+                                 HttpServletRequest httpServletRequest) {
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
     if (!redisProvider.isTokenBlacklisted(accessToken)) {
       redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());

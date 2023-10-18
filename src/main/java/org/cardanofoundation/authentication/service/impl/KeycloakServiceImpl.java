@@ -91,12 +91,7 @@ public class KeycloakServiceImpl implements KeycloakService {
       String val = redisProvider.getValue(key);
       if (Objects.nonNull(val)) {
         redisProvider.blacklistJwt(val, key);
-        if (redisProvider.isTokenBlacklisted(val)) {
-          redisProvider.remove(key);
-          log.info("black list success: " + val);
-        } else {
-          log.error("can not set black list user {} token {}", key, val);
-        }
+        log.info("black list success: " + val);
       }
     });
   }

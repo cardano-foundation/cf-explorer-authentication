@@ -31,7 +31,7 @@ public interface AuthenticationService {
    * @update: 20/09/2023
    */
   RefreshTokenResponse refreshToken(String refreshJwt,
-      HttpServletRequest httpServletRequest);
+                                    HttpServletRequest httpServletRequest);
 
   /*
    * @since: 24/10/2022

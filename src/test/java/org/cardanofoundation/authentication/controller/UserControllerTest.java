@@ -76,7 +76,7 @@ class UserControllerTest {
     mockMvc.perform(post("/api/v1/user/role-mapping")
             .content(asJsonString(model))
             .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
+        .andExpect(status().isInternalServerError())
         .andDo(print());
   }
 

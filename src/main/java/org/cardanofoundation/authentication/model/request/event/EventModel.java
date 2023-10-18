@@ -10,5 +10,6 @@ public class EventModel {
   private String resourceType;
 
   private String resourcePath;
+
   private String secretCode;
 }

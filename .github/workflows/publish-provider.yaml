@@ -1,4 +1,4 @@
-name: Publish artifacts to (internal) Gitlab Packages
+name: Publish custom keycloak to (internal) Gitlab Packages
 
 on:
   push:
@@ -23,10 +23,13 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: |
       "contains(github.event.head_commit.message, 'release-please--branches--main')" ||
       ${{ github.event_name == 'pull_request' }}
+    defaults:
+      run:
+        working-directory: ./keycloak-event-listener
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -42,15 +45,11 @@ jobs:
         run: |
           pip install yq
 
-      - name: Setup maven settings.xml
-        run: |
-          envsubst < ./.m2/settings.default.xml.tpl > ./.m2/settings.xml
-
       - name: Set extra environment and metadata
         id: metadata
         run: |
           CURRENT_VERSION=$(xq -r .project.version pom.xml)
-          DOCKER_IMAGE_NAME=$(basename ${GITHUB_REPOSITORY})
+          DOCKER_IMAGE_NAME=$(xq -r .project.artifactId pom.xml)
           echo "DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME}" >> "$GITHUB_ENV"
 
           if [ ${{github.event_name}} == "pull_request" ]
@@ -93,12 +92,8 @@ jobs:
           steps.metadata.outputs.DEVELOP_SNAPSHOT_OK == 'true' ||
           github.event_name == 'pull_request'
         with:
-          context: .
+          context: ./keycloak-event-listener
           push: true
           tags: |
             ${{ env.DOCKER_LATEST_IMAGE_TAG }}
             ${{ env.PRIVATE_DOCKER_REGISTRY_URL }}/${{ env.DOCKER_IMAGE_NAME }}:${{ env.ARTIFACT_VERSION }}
-          build-args: |
-            PRIVATE_MVN_REGISTRY_URL=${{ env.PRIVATE_MVN_REGISTRY_URL }}
-            PRIVATE_MVN_REGISTRY_USER=${{ env.PRIVATE_MVN_REGISTRY_USER }}
-            PRIVATE_MVN_REGISTRY_PASS=${{ env.PRIVATE_MVN_REGISTRY_PASS }}

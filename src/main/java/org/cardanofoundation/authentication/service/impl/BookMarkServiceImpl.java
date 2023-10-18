@@ -48,7 +48,9 @@ public class BookMarkServiceImpl implements BookMarkService {
     List<String> bookmarkList = null;
     if (Objects.nonNull(attributes) && Objects.nonNull(attributes.get(bookmarkKey))) {
       bookmarkList = attributes.get(bookmarkKey);
-      if (bookmarkList.stream().anyMatch(key -> key.contains(bookMarkRequest.getKeyword()))) {
+      if (bookmarkList.stream().map(bookmark -> StringUtils.substringBefore(bookmark,
+              CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))
+          .anyMatch(key -> key.equals(bookMarkRequest.getKeyword()))) {
         throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);
       }
     }
@@ -114,7 +116,8 @@ public class BookMarkServiceImpl implements BookMarkService {
     if (Objects.nonNull(attributes) && Objects.nonNull(attributes.get(bookmarkKey))) {
       List<String> bookmarkList = attributes.get(bookmarkKey);
       for (String val : bookmarkList) {
-        if (val.contains(keyword)) {
+        String key = StringUtils.substringBefore(val, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME);
+        if (key.equals(keyword)) {
           bookmarkList.remove(val);
           deleteFlag = true;
           break;
