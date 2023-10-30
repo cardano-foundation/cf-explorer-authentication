@@ -1,7 +1,6 @@
 package org.cardanofoundation.authentication.provider;
 
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -9,19 +8,17 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.config.RsaConfig;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
-import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.model.entity.RoleEntity;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
-import org.cardanofoundation.authentication.model.entity.security.UserDetailsImpl;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.cardanofoundation.explorer.common.exceptions.BusinessException;
+import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -30,22 +27,9 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class JwtProvider {
 
-  @Value("${jwt.expirationMs}")
-  private Long expirationMs;
-
   private final RsaConfig rsaConfig;
 
   private final MailProperties mail;
-
-  public String generateJwtToken(Authentication authentication, String accountId) {
-    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-    return Jwts.builder().setSubject(accountId)
-        .claim(CommonConstant.AUTHORITIES_KEY,
-            userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-                .toList()).setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + expirationMs))
-        .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
-  }
 
   public String generateCodeForVerify(String email) {
     return Jwts.builder().setSubject(email).setIssuedAt(new Date())
@@ -56,6 +40,19 @@ public class JwtProvider {
   public String getAccountIdFromJwtToken(String token) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
         .parseClaimsJws(token).getBody().getSubject();
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<String> getRolesFromJwtToken(String token) {
+    Claims claims = Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
+        .parseClaimsJws(token).getBody();
+    Map<String, List<String>> realmAccessMap = (Map<String, List<String>>) claims.get(
+        "realm_access");
+    if (Objects.nonNull(realmAccessMap)) {
+      List<String> allRoles = realmAccessMap.get("roles");
+      return allRoles.stream().filter(role -> role.startsWith("ROLE_")).toList();
+    }
+    return Collections.emptyList();
   }
 
   public String getAccountIdFromJwtToken(HttpServletRequest httpServletRequest) {
@@ -108,13 +105,5 @@ public class JwtProvider {
   public String getAccountIdFromVerifyCode(String code) {
     return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyMail()).build()
         .parseClaimsJws(code).getBody().getSubject();
-  }
-
-  public String generateJwtToken(UserEntity user, String accountId) {
-    return Jwts.builder().setSubject(accountId)
-        .claim(CommonConstant.AUTHORITIES_KEY,
-            user.getRoles().stream().map(RoleEntity::getName).toList())
-        .setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + expirationMs))
-        .signWith(rsaConfig.getPrivateKeyAuth(), SignatureAlgorithm.RS256).compact();
   }
 }

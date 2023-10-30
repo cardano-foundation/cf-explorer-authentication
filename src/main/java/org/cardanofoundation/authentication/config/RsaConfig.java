@@ -6,7 +6,7 @@ import java.security.PublicKey;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.cardanofoundation.authentication.provider.RsaProvider;
+import org.cardanofoundation.explorer.common.utils.RsaUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -17,15 +17,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RsaConfig {
 
-  private String privateKeyAuthPath;
+  private String publicAuth;
 
-  private String publicKeyAuthPath;
+  private String privateMail;
 
-  private String privateKeyMailPath;
-
-  private String publicKeyMailPath;
-
-  private PrivateKey privateKeyAuth;
+  private String publicMail;
 
   private PublicKey publicKeyAuth;
 
@@ -33,14 +29,11 @@ public class RsaConfig {
 
   private PublicKey publicKeyMail;
 
-  private final RsaProvider rsaProvider;
-
   @PostConstruct
   public void createRsaKey() {
     java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    privateKeyAuth = rsaProvider.getPrivateKey(privateKeyAuthPath);
-    publicKeyAuth = rsaProvider.getPublicKey(publicKeyAuthPath);
-    privateKeyMail = rsaProvider.getPrivateKey(privateKeyMailPath);
-    publicKeyMail = rsaProvider.getPublicKey(publicKeyMailPath);
+    publicKeyAuth = RsaUtils.getPublicKey(publicAuth);
+    privateKeyMail = RsaUtils.getPrivateKey(privateMail);
+    publicKeyMail = RsaUtils.getPublicKey(publicMail);
   }
 }

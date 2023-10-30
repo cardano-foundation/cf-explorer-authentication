@@ -7,66 +7,42 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.authentication.model.enums.ENetworkType;
-import org.cardanofoundation.authentication.model.request.EditUserRequest;
+import lombok.extern.log4j.Log4j2;
+
+import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
-import org.cardanofoundation.authentication.model.response.UserResponse;
-import org.cardanofoundation.authentication.service.UserService;
-import org.cardanofoundation.explorer.common.annotation.EnumValid;
+import org.cardanofoundation.authentication.service.KeycloakService;
 import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
 @Tag(name = "User Controller")
 @Validated
+@Log4j2
 public class UserController {
 
-  private final UserService userService;
+  private final KeycloakService keycloakService;
 
-  @Operation(description = "Edit the profile image for the account")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = UserResponse.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = "401", description = "Authentication error unsuccessful", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
-  @PutMapping("/edit-avatar")
-  public ResponseEntity<UserResponse> editAvatar(
-      @Parameter(
-          name = "avatar",
-          description = "Image data(byte[])",
-          required = true)
-      @RequestParam("avatar") MultipartFile avatar,
-      HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(userService.editAvatar(avatar, httpServletRequest));
-  }
 
-  @Operation(description = "Edit account information")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = UserResponse.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input parameter error", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = "401", description = "Authentication error unsuccessful", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
-  @PutMapping("/edit")
-  public ResponseEntity<UserResponse> edit(@Valid @RequestBody EditUserRequest editUserRequest,
-      HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(userService.editUser(editUserRequest, httpServletRequest));
-  }
+  @Value("${secret-code}")
+  private String secretCode;
 
   @Operation(description = "Get account information")
   @ApiResponses(value = {
@@ -76,15 +52,8 @@ public class UserController {
       @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   @GetMapping("/info")
-  public ResponseEntity<UserInfoResponse> info(
-      @Parameter(
-          name = "network",
-          description = "Network type",
-          example = "MAIN_NET",
-          required = true)
-      @RequestParam("network") @EnumValid(enumClass = ENetworkType.class) String network,
-      HttpServletRequest httpServletRequest) {
-    return ResponseEntity.ok(userService.infoUser(httpServletRequest, network));
+  public ResponseEntity<UserInfoResponse> info(HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(keycloakService.infoUser(httpServletRequest));
   }
 
   @Operation(description = "Check the existence of an email")
@@ -102,6 +71,15 @@ public class UserController {
           example = "phuc.viet@gmail.com",
           required = true)
       @RequestParam("email") @Email String email) {
-    return ResponseEntity.ok(userService.checkExistEmail(email));
+    return ResponseEntity.ok(keycloakService.checkExistEmail(email));
+  }
+
+  @PostMapping("/role-mapping")
+  public ResponseEntity<Boolean> roleMapping(@RequestBody EventModel model) {
+    if (!model.getSecretCode().equals(secretCode)) {
+      log.warn("Secret code is not correct! setup `{}`, received `{}` !", secretCode, model.getSecretCode());
+      return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+    return new ResponseEntity<>(keycloakService.roleMapping(model), HttpStatus.CREATED);
   }
 }

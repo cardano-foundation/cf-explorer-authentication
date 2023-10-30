@@ -59,8 +59,9 @@ public class AuthController {
       @ApiResponse(responseCode = "500", description = "Error not specified", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   @PostMapping(value = "/sign-up", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MessageResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));
+  public ResponseEntity<MessageResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(authenticationService.signUp(signUpRequest, httpServletRequest));
   }
 
   @Operation(description = "Generate a new JSON Web Token (JWT) using the refresh token")
