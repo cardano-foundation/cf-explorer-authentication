@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MailProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.provider</a> &gt; <span class="el_source">MailProvider.java</span></div><h1>MailProvider.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.provider;
 
 import jakarta.mail.internet.MimeMessage;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
+import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,8 +13,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 @Component
-<span class="nc" id="L15">@RequiredArgsConstructor</span>
-<span class="fc" id="L16">@Log4j2</span>
+<span class="nc" id="L16">@RequiredArgsConstructor</span>
+<span class="fc" id="L17">@Log4j2</span>
 public class MailProvider {
 
   @Value(&quot;${domain.client}&quot;)
@@ -23,38 +24,41 @@ public class MailProvider {
 
   private final MailProperties mail;
 
-  public void sendVerifyEmail(UserEntity user, EUserAction emailType, String code) {
-<span class="nc" id="L27">    log.info(&quot;start send verify mail to: &quot; + user.getEmail());</span>
-<span class="nc" id="L28">    String contentHtml</span>
-        = &quot;Hi there,&lt;br /&gt;&quot;
-        + &quot;Please click the link below to verify account:&lt;br /&gt;&quot;
-        + &quot;&lt;h3&gt;&lt;a href=\&quot;[URL]\&quot; target=\&quot;_self\&quot;&gt;VERIFY&lt;/a&gt;&lt;/h3&gt;&quot;
-        + &quot;Thank you,&lt;br /&gt;&quot;;
+  private final LocaleProvider localeProvider;
+
+  public void sendVerifyEmail(String email, EUserAction emailType, String code, Locale locale) {
+<span class="nc" id="L30">    log.info(&quot;start send verify mail to: &quot; + email);</span>
+<span class="nc" id="L31">    String contentHtml = localeProvider.getValue(&quot;mail.base-content&quot;, locale);</span>
     try {
-<span class="nc" id="L34">      MimeMessage mailMessage = javaMailSender.createMimeMessage();</span>
-<span class="nc" id="L35">      MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);</span>
-<span class="nc" id="L36">      helper.setFrom(mail.getFrom(), mail.getSender());</span>
-<span class="nc" id="L37">      helper.setTo(user.getEmail());</span>
-<span class="nc" id="L38">      StringBuilder verifyURL = new StringBuilder(domainClient);</span>
-<span class="nc bnc" id="L39" title="All 3 branches missed.">      switch (emailType) {</span>
+<span class="nc" id="L33">      MimeMessage mailMessage = javaMailSender.createMimeMessage();</span>
+<span class="nc" id="L34">      MimeMessageHelper helper = new MimeMessageHelper(mailMessage, Boolean.TRUE);</span>
+<span class="nc" id="L35">      helper.setFrom(mail.getFrom(), localeProvider.getValue(&quot;mail.sender&quot;, locale));</span>
+<span class="nc" id="L36">      helper.setTo(email);</span>
+<span class="nc" id="L37">      StringBuilder verifyURL = new StringBuilder(domainClient);</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">      if (locale.equals(new Locale(&quot;en&quot;))) {</span>
+<span class="nc" id="L39">        verifyURL.append(CommonConstant.ENGLISH_URL);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">      } else if (locale.equals(new Locale(&quot;fr&quot;))) {</span>
+<span class="nc" id="L41">        verifyURL.append(CommonConstant.FRENCH_URL);</span>
+      }
+<span class="nc bnc" id="L43" title="All 3 branches missed.">      switch (emailType) {</span>
         case CREATED -&gt; {
-<span class="nc" id="L41">          verifyURL.append(&quot;/verify-email?code=&quot;).append(code);</span>
-<span class="nc" id="L42">          helper.setSubject(mail.getSubjectRegistration());</span>
-<span class="nc" id="L43">        }</span>
-        case RESET_PASSWORD -&gt; {
-<span class="nc" id="L45">          verifyURL.append(&quot;/reset-password?code=&quot;).append(code);</span>
-<span class="nc" id="L46">          helper.setSubject(mail.getSubjectResetPassword());</span>
+<span class="nc" id="L45">          verifyURL.append(&quot;/verify-email?code=&quot;).append(code);</span>
+<span class="nc" id="L46">          helper.setSubject(localeProvider.getValue(&quot;mail.subject-registration&quot;, locale));</span>
 <span class="nc" id="L47">        }</span>
+        case RESET_PASSWORD -&gt; {
+<span class="nc" id="L49">          verifyURL.append(&quot;/reset-password?code=&quot;).append(code);</span>
+<span class="nc" id="L50">          helper.setSubject(localeProvider.getValue(&quot;mail.subject-reset-password&quot;, locale));</span>
+<span class="nc" id="L51">        }</span>
         default -&gt; {
         }
       }
-<span class="nc" id="L51">      contentHtml = contentHtml.replace(&quot;[URL]&quot;, verifyURL);</span>
-<span class="nc" id="L52">      contentHtml = contentHtml + mail.getFooter();</span>
-<span class="nc" id="L53">      helper.setText(contentHtml, Boolean.TRUE);</span>
-<span class="nc" id="L54">      javaMailSender.send(mailMessage);</span>
-<span class="nc" id="L55">    } catch (Exception e) {</span>
-<span class="nc" id="L56">      log.error(&quot;Failed to send verification email&quot;, e);</span>
-<span class="nc" id="L57">    }</span>
-<span class="nc" id="L58">  }</span>
+<span class="nc" id="L55">      contentHtml = contentHtml.replace(&quot;[URL]&quot;, verifyURL);</span>
+<span class="nc" id="L56">      contentHtml = contentHtml + localeProvider.getValue(&quot;mail.footer&quot;, locale);</span>
+<span class="nc" id="L57">      helper.setText(contentHtml, Boolean.TRUE);</span>
+<span class="nc" id="L58">      javaMailSender.send(mailMessage);</span>
+<span class="nc" id="L59">    } catch (Exception e) {</span>
+<span class="nc" id="L60">      log.error(&quot;Failed to send verification email&quot;, e);</span>
+<span class="nc" id="L61">    }</span>
+<span class="nc" id="L62">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -4,12 +4,18 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.cardanofoundation.authentication.model.enums.ENetworkType;
+import org.cardanofoundation.explorer.common.annotation.EnumValid;
 
 @Getter
-<span class="fc" id="L9">@Setter</span>
-<span class="fc" id="L10">public class BookMarksRequest {</span>
+<span class="nc" id="L11">@Setter</span>
+<span class="nc" id="L12">public class BookMarksRequest {</span>
 
   @NotNull
-<span class="fc" id="L13">  private List&lt;BookMarkRequest&gt; bookMarks;</span>
+<span class="nc" id="L15">  private List&lt;BookMarkRequest&gt; bookMarks;</span>
+
+  @NotNull
+  @EnumValid(enumClass = ENetworkType.class)
+<span class="nc" id="L19">  private String network;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

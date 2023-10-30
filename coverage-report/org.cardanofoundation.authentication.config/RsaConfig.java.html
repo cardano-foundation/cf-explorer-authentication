@@ -6,7 +6,7 @@ import java.security.PublicKey;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.cardanofoundation.authentication.provider.RsaProvider;
+import org.cardanofoundation.explorer.common.utils.RsaUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -17,31 +17,24 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L17">@RequiredArgsConstructor</span>
 public class RsaConfig {
 
-<span class="nc" id="L20">  private String privateKeyAuthPath;</span>
+<span class="nc" id="L20">  private String publicAuth;</span>
 
-<span class="nc" id="L22">  private String publicKeyAuthPath;</span>
+<span class="nc" id="L22">  private String privateMail;</span>
 
-<span class="nc" id="L24">  private String privateKeyMailPath;</span>
+<span class="nc" id="L24">  private String publicMail;</span>
 
-<span class="nc" id="L26">  private String publicKeyMailPath;</span>
+<span class="nc" id="L26">  private PublicKey publicKeyAuth;</span>
 
-<span class="nc" id="L28">  private PrivateKey privateKeyAuth;</span>
+<span class="nc" id="L28">  private PrivateKey privateKeyMail;</span>
 
-<span class="nc" id="L30">  private PublicKey publicKeyAuth;</span>
-
-<span class="nc" id="L32">  private PrivateKey privateKeyMail;</span>
-
-<span class="nc" id="L34">  private PublicKey publicKeyMail;</span>
-
-<span class="nc" id="L36">  private final RsaProvider rsaProvider;</span>
+<span class="nc" id="L30">  private PublicKey publicKeyMail;</span>
 
   @PostConstruct
   public void createRsaKey() {
-<span class="nc" id="L40">    java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());</span>
-<span class="nc" id="L41">    privateKeyAuth = rsaProvider.getPrivateKey(privateKeyAuthPath);</span>
-<span class="nc" id="L42">    publicKeyAuth = rsaProvider.getPublicKey(publicKeyAuthPath);</span>
-<span class="nc" id="L43">    privateKeyMail = rsaProvider.getPrivateKey(privateKeyMailPath);</span>
-<span class="nc" id="L44">    publicKeyMail = rsaProvider.getPublicKey(publicKeyMailPath);</span>
-<span class="nc" id="L45">  }</span>
+<span class="nc" id="L34">    java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());</span>
+<span class="nc" id="L35">    publicKeyAuth = RsaUtils.getPublicKey(publicAuth);</span>
+<span class="nc" id="L36">    privateKeyMail = RsaUtils.getPrivateKey(privateMail);</span>
+<span class="nc" id="L37">    publicKeyMail = RsaUtils.getPublicKey(publicMail);</span>
+<span class="nc" id="L38">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

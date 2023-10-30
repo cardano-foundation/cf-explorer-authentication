@@ -59,8 +59,9 @@ public class AuthController {
       @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   @PostMapping(value = &quot;/sign-up&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity&lt;MessageResponse&gt; signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-<span class="fc" id="L63">    return ResponseEntity.ok(authenticationService.signUp(signUpRequest));</span>
+  public ResponseEntity&lt;MessageResponse&gt; signUp(@Valid @RequestBody SignUpRequest signUpRequest,
+      HttpServletRequest httpServletRequest) {
+<span class="fc" id="L64">    return ResponseEntity.ok(authenticationService.signUp(signUpRequest, httpServletRequest));</span>
   }
 
   @Operation(description = &quot;Generate a new JSON Web Token (JWT) using the refresh token&quot;)
@@ -78,8 +79,8 @@ public class AuthController {
           required = true)
       @Valid @RequestParam(&quot;refreshJwt&quot;) String refreshJwt,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L81">    return ResponseEntity.ok(</span>
-<span class="fc" id="L82">        authenticationService.refreshToken(refreshJwt, httpServletRequest));</span>
+<span class="fc" id="L82">    return ResponseEntity.ok(</span>
+<span class="fc" id="L83">        authenticationService.refreshToken(refreshJwt, httpServletRequest));</span>
   }
 
   @Operation(description = &quot;Log out from the system&quot;)
@@ -91,7 +92,7 @@ public class AuthController {
   @PostMapping(value = &quot;/sign-out&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity&lt;MessageResponse&gt; signOut(@Valid @RequestBody SignOutRequest signOutRequest,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L94">    return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));</span>
+<span class="fc" id="L95">    return ResponseEntity.ok(authenticationService.signOut(signOutRequest, httpServletRequest));</span>
   }
 
   @Operation(description = &quot;Get a wallet code to generate a signature for logging into the system&quot;)
@@ -114,7 +115,7 @@ public class AuthController {
           example = &quot;NAMI&quot;,
           required = true)
       @RequestParam(&quot;walletName&quot;) String walletName) {
-<span class="fc" id="L117">    return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));</span>
+<span class="fc" id="L118">    return ResponseEntity.ok(authenticationService.findNonceByAddress(address, walletName));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -7,66 +7,42 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.authentication.model.enums.ENetworkType;
-import org.cardanofoundation.authentication.model.request.EditUserRequest;
+import lombok.extern.log4j.Log4j2;
+
+import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
-import org.cardanofoundation.authentication.model.response.UserResponse;
-import org.cardanofoundation.authentication.service.UserService;
-import org.cardanofoundation.explorer.common.annotation.EnumValid;
+import org.cardanofoundation.authentication.service.KeycloakService;
 import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(&quot;/api/v1/user&quot;)
-<span class="fc" id="L33">@RequiredArgsConstructor</span>
+<span class="fc" id="L35">@RequiredArgsConstructor</span>
 @Tag(name = &quot;User Controller&quot;)
 @Validated
+<span class="fc" id="L38">@Log4j2</span>
 public class UserController {
 
-  private final UserService userService;
+  private final KeycloakService keycloakService;
 
-  @Operation(description = &quot;Edit the profile image for the account&quot;)
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = UserResponse.class))),
-      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
-  @PutMapping(&quot;/edit-avatar&quot;)
-  public ResponseEntity&lt;UserResponse&gt; editAvatar(
-      @Parameter(
-          name = &quot;avatar&quot;,
-          description = &quot;Image data(byte[])&quot;,
-          required = true)
-      @RequestParam(&quot;avatar&quot;) MultipartFile avatar,
-      HttpServletRequest httpServletRequest) {
-<span class="nc" id="L55">    return ResponseEntity.ok(userService.editAvatar(avatar, httpServletRequest));</span>
-  }
 
-  @Operation(description = &quot;Edit account information&quot;)
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = UserResponse.class))),
-      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
-  @PutMapping(&quot;/edit&quot;)
-  public ResponseEntity&lt;UserResponse&gt; edit(@Valid @RequestBody EditUserRequest editUserRequest,
-      HttpServletRequest httpServletRequest) {
-<span class="fc" id="L68">    return ResponseEntity.ok(userService.editUser(editUserRequest, httpServletRequest));</span>
-  }
+  @Value(&quot;${secret-code}&quot;)
+  private String secretCode;
 
   @Operation(description = &quot;Get account information&quot;)
   @ApiResponses(value = {
@@ -76,15 +52,8 @@ public class UserController {
       @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   @GetMapping(&quot;/info&quot;)
-  public ResponseEntity&lt;UserInfoResponse&gt; info(
-      @Parameter(
-          name = &quot;network&quot;,
-          description = &quot;Network type&quot;,
-          example = &quot;MAIN_NET&quot;,
-          required = true)
-      @RequestParam(&quot;network&quot;) @EnumValid(enumClass = ENetworkType.class) String network,
-      HttpServletRequest httpServletRequest) {
-<span class="fc" id="L87">    return ResponseEntity.ok(userService.infoUser(httpServletRequest, network));</span>
+  public ResponseEntity&lt;UserInfoResponse&gt; info(HttpServletRequest httpServletRequest) {
+<span class="fc" id="L56">    return ResponseEntity.ok(keycloakService.infoUser(httpServletRequest));</span>
   }
 
   @Operation(description = &quot;Check the existence of an email&quot;)
@@ -102,7 +71,16 @@ public class UserController {
           example = &quot;phuc.viet@gmail.com&quot;,
           required = true)
       @RequestParam(&quot;email&quot;) @Email String email) {
-<span class="fc" id="L105">    return ResponseEntity.ok(userService.checkExistEmail(email));</span>
+<span class="fc" id="L74">    return ResponseEntity.ok(keycloakService.checkExistEmail(email));</span>
+  }
+
+  @PostMapping(&quot;/role-mapping&quot;)
+  public ResponseEntity&lt;Boolean&gt; roleMapping(@RequestBody EventModel model) {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">    if (!model.getSecretCode().equals(secretCode)) {</span>
+<span class="nc" id="L80">      log.warn(&quot;Secret code is not correct! setup `{}`, received `{}` !&quot;, secretCode, model.getSecretCode());</span>
+<span class="nc" id="L81">      return new ResponseEntity&lt;&gt;(false, HttpStatus.BAD_REQUEST);</span>
+    }
+<span class="nc" id="L83">    return new ResponseEntity&lt;&gt;(keycloakService.roleMapping(model), HttpStatus.CREATED);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

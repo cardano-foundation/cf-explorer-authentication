@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BookMarkResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.model.response</a> &gt; <span class="el_source">BookMarkResponse.java</span></div><h1>BookMarkResponse.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.model.response;
 
+import lombok.Builder;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import java.time.Instant;
@@ -7,19 +8,20 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-<span class="fc" id="L10">@Setter</span>
-<span class="fc" id="L11">public class BookMarkResponse {</span>
+<span class="nc" id="L11">@Setter</span>
+<span class="pc" id="L12">@Builder</span>
+public class BookMarkResponse {
 
-<span class="nc" id="L13">  private Long id;</span>
+<span class="nc" id="L15">  private Long id;</span>
 
-<span class="nc" id="L15">  private String urlPage;</span>
+<span class="nc" id="L17">  private String urlPage;</span>
 
-<span class="nc" id="L17">  private String keyword;</span>
+<span class="fc" id="L19">  private String keyword;</span>
 
-<span class="nc" id="L19">  private EBookMarkType type;</span>
+<span class="fc" id="L21">  private String type;</span>
 
-<span class="nc" id="L21">  private ENetworkType network;</span>
+<span class="nc" id="L23">  private String network;</span>
 
-<span class="nc" id="L23">  private Instant createdDate;</span>
+<span class="nc" id="L25">  private Instant createdDate;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

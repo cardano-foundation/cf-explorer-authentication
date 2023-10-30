@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KeycloakServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.service.impl</a> &gt; <span class="el_source">KeycloakServiceImpl.java</span></div><h1>KeycloakServiceImpl.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.service.impl;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.model.enums.EResourceType;
+import org.cardanofoundation.authentication.model.request.event.EventModel;
+import org.cardanofoundation.authentication.model.response.UserInfoResponse;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
+import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.service.KeycloakService;
+import org.keycloak.representations.idm.UserRepresentation;
+
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L27">@RequiredArgsConstructor</span>
+<span class="fc" id="L28">@Log4j2</span>
+public class KeycloakServiceImpl implements KeycloakService {
+
+  private final KeycloakProvider keycloakProvider;
+
+  private final JwtProvider jwtProvider;
+
+  private final RedisProvider redisProvider;
+
+  @Override
+  public Boolean checkExistEmail(String email) {
+<span class="fc" id="L39">    UserRepresentation user = keycloakProvider.getUser(email);</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">    return !Objects.isNull(user);</span>
+  }
+
+  @Override
+  public UserInfoResponse infoUser(HttpServletRequest httpServletRequest) {
+<span class="fc" id="L45">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="fc" id="L46">    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();</span>
+<span class="fc" id="L47">    return UserInfoResponse.builder().username(user.getUsername())</span>
+<span class="fc" id="L48">        .lastLogin(Instant.parse(user.firstAttribute(CommonConstant.ATTRIBUTE_LOGIN_TIME))).build();</span>
+  }
+
+  //REAM_ROLE: delete one role -&gt; logout all user has this role
+  //REAM_ROLE_MAPPING: assign or unassign a role of user
+
+  //REAM_ROLE: roles-by-id/{role_id} //delete role only
+  @Override
+  public Boolean roleMapping(EventModel model) {
+<span class="nc" id="L57">    log.info(&quot;resource type: &quot; + model.getResourceType());// REAM_ROLE , REAM_ROLE_MAPPING</span>
+<span class="nc" id="L58">    log.info(&quot;resource path: &quot;</span>
+<span class="nc" id="L59">        + model.getResourcePath());//(users/{user_id}) re or (users/{user_id}/role_mapping/realm) add role</span>
+<span class="nc" id="L60">    String resourceType = model.getResourceType();</span>
+<span class="nc" id="L61">    String[] resourceArr = model.getResourcePath().split(&quot;/&quot;);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">    if (resourceArr.length &gt; 0) {</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">      if (resourceType.equals(EResourceType.REALM_ROLE.name())</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">          &amp;&amp; !resourceType.isEmpty()) {// delete role of system then remove all token of user has this role</span>
+<span class="nc" id="L66">        log.info(&quot;role id: &quot; + resourceArr[1]);</span>
+        //get user prefix keys from role id
+<span class="nc" id="L68">        Set&lt;String&gt; userIds = redisProvider.getAllHashKeyOfKey(</span>
+<span class="nc" id="L69">            redisProvider.getRoleKeyByRoleId(resourceArr[1]));</span>
+
+<span class="nc" id="L71">        Set&lt;String&gt; userKeys = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L72">        userIds.forEach(</span>
+<span class="nc" id="L73">            userId -&gt; userKeys.addAll(</span>
+<span class="nc" id="L74">                redisProvider.getKeys(redisProvider.getUserPatternKey(userId))));</span>
+<span class="nc" id="L75">        setInValidToken(userKeys);</span>
+
+<span class="nc" id="L77">      } else { //REAM_ROLE_MAPPING: assign or unassign a role of user</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (!resourceType.isEmpty()) {</span>
+<span class="nc" id="L79">          log.warn(&quot;user id: {}&quot;, resourceArr[1]);</span>
+<span class="nc" id="L80">          Set&lt;String&gt; userKeys = redisProvider.getKeys(</span>
+<span class="nc" id="L81">              redisProvider.getUserPatternKey(resourceArr[1]));</span>
+<span class="nc" id="L82">          setInValidToken(userKeys);</span>
+        }
+      }
+    }
+<span class="nc" id="L86">    return true;</span>
+  }
+
+  private void setInValidToken(Set&lt;String&gt; keys) {
+<span class="nc" id="L90">    keys.forEach(key -&gt; {</span>
+<span class="nc" id="L91">      String val = redisProvider.getValue(key);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">      if (Objects.nonNull(val)) {</span>
+<span class="nc" id="L93">        redisProvider.blacklistJwt(val, key);</span>
+<span class="nc" id="L94">        log.info(&quot;black list success: &quot; + val);</span>
+      }
+<span class="nc" id="L96">    });</span>
+<span class="nc" id="L97">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

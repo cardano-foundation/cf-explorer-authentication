@@ -1,38 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VerifyServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.service.impl</a> &gt; <span class="el_source">VerifyServiceImpl.java</span></div><h1>VerifyServiceImpl.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.model.entity.UserEntity;
-import org.cardanofoundation.authentication.model.enums.EStatus;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.authentication.repository.UserRepository;
-import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.LocaleResolver;
 
 @Service
 <span class="fc" id="L25">@RequiredArgsConstructor</span>
 <span class="fc" id="L26">@Log4j2</span>
 public class VerifyServiceImpl implements VerifyService {
 
-  private final UserRepository userRepository;
-
-  private final UserService userService;
-
   private final MailProvider mailProvider;
-
-  private final PasswordEncoder encoder;
 
   private final JwtProvider jwtProvider;
 
@@ -40,64 +34,70 @@ public class VerifyServiceImpl implements VerifyService {
 
   private final ThreadPoolExecutor sendMailExecutor;
 
+  private final KeycloakProvider keycloakProvider;
+
+  private final LocaleResolver localeResolver;
+
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
-<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="fc" id="L46">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="fc" id="L44">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L48">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
-<span class="fc bfc" id="L49" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
-<span class="fc" id="L50">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L46">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
+<span class="fc" id="L48">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L52">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
-<span class="fc" id="L53">    redisProvider.blacklistJwt(code, accountId);</span>
-<span class="fc" id="L54">    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.PENDING);</span>
-<span class="fc bfc" id="L55" title="All 2 branches covered.">    if (Objects.nonNull(user)) {</span>
-<span class="fc" id="L56">      userService.activeUser(accountId);</span>
+<span class="fc" id="L50">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
+<span class="fc" id="L51">    redisProvider.blacklistJwt(code, accountId);</span>
+<span class="fc" id="L52">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    if (Objects.nonNull(user)) {</span>
+<span class="fc" id="L54">      user.setEnabled(true);</span>
+<span class="fc" id="L55">      keycloakProvider.getResource().get(user.getId()).update(user);</span>
     } else {
-<span class="fc" id="L58">      return new MessageResponse(CommonErrorCode.VERIFY_CODE_NOT_PENDING);</span>
+<span class="fc" id="L57">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L60">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L59">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
-<span class="fc" id="L65">    String code = resetPasswordRequest.getCode();</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="fc" id="L67">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L64">    String code = resetPasswordRequest.getCode();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="fc" id="L66">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L69">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
-<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
-<span class="fc" id="L71">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L68">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
+<span class="fc" id="L70">      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L73">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
-<span class="fc" id="L74">    redisProvider.blacklistJwt(code, accountId);</span>
-<span class="fc" id="L75">    UserEntity user = userService.findByEmailAndStatus(accountId, EStatus.ACTIVE);</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">    if (Objects.isNull(user)) {</span>
-<span class="fc" id="L77">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
-    }
-<span class="fc" id="L79">    user.setPassword(encoder.encode(resetPasswordRequest.getPassword()));</span>
-<span class="fc" id="L80">    userRepository.save(user);</span>
-<span class="fc" id="L81">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L72">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
+<span class="fc" id="L73">    redisProvider.blacklistJwt(code, accountId);</span>
+<span class="fc" id="L74">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
+<span class="fc" id="L75">    user.setCredentials(</span>
+<span class="fc" id="L76">        Collections.singletonList(</span>
+<span class="fc" id="L77">            keycloakProvider.createPasswordCredentials(resetPasswordRequest.getPassword())));</span>
+<span class="fc" id="L78">    keycloakProvider.getResource().get(user.getId()).update(user);</span>
+<span class="fc" id="L79">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
-  public MessageResponse forgotPassword(String email) {
-<span class="fc" id="L86">    UserEntity user = userRepository.findByEmailAndStatus(email, EStatus.ACTIVE).orElse(null);</span>
-<span class="fc bfc" id="L87" title="All 2 branches covered.">    if (Objects.isNull(user)) {</span>
-<span class="fc" id="L88">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
+  public MessageResponse forgotPassword(String email, HttpServletRequest httpServletRequest) {
+<span class="fc" id="L84">    UserRepresentation user = keycloakProvider.getUser(email);</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">    if (Objects.isNull(user)) {</span>
+<span class="fc" id="L86">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
     }
-<span class="fc" id="L90">    String code = jwtProvider.generateCodeForVerify(email);</span>
-<span class="fc" id="L91">    sendMailExecutor.execute(new MailHandler(mailProvider, user, EUserAction.RESET_PASSWORD, code));</span>
-<span class="fc" id="L92">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="nc" id="L88">    String code = jwtProvider.generateCodeForVerify(email);</span>
+<span class="nc" id="L89">    sendMailExecutor.execute(</span>
+        new MailHandler(mailProvider, email, EUserAction.RESET_PASSWORD,
+<span class="nc" id="L91">            localeResolver.resolveLocale(httpServletRequest), code));</span>
+<span class="nc" id="L92">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public Boolean checkExpiredCode(String code) {
-<span class="nc bnc" id="L97" title="All 2 branches missed.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="nc" id="L98">      return false;</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="fc" id="L98">      return false;</span>
     }
-<span class="nc" id="L100">    return jwtProvider.validateVerifyCode(code);</span>
+<span class="fc" id="L100">    return jwtProvider.validateVerifyCode(code);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

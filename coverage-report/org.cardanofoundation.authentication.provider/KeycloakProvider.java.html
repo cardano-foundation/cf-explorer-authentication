@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KeycloakProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.provider</a> &gt; <span class="el_source">KeycloakProvider.java</span></div><h1>KeycloakProvider.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.provider;
+
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import java.util.List;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.cardanofoundation.authentication.config.properties.KeycloakProperties;
+import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RolesResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.stereotype.Component;
+
+@Component
+<span class="nc" id="L24">@RequiredArgsConstructor</span>
+<span class="fc" id="L25">@Log4j2</span>
+public class KeycloakProvider {
+
+  private final KeycloakProperties keycloakProperties;
+
+  private Keycloak keycloak;
+
+  public Keycloak getInstance() {
+<span class="nc bnc" id="L33" title="All 2 branches missed.">    if (Objects.isNull(keycloak)) {</span>
+<span class="nc" id="L34">      keycloak = KeycloakBuilder.builder()</span>
+<span class="nc" id="L35">          .realm(keycloakProperties.getRealm())</span>
+<span class="nc" id="L36">          .serverUrl(keycloakProperties.getAuthServerUrl())</span>
+<span class="nc" id="L37">          .clientId(keycloakProperties.getResource())</span>
+<span class="nc" id="L38">          .clientSecret(keycloakProperties.getCredentials().getSecret())</span>
+<span class="nc" id="L39">          .grantType(OAuth2Constants.CLIENT_CREDENTIALS)</span>
+<span class="nc" id="L40">          .build();</span>
+    }
+<span class="nc" id="L42">    return keycloak;</span>
+  }
+
+  public Keycloak keycloakBuilderWhenLogin(String accountId, String password) {
+<span class="nc" id="L46">    return KeycloakBuilder.builder()</span>
+<span class="nc" id="L47">        .realm(keycloakProperties.getRealm())</span>
+<span class="nc" id="L48">        .serverUrl(keycloakProperties.getAuthServerUrl())</span>
+<span class="nc" id="L49">        .clientId(keycloakProperties.getResource())</span>
+<span class="nc" id="L50">        .clientSecret(keycloakProperties.getCredentials().getSecret())</span>
+<span class="nc" id="L51">        .username(accountId)</span>
+<span class="nc" id="L52">        .password(password)</span>
+<span class="nc" id="L53">        .build();</span>
+  }
+
+  public JsonNode refreshToken(String refreshToken) throws UnirestException {
+<span class="nc" id="L57">    String url = keycloakProperties.getAuthServerUrl() + &quot;/realms/&quot; + keycloakProperties.getRealm()</span>
+        + &quot;/protocol/openid-connect/token&quot;;
+<span class="nc" id="L59">    return Unirest.post(url)</span>
+<span class="nc" id="L60">        .header(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded&quot;)</span>
+<span class="nc" id="L61">        .field(&quot;client_id&quot;, keycloakProperties.getResource())</span>
+<span class="nc" id="L62">        .field(&quot;client_secret&quot;, keycloakProperties.getCredentials().getSecret())</span>
+<span class="nc" id="L63">        .field(&quot;refresh_token&quot;, refreshToken)</span>
+<span class="nc" id="L64">        .field(&quot;grant_type&quot;, &quot;refresh_token&quot;)</span>
+<span class="nc" id="L65">        .asJson().getBody();</span>
+  }
+
+  public UsersResource getResource() {
+<span class="nc" id="L69">    return getInstance().realm(keycloakProperties.getRealm()).users();</span>
+  }
+
+  public UserRepresentation getUser(String accountId) {
+<span class="nc" id="L73">    UsersResource usersResource = getResource();</span>
+<span class="nc" id="L74">    List&lt;UserRepresentation&gt; userList = usersResource.search(accountId);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">    if (!userList.isEmpty()) {</span>
+<span class="nc" id="L76">      return userList.get(CommonConstant.ZERO);</span>
+    }
+<span class="nc" id="L78">    return null;</span>
+  }
+
+  public CredentialRepresentation createPasswordCredentials(String password) {
+<span class="nc" id="L82">    CredentialRepresentation passwordCredentials = new CredentialRepresentation();</span>
+<span class="nc" id="L83">    passwordCredentials.setTemporary(false);</span>
+<span class="nc" id="L84">    passwordCredentials.setType(CredentialRepresentation.PASSWORD);</span>
+<span class="nc" id="L85">    passwordCredentials.setValue(password);</span>
+<span class="nc" id="L86">    return passwordCredentials;</span>
+  }
+
+  public String getRoleIdByRoleName(String roleName) {
+<span class="nc" id="L90">    RealmResource realmResource = getInstance().realm(keycloakProperties.getRealm());</span>
+<span class="nc" id="L91">    RolesResource rolesResource = realmResource.roles();</span>
+<span class="nc" id="L92">    RoleRepresentation roleRepresentation = rolesResource.get(roleName).toRepresentation();</span>
+<span class="nc" id="L93">    return roleRepresentation.getId();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

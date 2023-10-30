@@ -2,15 +2,14 @@
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
-@SpringBootApplication
-@EnableJpaAuditing
-<span class="fc" id="L9">public class AuthServiceApplication {</span>
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
+<span class="fc" id="L8">public class AuthServiceApplication {</span>
 
   public static void main(String[] args) {
-<span class="nc" id="L12">    SpringApplication.run(AuthServiceApplication.class, args);</span>
-<span class="nc" id="L13">  }</span>
+<span class="nc" id="L11">    SpringApplication.run(AuthServiceApplication.class, args);</span>
+<span class="nc" id="L12">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

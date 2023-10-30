@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(&quot;/api/v1/verify&quot;)
-<span class="fc" id="L29">@RequiredArgsConstructor</span>
+<span class="fc" id="L30">@RequiredArgsConstructor</span>
 @Tag(name = &quot;Verify Mail Controller&quot;)
 @Validated
 public class VerifyMailController {
@@ -46,7 +47,7 @@ public class VerifyMailController {
           description = &quot;Account activation code&quot;,
           required = true)
       @Valid @RequestParam(&quot;code&quot;) String code) {
-<span class="fc" id="L49">    return ResponseEntity.ok(verifyService.checkVerifySignUpByEmail(code));</span>
+<span class="fc" id="L50">    return ResponseEntity.ok(verifyService.checkVerifySignUpByEmail(code));</span>
   }
 
   @Operation(description = &quot;Initiate the password reset process&quot;)
@@ -62,9 +63,9 @@ public class VerifyMailController {
           description = &quot;Email address used to create the account&quot;,
           example = &quot;phuc.viet@gmail.com&quot;,
           required = true)
-      @Valid @RequestParam(&quot;email&quot;) @Email String email) {
-<span class="fc" id="L66">    return ResponseEntity.ok(</span>
-<span class="fc" id="L67">        verifyService.forgotPassword(email));</span>
+      @Valid @RequestParam(&quot;email&quot;) @Email String email, HttpServletRequest httpServletRequest) {
+<span class="fc" id="L67">    return ResponseEntity.ok(</span>
+<span class="fc" id="L68">        verifyService.forgotPassword(email, httpServletRequest));</span>
   }
 
   @Operation(description = &quot;Set a new password for the account&quot;)
@@ -76,8 +77,8 @@ public class VerifyMailController {
   @PutMapping(value = &quot;/reset-password&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity&lt;MessageResponse&gt; newPassword(@Valid
   @RequestBody ResetPasswordRequest resetPasswordRequest) {
-<span class="fc" id="L79">    return ResponseEntity.ok(</span>
-<span class="fc" id="L80">        verifyService.resetPassword(resetPasswordRequest));</span>
+<span class="fc" id="L80">    return ResponseEntity.ok(</span>
+<span class="fc" id="L81">        verifyService.resetPassword(resetPasswordRequest));</span>
   }
 
   @Operation(description = &quot;Check the validity of the authentication code&quot;)
@@ -93,7 +94,7 @@ public class VerifyMailController {
           description = &quot;Account verify code&quot;,
           required = true)
       @Valid @RequestParam(&quot;code&quot;) String code) {
-<span class="nc" id="L96">    return ResponseEntity.ok(verifyService.checkExpiredCode(code));</span>
+<span class="nc" id="L97">    return ResponseEntity.ok(verifyService.checkExpiredCode(code));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

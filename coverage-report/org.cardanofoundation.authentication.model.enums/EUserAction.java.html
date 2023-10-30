@@ -4,21 +4,19 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
-<span class="fc" id="L8">public enum EUserAction {</span>
-<span class="fc" id="L9">  CREATED(&quot;Created&quot;), UPDATED(&quot;Updated&quot;), LOGIN(&quot;Login&quot;), LOGOUT(&quot;Logout&quot;), TRANSFERS_WALLET(</span>
-<span class="fc" id="L10">      &quot;Transfers wallet&quot;), RESET_PASSWORD(&quot;Reset password admin&quot;);</span>
+<span class="nc" id="L9">@Getter</span>
+public enum EUserAction {
+<span class="nc" id="L11">  CREATED(&quot;Created&quot;), RESET_PASSWORD(&quot;Reset password&quot;);</span>
 
-  private final String action;
-<span class="fc" id="L13">  private static final Map&lt;String, EUserAction&gt; userActionMap = Arrays.stream(values())</span>
-<span class="fc" id="L14">      .collect(Collectors.toMap(EUserAction::getAction, Function.identity()));</span>
+<span class="nc" id="L13">  private final String action;</span>
+<span class="nc" id="L14">  private static final Map&lt;String, EUserAction&gt; userActionMap = Arrays.stream(values())</span>
+<span class="nc" id="L15">      .collect(Collectors.toMap(EUserAction::getAction, Function.identity()));</span>
 
-<span class="fc" id="L16">  EUserAction(String action) {</span>
-<span class="fc" id="L17">    this.action = action;</span>
-<span class="fc" id="L18">  }</span>
+<span class="nc" id="L17">  EUserAction(String action) {</span>
+<span class="nc" id="L18">    this.action = action;</span>
+<span class="nc" id="L19">  }</span>
 
-  public String getAction() {
-<span class="fc" id="L21">    return this.action;</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
