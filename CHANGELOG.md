@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.1.14](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.13...v0.1.14) (2023-10-30)
+
+
+### Features
+
+* add keycloak event listener ([ef1aaaf](https://github.com/cardano-foundation/cf-explorer-authentication/commit/ef1aaaf6f25bc978f470e29c99112caea4580da7))
+* add provider ([5870390](https://github.com/cardano-foundation/cf-explorer-authentication/commit/5870390ad8a4d389731e4ce7498ffcb3f224a6ce))
+* Create licence checker and add to CICD pipeline for Authentication ([860995b](https://github.com/cardano-foundation/cf-explorer-authentication/commit/860995bf5b737311a1fb39ca6065f59c98696217))
+* custom multiple language when send email verify ([5ca9414](https://github.com/cardano-foundation/cf-explorer-authentication/commit/5ca94140dff55eb079210b76e1dee4bb37b36b21))
+* edit constant language ([8b0210c](https://github.com/cardano-foundation/cf-explorer-authentication/commit/8b0210c8d4754da538adb891f7493bde4d43804e))
+* handle event listener from keycloak when edit role ([83e93e1](https://github.com/cardano-foundation/cf-explorer-authentication/commit/83e93e1d22f696ca58fc046b67a0698acac4c29f))
+* handle event listeners from keycloak when edit role ([6a74dc6](https://github.com/cardano-foundation/cf-explorer-authentication/commit/6a74dc60a54f582ff58de43620570cd240872e9a))
+* handle logout when edit user role on keycloak ([ced99ff](https://github.com/cardano-foundation/cf-explorer-authentication/commit/ced99ff6282d5cd2cdb3a62ef5449cf0d93bb09d))
+* handle read RSA key ([3ba0b41](https://github.com/cardano-foundation/cf-explorer-authentication/commit/3ba0b414b76250c0901bbb92bd66e18ad657f9c7))
+* handle RSA key with keycloak and paging bookmark api ([9dc7ffc](https://github.com/cardano-foundation/cf-explorer-authentication/commit/9dc7ffc60dc645c6d7b715a5dd537499dd5a1230))
+* handle token when edit user role on keycloak ([69e1c4f](https://github.com/cardano-foundation/cf-explorer-authentication/commit/69e1c4f2aeedfb4835584ec5ed55ae43a5a8b6b7))
+* refactor code, integrate keycloak into authentication ([da2d9d6](https://github.com/cardano-foundation/cf-explorer-authentication/commit/da2d9d6a7a355f9ec24ec7a02e63b6183aca86be))
+* remove config rollback transaction ([d291811](https://github.com/cardano-foundation/cf-explorer-authentication/commit/d29181192362d995749ffec82da3b5efc2ca995a))
+* update licenses.txt ([4e6b9ec](https://github.com/cardano-foundation/cf-explorer-authentication/commit/4e6b9ec9c326550648692e0759d56c1af89514db))
+* update licenses.txt ([6309a6e](https://github.com/cardano-foundation/cf-explorer-authentication/commit/6309a6ec1b79f38e19d58056b99298ee4c631a89))
+* update redis ([df4fc1c](https://github.com/cardano-foundation/cf-explorer-authentication/commit/df4fc1c9403092c4b3ed48417ab5c44a63c526c0))
+
+
+### Bug Fixes
+
+* add public_key ([47bee0c](https://github.com/cardano-foundation/cf-explorer-authentication/commit/47bee0c947f23d881e406d2e689d3d58488f43be))
+* bug testing ([c3fec3c](https://github.com/cardano-foundation/cf-explorer-authentication/commit/c3fec3c448abc884148b5261c2f4a5ac7f02c32f))
+* check null when get value from redis ([2ae160c](https://github.com/cardano-foundation/cf-explorer-authentication/commit/2ae160ca1522d569caccca5b0ca5b16d17ad7e46))
+* check test ([3c21025](https://github.com/cardano-foundation/cf-explorer-authentication/commit/3c21025a48b2e0bdf5739d9fa4131194b25f1046))
+* config keycloak ([9c82446](https://github.com/cardano-foundation/cf-explorer-authentication/commit/9c8244603294ea922d16d97457addb554345611f))
+* conflict with sota-testing ([50ec73b](https://github.com/cardano-foundation/cf-explorer-authentication/commit/50ec73be7b6a24b5c5229cb6306bf73ac149d66c))
+* fix conflict with sota-testing ([e33acc4](https://github.com/cardano-foundation/cf-explorer-authentication/commit/e33acc49ecf681703c936f6af1e0f5fb6a2214a9))
+* Handle log out when edit user role in keycloak ([2d06e64](https://github.com/cardano-foundation/cf-explorer-authentication/commit/2d06e647c40f4500357b5d4514ad829ff0023ce2))
+* redis key invalid ([d423cd1](https://github.com/cardano-foundation/cf-explorer-authentication/commit/d423cd141135d83084330eee3baa7859c2a71b4e))
+* redis key invalid ([fecdaae](https://github.com/cardano-foundation/cf-explorer-authentication/commit/fecdaae07344e4d39468f6d5a86226d8976f043d))
+* remove LocaleUtils ([f60e60f](https://github.com/cardano-foundation/cf-explorer-authentication/commit/f60e60f6bf6bab0bb73e9a083ca756b6f1a6d1c0))
+* testing ([30c10cd](https://github.com/cardano-foundation/cf-explorer-authentication/commit/30c10cd681fe19f1d1f4fd8567d816d5aedb107a))
+* update public_key ([947b893](https://github.com/cardano-foundation/cf-explorer-authentication/commit/947b893ff6b9300335304cda0f6a9eb7c9e19fc9))
+* update read me for authentication ([#103](https://github.com/cardano-foundation/cf-explorer-authentication/issues/103)) ([5619f45](https://github.com/cardano-foundation/cf-explorer-authentication/commit/5619f45cb006e69b2a7247b13d4821114fa07b42))
+* update redis config ([bee07a2](https://github.com/cardano-foundation/cf-explorer-authentication/commit/bee07a2561e16b1090d0b84a4192dad6454b0fab))
+* update redis config ([fa41614](https://github.com/cardano-foundation/cf-explorer-authentication/commit/fa416149359bd8635fd650e339ca0995541f8cd8))
+* update unit test ([3e4331b](https://github.com/cardano-foundation/cf-explorer-authentication/commit/3e4331bb93791f86f6486330d745bb02cac14672))
+* update version common api ([e2a832e](https://github.com/cardano-foundation/cf-explorer-authentication/commit/e2a832e2e1f8d9269ad438ad72a6fc590a157e24))
+
 ## [0.1.13](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.12...v0.1.13) (2023-08-11)
 
 
