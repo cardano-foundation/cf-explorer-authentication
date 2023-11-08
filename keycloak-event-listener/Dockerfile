@@ -12,3 +12,4 @@ RUN ./mvnw clean package -DskipTests
 FROM quay.io/keycloak/keycloak:latest
 
 COPY --from=build /app/target/*.jar /opt/keycloak/providers
+COPY ./imports /opt/keycloak/data/import
