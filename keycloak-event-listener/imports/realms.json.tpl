@@ -634,8 +634,7 @@
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
         "config" : {
-          "defaultResourceType" : "urn:cardano_authentication_client:resources:default",
-          "applyPolicies" : "[\"Default Policy\"]"
+          "defaultResourceType" : "urn:cardano_authentication_client:resources:default"
         }
       } ],
       "scopes" : [ ],
