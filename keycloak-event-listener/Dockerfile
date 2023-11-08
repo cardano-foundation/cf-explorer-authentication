@@ -9,7 +9,7 @@ RUN ./mvnw verify clean --fail-never
 COPY . /app
 RUN ./mvnw clean package -DskipTests
 
-FROM quay.io/keycloak/keycloak:latest
+FROM quay.io/keycloak/keycloak:21.1.1
 
 COPY --from=build /app/target/*.jar /opt/keycloak/providers
 COPY ./imports /opt/keycloak/data/import
