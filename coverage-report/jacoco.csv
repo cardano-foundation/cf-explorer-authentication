@@ -51,7 +51,7 @@ auth-service,org.cardanofoundation.authentication.model.request.bookmark,BookMar
 auth-service,org.cardanofoundation.authentication,AuthServiceApplication,5,3,0,0,2,1,1,1,1,1
 auth-service,org.cardanofoundation.authentication.config.email,AwsEmailConfig,27,0,0,0,7,0,2,0,2,0
 auth-service,org.cardanofoundation.authentication.model.request.event,EventModel,10,14,0,0,2,3,3,4,3,4
-auth-service,org.cardanofoundation.authentication.provider,MailProvider,137,4,7,0,27,1,6,1,2,1
+auth-service,org.cardanofoundation.authentication.provider,MailProvider,118,4,3,0,24,1,4,1,2,1
 auth-service,org.cardanofoundation.authentication.provider,LocaleProvider,17,0,0,0,3,0,3,0,3,0
 auth-service,org.cardanofoundation.authentication.provider,JwtProvider,215,4,6,0,47,1,13,1,10,1
 auth-service,org.cardanofoundation.authentication.provider,RedisProvider,105,4,4,0,22,1,15,1,13,1
