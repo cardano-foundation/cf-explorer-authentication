@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.14...v0.1.15) (2023-11-23)
+
+
+### Bug Fixes
+
+* comment code defines url by language ([77323f0](https://github.com/cardano-foundation/cf-explorer-authentication/commit/77323f0e27ab6844748b83ea144c105b642da0e6))
+
 ## [0.1.14](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.13...v0.1.14) (2023-10-30)
 
 
