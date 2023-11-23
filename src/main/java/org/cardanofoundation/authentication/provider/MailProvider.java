@@ -35,11 +35,13 @@ public class MailProvider {
       helper.setFrom(mail.getFrom(), localeProvider.getValue("mail.sender", locale));
       helper.setTo(email);
       StringBuilder verifyURL = new StringBuilder(domainClient);
+      /* Config multiple language for mail
       if (locale.equals(new Locale("en"))) {
         verifyURL.append(CommonConstant.ENGLISH_URL);
       } else if (locale.equals(new Locale("fr"))) {
         verifyURL.append(CommonConstant.FRENCH_URL);
       }
+      */
       switch (emailType) {
         case CREATED -> {
           verifyURL.append("/verify-email?code=").append(code);
@@ -49,8 +51,7 @@ public class MailProvider {
           verifyURL.append("/reset-password?code=").append(code);
           helper.setSubject(localeProvider.getValue("mail.subject-reset-password", locale));
         }
-        default -> {
-        }
+        default -> log.error("Mail type incorrect: " + emailType);
       }
       contentHtml = contentHtml.replace("[URL]", verifyURL);
       contentHtml = contentHtml + localeProvider.getValue("mail.footer", locale);
