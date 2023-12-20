@@ -11,7 +11,7 @@
 
 	<groupId>org.cardanofoundation.authentication</groupId>
 	<artifactId>auth-service</artifactId>
-	<version>0.5.0-sanchonet</version>
+	<version>0.5.0-sanchonet-SNAPSHOT</version>
 
 	<name>auth-service</name>
 	<description>Auth Service for Spring Boot</description>
