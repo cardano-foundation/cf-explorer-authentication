@@ -7,7 +7,7 @@ auth-service,org.cardanofoundation.authentication.thread,MailHandler,45,0,0,0,15
 auth-service,org.cardanofoundation.authentication.config.redis.cluster,RedisClusterConfig,115,0,0,0,26,0,9,0,9,0
 auth-service,org.cardanofoundation.authentication.controller.advice,GlobalExceptionHandler,126,25,0,0,26,6,7,3,7,3
 auth-service,org.cardanofoundation.authentication.model.enums,EUserAction,36,0,0,0,8,0,3,0,3,0
-auth-service,org.cardanofoundation.authentication.model.enums,ENetworkType,0,27,0,0,0,2,0,1,0,1
+auth-service,org.cardanofoundation.authentication.model.enums,ENetworkType,0,33,0,0,0,2,0,1,0,1
 auth-service,org.cardanofoundation.authentication.model.enums,EResourceType,15,0,0,0,2,0,1,0,1,0
 auth-service,org.cardanofoundation.authentication.model.enums,EBookMarkType,0,39,0,0,0,2,0,1,0,1
 auth-service,org.cardanofoundation.authentication.model.enums,ERole,15,0,0,0,2,0,1,0,1,0
@@ -33,7 +33,7 @@ auth-service,org.cardanofoundation.authentication.config,KeycloakResolverConfig,
 auth-service,org.cardanofoundation.authentication.config.redis.standalone,RedisStandaloneConfig,132,0,4,0,29,0,11,0,9,0
 auth-service,org.cardanofoundation.authentication.util,SesSmtpCredentialGenerator,59,0,0,0,13,0,2,0,2,0
 auth-service,org.cardanofoundation.authentication.util,NonceUtils,11,55,0,0,3,13,0,3,0,3
-auth-service,org.cardanofoundation.authentication.service.impl,BookMarkServiceImpl,61,351,12,20,16,74,13,13,2,8
+auth-service,org.cardanofoundation.authentication.service.impl,BookMarkServiceImpl,61,361,12,20,16,76,13,14,2,9
 auth-service,org.cardanofoundation.authentication.service.impl,VerifyServiceImpl,26,182,1,13,4,35,1,12,0,6
 auth-service,org.cardanofoundation.authentication.service.impl,KeycloakServiceImpl,117,52,10,2,30,8,9,5,4,4
 auth-service,org.cardanofoundation.authentication.service.impl,AuthenticationServiceImpl,120,389,10,16,30,88,9,12,1,7

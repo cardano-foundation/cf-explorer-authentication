@@ -48,113 +48,116 @@ public class BookMarkServiceImpl implements BookMarkService {
 <span class="fc" id="L48">    List&lt;String&gt; bookmarkList = null;</span>
 <span class="pc bpc" id="L49" title="1 of 4 branches missed.">    if (Objects.nonNull(attributes) &amp;&amp; Objects.nonNull(attributes.get(bookmarkKey))) {</span>
 <span class="fc" id="L50">      bookmarkList = attributes.get(bookmarkKey);</span>
-<span class="fc bfc" id="L51" title="All 2 branches covered.">      if (bookmarkList.stream().anyMatch(key -&gt; key.contains(bookMarkRequest.getKeyword()))) {</span>
-<span class="fc" id="L52">        throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);</span>
+<span class="fc" id="L51">      if (bookmarkList.stream().map(bookmark -&gt; StringUtils.substringBefore(bookmark,</span>
+              CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))
+<span class="fc bfc" id="L53" title="All 2 branches covered.">          .anyMatch(key -&gt; key.equals(bookMarkRequest.getKeyword()))) {</span>
+<span class="fc" id="L54">        throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);</span>
       }
     }
-<span class="pc bpc" id="L55" title="1 of 4 branches missed.">    if (Objects.nonNull(bookmarkList) &amp;&amp; bookmarkList.size() &gt;= CommonConstant.LIMIT_BOOKMARK) {</span>
-<span class="fc" id="L56">      throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);</span>
+<span class="pc bpc" id="L57" title="1 of 4 branches missed.">    if (Objects.nonNull(bookmarkList) &amp;&amp; bookmarkList.size() &gt;= CommonConstant.LIMIT_BOOKMARK) {</span>
+<span class="fc" id="L58">      throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);</span>
     }
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">    if (Objects.isNull(attributes)) {</span>
-<span class="nc" id="L59">      attributes = new HashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">    if (Objects.isNull(attributes)) {</span>
+<span class="nc" id="L61">      attributes = new HashMap&lt;&gt;();</span>
     }
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">    if (Objects.isNull(bookmarkList)) {</span>
-<span class="fc" id="L62">      bookmarkList = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">    if (Objects.isNull(bookmarkList)) {</span>
+<span class="fc" id="L64">      bookmarkList = new ArrayList&lt;&gt;();</span>
     }
-<span class="fc" id="L64">    Instant addTime = Instant.now();</span>
-<span class="fc" id="L65">    bookmarkList.add(</span>
-<span class="fc" id="L66">        bookMarkRequest.getKeyword() + CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME + addTime);</span>
-<span class="fc" id="L67">    attributes.put(bookmarkKey, bookmarkList);</span>
-<span class="fc" id="L68">    user.setAttributes(attributes);</span>
-<span class="fc" id="L69">    keycloakProvider.getResource().get(user.getId()).update(user);</span>
-<span class="fc" id="L70">    return BookMarkResponse.builder().type(bookMarkRequest.getType()).createdDate(addTime)</span>
-<span class="fc" id="L71">        .keyword(bookMarkRequest.getKeyword()).network(bookMarkRequest.getNetwork()).build();</span>
+<span class="fc" id="L66">    Instant addTime = Instant.now();</span>
+<span class="fc" id="L67">    bookmarkList.add(</span>
+<span class="fc" id="L68">        bookMarkRequest.getKeyword() + CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME + addTime);</span>
+<span class="fc" id="L69">    attributes.put(bookmarkKey, bookmarkList);</span>
+<span class="fc" id="L70">    user.setAttributes(attributes);</span>
+<span class="fc" id="L71">    keycloakProvider.getResource().get(user.getId()).update(user);</span>
+<span class="fc" id="L72">    return BookMarkResponse.builder().type(bookMarkRequest.getType()).createdDate(addTime)</span>
+<span class="fc" id="L73">        .keyword(bookMarkRequest.getKeyword()).network(bookMarkRequest.getNetwork()).build();</span>
   }
 
   @Override
   public BasePageResponse&lt;BookMarkResponse&gt; findBookMarkByType(
       HttpServletRequest httpServletRequest, String bookMarkType, String network,
       Pageable pageable) {
-<span class="fc" id="L78">    BasePageResponse&lt;BookMarkResponse&gt; response = new BasePageResponse&lt;&gt;();</span>
-<span class="fc" id="L79">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
-<span class="fc" id="L80">    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();</span>
-<span class="fc" id="L81">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
-<span class="fc" id="L82">    String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + &quot;_&quot; + bookMarkType;</span>
-<span class="fc" id="L83">    List&lt;BookMarkResponse&gt; bookMarkResponseList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L80">    BasePageResponse&lt;BookMarkResponse&gt; response = new BasePageResponse&lt;&gt;();</span>
+<span class="fc" id="L81">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="fc" id="L82">    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();</span>
+<span class="fc" id="L83">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
+<span class="fc" id="L84">    String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + &quot;_&quot; + bookMarkType;</span>
+<span class="fc" id="L85">    List&lt;BookMarkResponse&gt; bookMarkResponseList = new ArrayList&lt;&gt;();</span>
     List&lt;String&gt; bookmarkList;
-<span class="fc" id="L85">    int size = 0;</span>
-<span class="pc bpc" id="L86" title="1 of 4 branches missed.">    if (Objects.nonNull(attributes) &amp;&amp; Objects.nonNull(attributes.get(bookmarkKey))) {</span>
-<span class="fc" id="L87">      bookmarkList = attributes.get(bookmarkKey);</span>
-<span class="fc" id="L88">      size = bookmarkList.size();</span>
-<span class="fc" id="L89">      int start = (int) pageable.getOffset();</span>
-<span class="fc" id="L90">      int end = Math.min((start + pageable.getPageSize()), size);</span>
-<span class="fc" id="L91">      List&lt;String&gt; bookmarkPage = bookmarkList.subList(start, end);</span>
-<span class="fc" id="L92">      bookmarkPage.forEach(value -&gt; bookMarkResponseList.add(</span>
-<span class="fc" id="L93">          BookMarkResponse.builder().keyword(</span>
-<span class="fc" id="L94">                  StringUtils.substringBefore(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))</span>
-<span class="fc" id="L95">              .createdDate(Instant.parse(</span>
-<span class="fc" id="L96">                  StringUtils.substringAfter(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME)))</span>
-<span class="fc" id="L97">              .type(bookMarkType)</span>
-<span class="fc" id="L98">              .network(network)</span>
-<span class="fc" id="L99">              .build()));</span>
+<span class="fc" id="L87">    int size = 0;</span>
+<span class="pc bpc" id="L88" title="1 of 4 branches missed.">    if (Objects.nonNull(attributes) &amp;&amp; Objects.nonNull(attributes.get(bookmarkKey))) {</span>
+<span class="fc" id="L89">      bookmarkList = attributes.get(bookmarkKey);</span>
+<span class="fc" id="L90">      size = bookmarkList.size();</span>
+<span class="fc" id="L91">      int start = (int) pageable.getOffset();</span>
+<span class="fc" id="L92">      int end = Math.min((start + pageable.getPageSize()), size);</span>
+<span class="fc" id="L93">      List&lt;String&gt; bookmarkPage = bookmarkList.subList(start, end);</span>
+<span class="fc" id="L94">      bookmarkPage.forEach(value -&gt; bookMarkResponseList.add(</span>
+<span class="fc" id="L95">          BookMarkResponse.builder().keyword(</span>
+<span class="fc" id="L96">                  StringUtils.substringBefore(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))</span>
+<span class="fc" id="L97">              .createdDate(Instant.parse(</span>
+<span class="fc" id="L98">                  StringUtils.substringAfter(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME)))</span>
+<span class="fc" id="L99">              .type(bookMarkType)</span>
+<span class="fc" id="L100">              .network(network)</span>
+<span class="fc" id="L101">              .build()));</span>
     }
-<span class="fc" id="L101">    response.setTotalItems(size);</span>
-<span class="fc" id="L102">    response.setData(bookMarkResponseList);</span>
-<span class="fc" id="L103">    return response;</span>
+<span class="fc" id="L103">    response.setTotalItems(size);</span>
+<span class="fc" id="L104">    response.setData(bookMarkResponseList);</span>
+<span class="fc" id="L105">    return response;</span>
   }
 
   @Override
   public MessageResponse deleteBookMark(String type, String network, String keyword,
       HttpServletRequest httpServletRequest) {
-<span class="fc" id="L109">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
-<span class="fc" id="L110">    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();</span>
-<span class="fc" id="L111">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
-<span class="fc" id="L112">    String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + &quot;_&quot; + type;</span>
-<span class="fc" id="L113">    boolean deleteFlag = false;</span>
-<span class="pc bpc" id="L114" title="2 of 4 branches missed.">    if (Objects.nonNull(attributes) &amp;&amp; Objects.nonNull(attributes.get(bookmarkKey))) {</span>
-<span class="fc" id="L115">      List&lt;String&gt; bookmarkList = attributes.get(bookmarkKey);</span>
-<span class="fc bfc" id="L116" title="All 2 branches covered.">      for (String val : bookmarkList) {</span>
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (val.contains(keyword)) {</span>
-<span class="nc" id="L118">          bookmarkList.remove(val);</span>
-<span class="nc" id="L119">          deleteFlag = true;</span>
-<span class="nc" id="L120">          break;</span>
+<span class="fc" id="L111">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="fc" id="L112">    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();</span>
+<span class="fc" id="L113">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
+<span class="fc" id="L114">    String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + &quot;_&quot; + type;</span>
+<span class="fc" id="L115">    boolean deleteFlag = false;</span>
+<span class="pc bpc" id="L116" title="2 of 4 branches missed.">    if (Objects.nonNull(attributes) &amp;&amp; Objects.nonNull(attributes.get(bookmarkKey))) {</span>
+<span class="fc" id="L117">      List&lt;String&gt; bookmarkList = attributes.get(bookmarkKey);</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">      for (String val : bookmarkList) {</span>
+<span class="fc" id="L119">        String key = StringUtils.substringBefore(val, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME);</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (key.equals(keyword)) {</span>
+<span class="nc" id="L121">          bookmarkList.remove(val);</span>
+<span class="nc" id="L122">          deleteFlag = true;</span>
+<span class="nc" id="L123">          break;</span>
         }
-<span class="fc" id="L122">      }</span>
-<span class="fc" id="L123">      attributes.put(bookmarkKey, bookmarkList);</span>
-<span class="fc" id="L124">      user.setAttributes(attributes);</span>
-<span class="fc" id="L125">      keycloakProvider.getResource().get(accountId).update(user);</span>
+<span class="fc" id="L125">      }</span>
+<span class="fc" id="L126">      attributes.put(bookmarkKey, bookmarkList);</span>
+<span class="fc" id="L127">      user.setAttributes(attributes);</span>
+<span class="fc" id="L128">      keycloakProvider.getResource().get(accountId).update(user);</span>
     }
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">    return deleteFlag ? new MessageResponse(CommonConstant.CODE_SUCCESS,</span>
-<span class="fc" id="L128">        CommonConstant.RESPONSE_SUCCESS) : new MessageResponse(CommonErrorCode.UNKNOWN_ERROR);</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">    return deleteFlag ? new MessageResponse(CommonConstant.CODE_SUCCESS,</span>
+<span class="fc" id="L131">        CommonConstant.RESPONSE_SUCCESS) : new MessageResponse(CommonErrorCode.UNKNOWN_ERROR);</span>
   }
 
   @Override
   public List&lt;BookMarkResponse&gt; findKeyBookMark(HttpServletRequest httpServletRequest,
       String network) {
-<span class="fc" id="L134">    List&lt;BookMarkResponse&gt; response = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L135">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
-<span class="fc" id="L136">    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();</span>
-<span class="fc" id="L137">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
-<span class="fc" id="L138">    List&lt;String&gt; bookMarkKeys = Arrays.asList(EBookMarkType.STAKE_KEY.name(),</span>
-<span class="fc" id="L139">        EBookMarkType.POOL.name(), EBookMarkType.ADDRESS.name(), EBookMarkType.BLOCK.name(),</span>
-<span class="fc" id="L140">        EBookMarkType.EPOCH.name(), EBookMarkType.TRANSACTION.name());</span>
-<span class="pc bpc" id="L141" title="1 of 2 branches missed.">    if (Objects.nonNull(attributes)) {</span>
-<span class="nc" id="L142">      bookMarkKeys.forEach(key -&gt; {</span>
-<span class="nc" id="L143">        String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + &quot;_&quot; + key;</span>
-<span class="nc" id="L144">        List&lt;String&gt; bookmarkList = attributes.get(bookmarkKey);</span>
-<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (Objects.nonNull(bookmarkList)) {</span>
-<span class="nc" id="L146">          bookmarkList.forEach(value -&gt; response.add(</span>
-<span class="nc" id="L147">              BookMarkResponse.builder().keyword(</span>
-<span class="nc" id="L148">                      StringUtils.substringBefore(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))</span>
-<span class="nc" id="L149">                  .createdDate(Instant.parse(StringUtils.substringAfter(value,</span>
+<span class="fc" id="L137">    List&lt;BookMarkResponse&gt; response = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L138">    String accountId = jwtProvider.getAccountIdFromJwtToken(httpServletRequest);</span>
+<span class="fc" id="L139">    UserRepresentation user = keycloakProvider.getResource().get(accountId).toRepresentation();</span>
+<span class="fc" id="L140">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
+<span class="fc" id="L141">    List&lt;String&gt; bookMarkKeys = Arrays.asList(EBookMarkType.STAKE_KEY.name(),</span>
+<span class="fc" id="L142">        EBookMarkType.POOL.name(), EBookMarkType.ADDRESS.name(), EBookMarkType.BLOCK.name(),</span>
+<span class="fc" id="L143">        EBookMarkType.EPOCH.name(), EBookMarkType.TRANSACTION.name());</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">    if (Objects.nonNull(attributes)) {</span>
+<span class="nc" id="L145">      bookMarkKeys.forEach(key -&gt; {</span>
+<span class="nc" id="L146">        String bookmarkKey = CommonConstant.ATTRIBUTE_BOOKMARK + network + &quot;_&quot; + key;</span>
+<span class="nc" id="L147">        List&lt;String&gt; bookmarkList = attributes.get(bookmarkKey);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (Objects.nonNull(bookmarkList)) {</span>
+<span class="nc" id="L149">          bookmarkList.forEach(value -&gt; response.add(</span>
+<span class="nc" id="L150">              BookMarkResponse.builder().keyword(</span>
+<span class="nc" id="L151">                      StringUtils.substringBefore(value, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))</span>
+<span class="nc" id="L152">                  .createdDate(Instant.parse(StringUtils.substringAfter(value,</span>
                       CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME)))
-<span class="nc" id="L151">                  .network(network)</span>
-<span class="nc" id="L152">                  .type(key)</span>
-<span class="nc" id="L153">                  .build()));</span>
+<span class="nc" id="L154">                  .network(network)</span>
+<span class="nc" id="L155">                  .type(key)</span>
+<span class="nc" id="L156">                  .build()));</span>
         }
-<span class="nc" id="L155">      });</span>
+<span class="nc" id="L158">      });</span>
     }
-<span class="fc" id="L157">    return response;</span>
+<span class="fc" id="L160">    return response;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
