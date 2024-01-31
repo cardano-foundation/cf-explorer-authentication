@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
-    log.error("Unknown exception: {}", e.getMessage());
+    log.error("Unknown exception: {}", e);
     return new ResponseEntity<>(
         ErrorResponse.builder().errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
             .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build(),
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Throwable.class)
   public ResponseEntity<ErrorResponse> handleBusinessException(Throwable e) {
-    log.error("Unknown exception: {}", e.getMessage());
+    log.error("Unknown exception: {}", e);
     return new ResponseEntity<>(
         ErrorResponse.builder().errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
             .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build(),
