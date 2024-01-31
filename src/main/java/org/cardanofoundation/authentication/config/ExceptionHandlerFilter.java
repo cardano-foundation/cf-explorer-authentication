@@ -29,20 +29,20 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     try {
       filterChain.doFilter(httpServletRequest, httpServletResponse);
     } catch (InvalidAccessTokenException | AccessTokenExpireException e) {
-      log.error(e.getMessage());
+      log.error(e);
       ErrorResponse errorResponse = ErrorResponse.builder()
           .errorCode(e.getErrorCode().getServiceErrorCode())
           .errorMessage(e.getErrorCode().getDesc()).build();
       httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
       httpServletResponse.getWriter().write(convertObjectToJson(errorResponse));
     } catch (BusinessException e) {
-      log.error(e.getMessage());
+      log.error(e);
       ErrorResponse errorResponse = ErrorResponse.builder().errorCode(e.getErrorCode())
           .errorMessage(e.getErrorMsg()).build();
       httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
       httpServletResponse.getWriter().write(convertObjectToJson(errorResponse));
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error(e);
       ErrorResponse errorResponse = ErrorResponse.builder()
           .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())
           .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build();
