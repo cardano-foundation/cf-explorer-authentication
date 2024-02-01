@@ -32,7 +32,7 @@ public class KeycloakProvider {
   public Keycloak getInstance() {
     if (Objects.isNull(keycloak)) {
       keycloak = KeycloakBuilder.builder()
-          .realm("master")
+          .realm(keycloakProperties.getRealm())
           .serverUrl(keycloakProperties.getAuthServerUrl())
           .clientId(keycloakProperties.getResource())
           .clientSecret(keycloakProperties.getCredentials().getSecret())
