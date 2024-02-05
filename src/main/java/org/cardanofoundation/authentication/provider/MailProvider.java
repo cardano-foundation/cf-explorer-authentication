@@ -1,16 +1,19 @@
 package org.cardanofoundation.authentication.provider;
 
-import jakarta.mail.internet.MimeMessage;
 import java.util.Locale;
+
+import jakarta.mail.internet.MimeMessage;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.authentication.config.properties.MailProperties;
-import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.model.enums.EUserAction;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+
+import org.cardanofoundation.authentication.config.properties.MailProperties;
+import org.cardanofoundation.authentication.model.enums.EUserAction;
 
 @Component
 @RequiredArgsConstructor
