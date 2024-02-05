@@ -4,9 +4,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -45,11 +43,8 @@ import redis.clients.jedis.JedisPoolConfig;
 @RequiredArgsConstructor
 public class RedisConfiguration implements CachingConfigurer {
 
-  /**
-   * Redis properties config
-   */
+  /** Redis properties config */
   private final RedisProperties redisProperties;
-
 
   @Bean
   @Primary
@@ -64,7 +59,6 @@ public class RedisConfiguration implements CachingConfigurer {
     return jedisPoolConfig;
   }
 
-
   @Bean
   @Primary
   RedisSentinelConfiguration sentinelConfig() {
@@ -73,16 +67,17 @@ public class RedisConfiguration implements CachingConfigurer {
     sentinelConfig.master(redisProperties.getMaster());
     sentinelConfig.setSentinelPassword(RedisPassword.of(redisProperties.getPassword()));
     sentinelConfig.setDatabase(redisProperties.getDatabaseIndex());
-    var sentinels = redisProperties.getSentinels()
-        .stream()
-        .map(getSentinelNodeRedisNodeFunction())
-        .collect(Collectors.toSet());
+    var sentinels =
+        redisProperties.getSentinels().stream()
+            .map(getSentinelNodeRedisNodeFunction())
+            .collect(Collectors.toSet());
 
     sentinelConfig.setSentinels(sentinels);
     return sentinelConfig;
   }
 
-  private static Function<RedisProperties.SentinelNode, RedisNode> getSentinelNodeRedisNodeFunction() {
+  private static Function<RedisProperties.SentinelNode, RedisNode>
+      getSentinelNodeRedisNodeFunction() {
     return sentinel -> new RedisNode(sentinel.getHost(), sentinel.getPort());
   }
 
@@ -116,8 +111,8 @@ public class RedisConfiguration implements CachingConfigurer {
    */
   @Bean
   @Autowired
-  RedisTemplate<String, ?> redisTemplate(//NOSONAR
-                                         final LettuceConnectionFactory lettuceConnectionFactory) {
+  RedisTemplate<String, ?> redisTemplate( // NOSONAR
+      final LettuceConnectionFactory lettuceConnectionFactory) {
     var redisTemplate = new RedisTemplate<String, Object>();
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
     redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -131,13 +126,13 @@ public class RedisConfiguration implements CachingConfigurer {
    * Config bean hashOperations
    *
    * @param redisTemplate bean
-   * @param <HK>          hash key type
-   * @param <V>           value type
+   * @param <HK> hash key type
+   * @param <V> value type
    * @return bean hashOperations
    */
   @Bean
   <HK, V> HashOperations<String, HK, V> hashOperations(
-      final RedisTemplate<String, V> redisTemplate) { //NOSONAR
+      final RedisTemplate<String, V> redisTemplate) { // NOSONAR
     return redisTemplate.opsForHash();
   }
 
@@ -145,7 +140,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * ListOperations bean configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return listOperations
    */
   @Bean
@@ -157,7 +152,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * ZSetOperations configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return ZSetOperations<String, V>
    */
   @Bean
@@ -169,7 +164,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * SetOperations configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return SetOperations<String, V>
    */
   @Bean
@@ -181,7 +176,7 @@ public class RedisConfiguration implements CachingConfigurer {
    * ValueOperations configuration
    *
    * @param redisTemplate inject bean
-   * @param <V>           value type
+   * @param <V> value type
    * @return ValueOperations<String, V>
    */
   @Bean

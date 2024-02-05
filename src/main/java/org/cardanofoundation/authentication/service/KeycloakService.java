@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 

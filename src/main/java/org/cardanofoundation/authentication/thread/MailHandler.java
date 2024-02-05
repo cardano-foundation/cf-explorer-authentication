@@ -1,7 +1,9 @@
 package org.cardanofoundation.authentication.thread;
 
 import java.util.Locale;
+
 import lombok.extern.log4j.Log4j2;
+
 import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.provider.MailProvider;
@@ -19,8 +21,8 @@ public class MailHandler implements Runnable {
 
   private Locale locale;
 
-  public MailHandler(MailProvider mailProvider, String email, EUserAction emailType, Locale locale,
-      String code) {
+  public MailHandler(
+      MailProvider mailProvider, String email, EUserAction emailType, Locale locale, String code) {
     this.mailProvider = mailProvider;
     this.email = email;
     this.emailType = emailType;
