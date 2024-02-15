@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
@@ -34,7 +35,6 @@ import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.impl.VerifyServiceImpl;
 import org.cardanofoundation.authentication.thread.MailHandler;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -61,7 +61,7 @@ class VerifyServiceTest {
   void whenCheckVerifySignUpByEmail_codeInValid1_throwException() {
     when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(true);
     MessageResponse response = verifyService.checkVerifySignUpByEmail(CODE);
-    String expectedCode = CommonErrorCode.INVALID_VERIFY_CODE.getServiceErrorCode();
+    String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
     String actualCode = response.getCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -71,7 +71,7 @@ class VerifyServiceTest {
     when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(false);
     MessageResponse response = verifyService.checkVerifySignUpByEmail(CODE);
-    String expectedCode = CommonErrorCode.INVALID_VERIFY_CODE.getServiceErrorCode();
+    String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
     String actualCode = response.getCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -84,7 +84,7 @@ class VerifyServiceTest {
     doNothing().when(redisProvider).blacklistJwt(CODE, EMAIL);
     when(keycloakProvider.getUser(EMAIL)).thenReturn(null);
     MessageResponse response = verifyService.checkVerifySignUpByEmail(CODE);
-    String expectedCode = CommonErrorCode.INVALID_VERIFY_CODE.getServiceErrorCode();
+    String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
     String actualCode = response.getCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -117,7 +117,7 @@ class VerifyServiceTest {
     request.setPassword("password");
     when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(true);
     MessageResponse response = verifyService.resetPassword(request);
-    String expectedCode = CommonErrorCode.INVALID_VERIFY_CODE.getServiceErrorCode();
+    String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
     String actualCode = response.getCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -130,7 +130,7 @@ class VerifyServiceTest {
     when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(false);
     MessageResponse response = verifyService.resetPassword(request);
-    String expectedCode = CommonErrorCode.INVALID_VERIFY_CODE.getServiceErrorCode();
+    String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
     String actualCode = response.getCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }

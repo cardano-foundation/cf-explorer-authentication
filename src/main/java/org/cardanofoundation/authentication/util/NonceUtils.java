@@ -14,8 +14,8 @@ import co.nstant.in.cbor.model.ByteString;
 import co.nstant.in.cbor.model.DataItem;
 import com.bloxbean.cardano.client.util.HexUtil;
 
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log4j2

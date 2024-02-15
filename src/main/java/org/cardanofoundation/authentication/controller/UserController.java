@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.service.KeycloakService;
-import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+import org.cardanofoundation.explorer.common.exception.ErrorResponse;
 
 @RestController
 @RequestMapping("/api/v1/user")

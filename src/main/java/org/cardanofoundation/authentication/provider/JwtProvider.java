@@ -24,8 +24,8 @@ import io.jsonwebtoken.security.SignatureException;
 
 import org.cardanofoundation.authentication.config.RsaConfig;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Component
 @Log4j2
@@ -110,7 +110,7 @@ public class JwtProvider {
       throw new BusinessException(CommonErrorCode.TOKEN_UNSUPPORTED);
     } catch (IllegalArgumentException e) {
       log.error("JWT claims string is empty: {}", e.getMessage());
-      throw new BusinessException(CommonErrorCode.TOKEN_IS_NOT_EMPTY);
+      throw new BusinessException(CommonErrorCode.TOKEN_IS_EMPTY);
     }
   }
 

@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
-import org.cardanofoundation.explorer.common.annotation.EnumValid;
+import org.cardanofoundation.explorer.common.validation.EnumValid;
 
 @Getter
 @Setter

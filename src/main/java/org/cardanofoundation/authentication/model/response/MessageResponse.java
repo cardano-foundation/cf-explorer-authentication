@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.cardanofoundation.explorer.common.exceptions.enums.ErrorCode;
+import org.cardanofoundation.explorer.common.exception.ErrorCode;
 
 @Getter
 @Setter

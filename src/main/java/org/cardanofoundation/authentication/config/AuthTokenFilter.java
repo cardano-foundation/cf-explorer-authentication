@@ -29,7 +29,7 @@ import org.cardanofoundation.authentication.constant.AuthConstant;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
 
 @Log4j2
 @RequiredArgsConstructor

@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import org.cardanofoundation.authentication.model.request.bookmark.BookMarkRequest;
@@ -40,8 +41,8 @@ import org.cardanofoundation.authentication.model.response.base.BasePageResponse
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.service.impl.BookMarkServiceImpl;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -84,7 +85,7 @@ class BookMarkServiceTest {
             () -> {
               bookMarkService.addBookMark(bookMarkRequest, httpServletRequest);
             });
-    String expectedCode = CommonErrorCode.BOOKMARK_IS_EXIST.getServiceErrorCode();
+    String expectedCode = BusinessCode.BOOKMARK_IS_EXIST.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -121,7 +122,7 @@ class BookMarkServiceTest {
             () -> {
               bookMarkService.addBookMark(bookMarkRequest, httpServletRequest);
             });
-    String expectedCode = CommonErrorCode.LIMIT_BOOKMARK_IS_2000.getServiceErrorCode();
+    String expectedCode = BusinessCode.LIMIT_BOOKMARK_IS_2000.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }

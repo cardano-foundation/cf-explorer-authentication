@@ -32,7 +32,7 @@ import org.cardanofoundation.authentication.model.response.auth.NonceResponse;
 import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResponse;
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.service.AuthenticationService;
-import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+import org.cardanofoundation.explorer.common.exception.ErrorResponse;
 import org.cardanofoundation.explorer.common.validation.prefixed.PrefixedValid;
 
 @RestController

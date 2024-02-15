@@ -37,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.constant.RedisConstant;
+import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
@@ -51,8 +52,7 @@ import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl;
 import org.cardanofoundation.authentication.thread.MailHandler;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -115,7 +115,7 @@ class AuthenticationServiceTest {
             () -> {
               authenticationService.signIn(signInRequest);
             });
-    String expectedCode = CommonErrorCode.SIGNATURE_INVALID.getServiceErrorCode();
+    String expectedCode = BusinessCode.SIGNATURE_INVALID.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -159,7 +159,7 @@ class AuthenticationServiceTest {
             () -> {
               authenticationService.signIn(signInRequest);
             });
-    String expectedCode = CommonErrorCode.USERNAME_OR_PASSWORD_INVALID.getServiceErrorCode();
+    String expectedCode = BusinessCode.USERNAME_OR_PASSWORD_INVALID.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -205,7 +205,7 @@ class AuthenticationServiceTest {
             () -> {
               authenticationService.signUp(signUpRequest, httpServletRequest);
             });
-    String expectedCode = CommonErrorCode.EMAIL_IS_ALREADY_EXIST.getServiceErrorCode();
+    String expectedCode = BusinessCode.EMAIL_IS_ALREADY_EXIST.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }
@@ -280,7 +280,7 @@ class AuthenticationServiceTest {
             () -> {
               authenticationService.refreshToken(REFRESH_TOKEN, any());
             });
-    String expectedCode = CommonErrorCode.REFRESH_TOKEN_EXPIRED.getServiceErrorCode();
+    String expectedCode = BusinessCode.REFRESH_TOKEN_EXPIRED.getServiceErrorCode();
     String actualCode = exception.getErrorCode();
     Assertions.assertEquals(expectedCode, actualCode);
   }

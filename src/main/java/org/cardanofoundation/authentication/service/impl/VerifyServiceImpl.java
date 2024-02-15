@@ -15,6 +15,7 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
@@ -24,7 +25,6 @@ import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.cardanofoundation.authentication.thread.MailHandler;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -46,11 +46,11 @@ public class VerifyServiceImpl implements VerifyService {
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
     if (redisProvider.isTokenBlacklisted(code)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     Boolean validateCode = jwtProvider.validateVerifyCode(code);
     if (validateCode.equals(Boolean.FALSE)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
     redisProvider.blacklistJwt(code, accountId);
@@ -59,7 +59,7 @@ public class VerifyServiceImpl implements VerifyService {
       user.setEnabled(true);
       keycloakProvider.getResource().get(user.getId()).update(user);
     } else {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
@@ -68,11 +68,11 @@ public class VerifyServiceImpl implements VerifyService {
   public MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
     String code = resetPasswordRequest.getCode();
     if (redisProvider.isTokenBlacklisted(code)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     Boolean validateCode = jwtProvider.validateVerifyCode(code);
     if (validateCode.equals(Boolean.FALSE)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
     redisProvider.blacklistJwt(code, accountId);

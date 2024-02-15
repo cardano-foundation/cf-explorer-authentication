@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.service.VerifyService;
-import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
+import org.cardanofoundation.explorer.common.exception.ErrorResponse;
 
 @RestController
 @RequestMapping("/api/v1/verify")

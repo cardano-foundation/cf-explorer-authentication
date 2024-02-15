@@ -40,3 +40,5 @@ out/
 .vscode/
 
 **/logs
+/.env.server
+/.env

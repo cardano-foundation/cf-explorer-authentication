@@ -29,6 +29,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.constant.RedisConstant;
+import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
@@ -44,8 +45,8 @@ import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.AuthenticationService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.authentication.util.NonceUtils;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -86,9 +87,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     } catch (Exception e) {
       log.error("Exception authentication: " + e.getMessage());
       if (type == 0) {
-        throw new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID);
+        throw new BusinessException(BusinessCode.USERNAME_OR_PASSWORD_INVALID);
       } else {
-        throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);
+        throw new BusinessException(BusinessCode.SIGNATURE_INVALID);
       }
     }
     UserRepresentation user = keycloakProvider.getUser(accountId);
@@ -135,7 +136,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String email = signUpRequest.getEmail();
     UserRepresentation userExist = keycloakProvider.getUser(email);
     if (Objects.nonNull(userExist) && userExist.isEnabled()) {
-      throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
+      throw new BusinessException(BusinessCode.EMAIL_IS_ALREADY_EXIST);
     }
     UsersResource usersResource = keycloakProvider.getResource();
     CredentialRepresentation encodePassword =
@@ -175,7 +176,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       String refreshJwt, HttpServletRequest httpServletRequest) {
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
     if (redisProvider.isTokenBlacklisted(refreshJwt)) {
-      throw new BusinessException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
+      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);
     }
     try {
       JsonNode jsonNode = keycloakProvider.refreshToken(refreshJwt);
@@ -191,7 +192,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     } catch (Exception ex) {
       log.error(
           "Error: when generate access token from refresh token by keycloak: " + ex.getMessage());
-      throw new BusinessException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
+      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);
     }
     return null;
   }

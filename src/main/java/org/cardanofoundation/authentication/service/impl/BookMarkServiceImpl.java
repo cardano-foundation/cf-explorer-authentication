@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EBookMarkType;
 import org.cardanofoundation.authentication.model.request.bookmark.BookMarkRequest;
 import org.cardanofoundation.authentication.model.response.BookMarkResponse;
@@ -28,8 +29,8 @@ import org.cardanofoundation.authentication.model.response.base.BasePageResponse
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.service.BookMarkService;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -59,11 +60,11 @@ public class BookMarkServiceImpl implements BookMarkService {
               bookmark ->
                   StringUtils.substringBefore(bookmark, CommonConstant.ATTRIBUTE_BOOKMARK_ADD_TIME))
           .anyMatch(key -> key.equals(bookMarkRequest.getKeyword()))) {
-        throw new BusinessException(CommonErrorCode.BOOKMARK_IS_EXIST);
+        throw new BusinessException(BusinessCode.BOOKMARK_IS_EXIST);
       }
     }
     if (Objects.nonNull(bookmarkList) && bookmarkList.size() >= CommonConstant.LIMIT_BOOKMARK) {
-      throw new BusinessException(CommonErrorCode.LIMIT_BOOKMARK_IS_2000);
+      throw new BusinessException(BusinessCode.LIMIT_BOOKMARK_IS_2000);
     }
     if (Objects.isNull(attributes)) {
       attributes = new HashMap<>();

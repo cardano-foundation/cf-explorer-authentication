@@ -16,11 +16,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.cardanofoundation.explorer.common.exceptions.AccessTokenExpireException;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
-import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.AccessTokenExpireException;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.ErrorResponse;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
 
 @Log4j2
 public class ExceptionHandlerFilter extends OncePerRequestFilter {

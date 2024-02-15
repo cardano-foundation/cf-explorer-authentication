@@ -14,8 +14,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import org.cardanofoundation.authentication.constant.RedisConstant;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 import org.cardanofoundation.explorer.common.utils.StringUtils;
 
 @Component
