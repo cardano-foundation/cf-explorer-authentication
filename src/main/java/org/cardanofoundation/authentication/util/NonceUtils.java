@@ -1,18 +1,21 @@
 package org.cardanofoundation.authentication.util;
 
+import java.security.SecureRandom;
+import java.util.List;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import co.nstant.in.cbor.CborDecoder;
 import co.nstant.in.cbor.CborException;
 import co.nstant.in.cbor.model.Array;
 import co.nstant.in.cbor.model.ByteString;
 import co.nstant.in.cbor.model.DataItem;
 import com.bloxbean.cardano.client.util.HexUtil;
-import java.security.SecureRandom;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log4j2

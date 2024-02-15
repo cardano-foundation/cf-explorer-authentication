@@ -1,5 +1,19 @@
 package org.cardanofoundation.authentication.provider;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -7,20 +21,11 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+
 import org.cardanofoundation.authentication.config.RsaConfig;
 import org.cardanofoundation.authentication.config.properties.MailProperties;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Component
 @Log4j2
@@ -32,22 +37,33 @@ public class JwtProvider {
   private final MailProperties mail;
 
   public String generateCodeForVerify(String email) {
-    return Jwts.builder().setSubject(email).setIssuedAt(new Date())
+    return Jwts.builder()
+        .setSubject(email)
+        .setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + mail.getExpirationMs()))
-        .signWith(rsaConfig.getPrivateKeyMail(), SignatureAlgorithm.RS256).compact();
+        .signWith(rsaConfig.getPrivateKeyMail(), SignatureAlgorithm.RS256)
+        .compact();
   }
 
   public String getAccountIdFromJwtToken(String token) {
-    return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
-        .parseClaimsJws(token).getBody().getSubject();
+    return Jwts.parserBuilder()
+        .setSigningKey(rsaConfig.getPublicKeyAuth())
+        .build()
+        .parseClaimsJws(token)
+        .getBody()
+        .getSubject();
   }
 
   @SuppressWarnings("unchecked")
   public List<String> getRolesFromJwtToken(String token) {
-    Claims claims = Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
-        .parseClaimsJws(token).getBody();
-    Map<String, List<String>> realmAccessMap = (Map<String, List<String>>) claims.get(
-        "realm_access");
+    Claims claims =
+        Jwts.parserBuilder()
+            .setSigningKey(rsaConfig.getPublicKeyAuth())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+    Map<String, List<String>> realmAccessMap =
+        (Map<String, List<String>>) claims.get("realm_access");
     if (Objects.nonNull(realmAccessMap)) {
       List<String> allRoles = realmAccessMap.get("roles");
       return allRoles.stream().filter(role -> role.startsWith("ROLE_")).toList();
@@ -57,8 +73,12 @@ public class JwtProvider {
 
   public String getAccountIdFromJwtToken(HttpServletRequest httpServletRequest) {
     String token = parseJwt(httpServletRequest);
-    return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
-        .parseClaimsJws(token).getBody().getSubject();
+    return Jwts.parserBuilder()
+        .setSigningKey(rsaConfig.getPublicKeyAuth())
+        .build()
+        .parseClaimsJws(token)
+        .getBody()
+        .getSubject();
   }
 
   public String parseJwt(HttpServletRequest request) {
@@ -72,7 +92,9 @@ public class JwtProvider {
 
   public void validateJwtToken(String token) {
     try {
-      Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyAuth()).build()
+      Jwts.parserBuilder()
+          .setSigningKey(rsaConfig.getPublicKeyAuth())
+          .build()
           .parseClaimsJws(token);
     } catch (SignatureException e) {
       log.error("Invalid JWT signature: {}", e.getMessage());
@@ -88,7 +110,7 @@ public class JwtProvider {
       throw new BusinessException(CommonErrorCode.TOKEN_UNSUPPORTED);
     } catch (IllegalArgumentException e) {
       log.error("JWT claims string is empty: {}", e.getMessage());
-      throw new BusinessException(CommonErrorCode.TOKEN_IS_NOT_EMPTY);
+      throw new BusinessException(CommonErrorCode.TOKEN_IS_EMPTY);
     }
   }
 
@@ -103,7 +125,11 @@ public class JwtProvider {
   }
 
   public String getAccountIdFromVerifyCode(String code) {
-    return Jwts.parserBuilder().setSigningKey(rsaConfig.getPublicKeyMail()).build()
-        .parseClaimsJws(code).getBody().getSubject();
+    return Jwts.parserBuilder()
+        .setSigningKey(rsaConfig.getPublicKeyMail())
+        .build()
+        .parseClaimsJws(code)
+        .getBody()
+        .getSubject();
   }
 }

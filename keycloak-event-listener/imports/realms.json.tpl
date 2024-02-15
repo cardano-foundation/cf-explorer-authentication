@@ -629,8 +629,8 @@
       "policies" : [ {
         "id" : "d17a54e7-c4af-4c97-acd2-fa19fac3c4e3",
         "name" : "Default Permission",
-        "description" : "A permission that applies to the default resource type",
-        "type" : "resource",
+        "description" : "A permission that applies to the default resources type",
+        "type" : "resources",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
         "config" : {

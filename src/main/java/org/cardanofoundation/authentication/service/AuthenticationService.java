@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
@@ -30,8 +31,7 @@ public interface AuthenticationService {
    * description: process gen new access token by refresh token
    * @update: 20/09/2023
    */
-  RefreshTokenResponse refreshToken(String refreshJwt,
-                                    HttpServletRequest httpServletRequest);
+  RefreshTokenResponse refreshToken(String refreshJwt, HttpServletRequest httpServletRequest);
 
   /*
    * @since: 24/10/2022

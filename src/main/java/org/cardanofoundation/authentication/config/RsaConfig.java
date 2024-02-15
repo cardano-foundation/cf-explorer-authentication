@@ -1,14 +1,18 @@
 package org.cardanofoundation.authentication.config;
 
-import jakarta.annotation.PostConstruct;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import jakarta.annotation.PostConstruct;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.cardanofoundation.explorer.common.utils.RsaUtils;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import org.cardanofoundation.explorer.common.utils.RsaUtils;
 
 @Component
 @ConfigurationProperties("rsa.key")
