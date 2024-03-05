@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.15...v0.9.0) (2024-03-05)
+
+
+### Features
+
+* adapt code formatter for authen service ([56fa123](https://github.com/cardano-foundation/cf-explorer-authentication/commit/56fa1230554285b0b2f0ee8f56268fb241f5b079))
+
 ## [0.1.15](https://github.com/cardano-foundation/cf-explorer-authentication/compare/v0.1.14...v0.1.15) (2023-11-23)
 
 
