@@ -4,19 +4,19 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-<span class="fc" id="L11">@Setter</span>
-<span class="fc" id="L12">public class SignInRequest {</span>
+<span class="fc" id="L12">@Setter</span>
+<span class="fc" id="L13">public class SignInRequest {</span>
 
-<span class="fc" id="L14">  private String address;</span>
+<span class="fc" id="L15">  private String address;</span>
 
-<span class="fc" id="L16">  private String signature;</span>
+<span class="fc" id="L17">  private String signature;</span>
 
-  @Email
-<span class="fc" id="L19">  private String email;</span>
+<span class="fc" id="L19">  @Email private String email;</span>
 
 <span class="fc" id="L21">  private String password;</span>
 

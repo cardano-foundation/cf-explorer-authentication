@@ -12,18 +12,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-<span class="fc" id="L15">    registry.addMapping(&quot;/**&quot;).allowedOrigins(&quot;*&quot;)</span>
-<span class="fc" id="L16">        .allowedMethods(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;HEAD&quot;);</span>
-<span class="fc" id="L17">  }</span>
+<span class="fc" id="L15">    registry</span>
+<span class="fc" id="L16">        .addMapping(&quot;/**&quot;)</span>
+<span class="fc" id="L17">        .allowedOrigins(&quot;*&quot;)</span>
+<span class="fc" id="L18">        .allowedMethods(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;HEAD&quot;);</span>
+<span class="fc" id="L19">  }</span>
 
   @Bean(name = &quot;messageSource&quot;)
   @Primary
   public ResourceBundleMessageSource messageSource() {
-<span class="fc" id="L22">    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();</span>
-<span class="fc" id="L23">    messageSource.setBasename(&quot;i18n.messages&quot;);</span>
-<span class="fc" id="L24">    messageSource.setDefaultEncoding(&quot;UTF-8&quot;);</span>
-<span class="fc" id="L25">    messageSource.setUseCodeAsDefaultMessage(true);</span>
-<span class="fc" id="L26">    return messageSource;</span>
+<span class="fc" id="L24">    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();</span>
+<span class="fc" id="L25">    messageSource.setBasename(&quot;i18n.messages&quot;);</span>
+<span class="fc" id="L26">    messageSource.setDefaultEncoding(&quot;UTF-8&quot;);</span>
+<span class="fc" id="L27">    messageSource.setUseCodeAsDefaultMessage(true);</span>
+<span class="fc" id="L28">    return messageSource;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

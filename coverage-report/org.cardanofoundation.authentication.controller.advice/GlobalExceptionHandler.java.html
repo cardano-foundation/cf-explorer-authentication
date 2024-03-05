@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.controller.advice</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.controller.advice;
 
 import jakarta.validation.ConstraintViolationException;
+
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.explorer.common.exceptions.AccessTokenExpireException;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
-import org.cardanofoundation.explorer.common.exceptions.IgnoreRollbackException;
-import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
-import org.cardanofoundation.explorer.common.exceptions.TokenRefreshException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -17,75 +12,109 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-<span class="fc" id="L20">@Log4j2</span>
+import org.cardanofoundation.explorer.common.exception.AccessTokenExpireException;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
+import org.cardanofoundation.explorer.common.exception.ErrorResponse;
+import org.cardanofoundation.explorer.common.exception.IgnoreRollbackException;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
+import org.cardanofoundation.explorer.common.exception.TokenRefreshException;
+
+<span class="fc" id="L23">@Log4j2</span>
 @RestControllerAdvice
-<span class="fc" id="L22">public class GlobalExceptionHandler {</span>
+<span class="fc" id="L25">public class GlobalExceptionHandler {</span>
 
   @ExceptionHandler({BusinessException.class})
   public ResponseEntity&lt;ErrorResponse&gt; handleException(BusinessException e) {
-<span class="nc" id="L26">    log.error(&quot;Business logic exception: {}&quot;, e.getErrorMsg());</span>
-<span class="nc" id="L27">    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(</span>
-<span class="nc" id="L28">        ErrorResponse.builder().errorCode(e.getErrorCode()).errorMessage(e.getErrorMsg()).build());</span>
+<span class="nc" id="L29">    log.error(&quot;Business logic exception: {}&quot;, e.getErrorMsg());</span>
+<span class="nc" id="L30">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L31">        .body(</span>
+<span class="nc" id="L32">            ErrorResponse.builder()</span>
+<span class="nc" id="L33">                .errorCode(e.getErrorCode())</span>
+<span class="nc" id="L34">                .errorMessage(e.getErrorMsg())</span>
+<span class="nc" id="L35">                .build());</span>
   }
 
   @ExceptionHandler({IgnoreRollbackException.class})
   public ResponseEntity&lt;ErrorResponse&gt; handleException(IgnoreRollbackException e) {
-<span class="nc" id="L33">    log.error(&quot;No rollback exception: {}&quot;, e.getErrorMsg());</span>
-<span class="nc" id="L34">    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(</span>
-<span class="nc" id="L35">        ErrorResponse.builder().errorCode(e.getErrorCode()).errorMessage(e.getErrorMsg()).build());</span>
+<span class="nc" id="L40">    log.error(&quot;No rollback exception: {}&quot;, e.getErrorMsg());</span>
+<span class="nc" id="L41">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L42">        .body(</span>
+<span class="nc" id="L43">            ErrorResponse.builder()</span>
+<span class="nc" id="L44">                .errorCode(e.getErrorCode())</span>
+<span class="nc" id="L45">                .errorMessage(e.getErrorMsg())</span>
+<span class="nc" id="L46">                .build());</span>
   }
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity&lt;ErrorResponse&gt; handleException(Exception e) {
-<span class="fc" id="L40">    log.error(&quot;Unknown exception: {}&quot;, e.getMessage());</span>
-<span class="fc" id="L41">    return new ResponseEntity&lt;&gt;(</span>
-<span class="fc" id="L42">        ErrorResponse.builder().errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())</span>
-<span class="fc" id="L43">            .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build(),</span>
+<span class="fc" id="L51">    log.error(&quot;Unknown exception: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L52">    return new ResponseEntity&lt;&gt;(</span>
+<span class="fc" id="L53">        ErrorResponse.builder()</span>
+<span class="fc" id="L54">            .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())</span>
+<span class="fc" id="L55">            .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc())</span>
+<span class="fc" id="L56">            .build(),</span>
         HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   @ExceptionHandler(Throwable.class)
   public ResponseEntity&lt;ErrorResponse&gt; handleBusinessException(Throwable e) {
-<span class="nc" id="L49">    log.error(&quot;Unknown exception: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L50">    return new ResponseEntity&lt;&gt;(</span>
-<span class="nc" id="L51">        ErrorResponse.builder().errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())</span>
-<span class="nc" id="L52">            .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc()).build(),</span>
+<span class="nc" id="L62">    log.error(&quot;Unknown exception: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L63">    return new ResponseEntity&lt;&gt;(</span>
+<span class="nc" id="L64">        ErrorResponse.builder()</span>
+<span class="nc" id="L65">            .errorCode(CommonErrorCode.UNKNOWN_ERROR.getServiceErrorCode())</span>
+<span class="nc" id="L66">            .errorMessage(CommonErrorCode.UNKNOWN_ERROR.getDesc())</span>
+<span class="nc" id="L67">            .build(),</span>
         HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   @ExceptionHandler({TokenRefreshException.class})
   public ResponseEntity&lt;ErrorResponse&gt; handleAuthException(TokenRefreshException e) {
-<span class="nc" id="L58">    log.error(&quot;Refresh token exception: {}, stack trace:&quot;, e.getErrorCode());</span>
-<span class="nc" id="L59">    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(</span>
-<span class="nc" id="L60">        ErrorResponse.builder().errorCode(e.getErrorCode().getServiceErrorCode())</span>
-<span class="nc" id="L61">            .errorMessage(e.getErrorCode().getDesc()).build());</span>
+<span class="nc" id="L73">    log.error(&quot;Refresh token exception: {}, stack trace:&quot;, e.getErrorCode());</span>
+<span class="nc" id="L74">    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="nc" id="L75">        .body(</span>
+<span class="nc" id="L76">            ErrorResponse.builder()</span>
+<span class="nc" id="L77">                .errorCode(e.getErrorCode().getServiceErrorCode())</span>
+<span class="nc" id="L78">                .errorMessage(e.getErrorCode().getDesc())</span>
+<span class="nc" id="L79">                .build());</span>
   }
 
   @ExceptionHandler({AccessTokenExpireException.class})
   public ResponseEntity&lt;ErrorResponse&gt; handleAuthException(AccessTokenExpireException e) {
-<span class="nc" id="L66">    log.error(&quot;Access token expired: {}, stack trace:&quot;, e.getErrorCode());</span>
-<span class="nc" id="L67">    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(</span>
-<span class="nc" id="L68">        ErrorResponse.builder().errorCode(e.getErrorCode().getServiceErrorCode())</span>
-<span class="nc" id="L69">            .errorMessage(e.getErrorCode().getDesc()).build());</span>
+<span class="nc" id="L84">    log.error(&quot;Access token expired: {}, stack trace:&quot;, e.getErrorCode());</span>
+<span class="nc" id="L85">    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="nc" id="L86">        .body(</span>
+<span class="nc" id="L87">            ErrorResponse.builder()</span>
+<span class="nc" id="L88">                .errorCode(e.getErrorCode().getServiceErrorCode())</span>
+<span class="nc" id="L89">                .errorMessage(e.getErrorCode().getDesc())</span>
+<span class="nc" id="L90">                .build());</span>
   }
 
   @ExceptionHandler({InvalidAccessTokenException.class})
   public ResponseEntity&lt;ErrorResponse&gt; handleAuthException(InvalidAccessTokenException e) {
-<span class="nc" id="L74">    log.error(&quot;Invalid access token: {}&quot;, e.getErrorCode());</span>
-<span class="nc" id="L75">    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(</span>
-<span class="nc" id="L76">        ErrorResponse.builder().errorCode(e.getErrorCode().getServiceErrorCode())</span>
-<span class="nc" id="L77">            .errorMessage(e.getErrorCode().getDesc()).build());</span>
+<span class="nc" id="L95">    log.error(&quot;Invalid access token: {}&quot;, e.getErrorCode());</span>
+<span class="nc" id="L96">    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="nc" id="L97">        .body(</span>
+<span class="nc" id="L98">            ErrorResponse.builder()</span>
+<span class="nc" id="L99">                .errorCode(e.getErrorCode().getServiceErrorCode())</span>
+<span class="nc" id="L100">                .errorMessage(e.getErrorCode().getDesc())</span>
+<span class="nc" id="L101">                .build());</span>
   }
 
-  @ExceptionHandler({ConstraintViolationException.class,
-      MissingServletRequestParameterException.class, HttpMediaTypeNotSupportedException.class,
-      MethodArgumentNotValidException.class})
-  public ResponseEntity&lt;ErrorResponse&gt; handleConstraintViolationException(
-      Exception e) {
-<span class="nc" id="L85">    log.warn(&quot;constraint not valid: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L86">    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(</span>
-<span class="nc" id="L87">        ErrorResponse.builder().errorCode(CommonErrorCode.INVALID_PARAM.getCode())</span>
-<span class="nc" id="L88">            .errorMessage(CommonErrorCode.INVALID_PARAM.getDesc()).build());</span>
+  @ExceptionHandler({
+    ConstraintViolationException.class,
+    MissingServletRequestParameterException.class,
+    HttpMediaTypeNotSupportedException.class,
+    MethodArgumentNotValidException.class
+  })
+  public ResponseEntity&lt;ErrorResponse&gt; handleConstraintViolationException(Exception e) {
+<span class="nc" id="L111">    log.warn(&quot;constraint not valid: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L112">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L113">        .body(</span>
+<span class="nc" id="L114">            ErrorResponse.builder()</span>
+<span class="nc" id="L115">                .errorCode(CommonErrorCode.INVALID_PARAM.getCode())</span>
+<span class="nc" id="L116">                .errorMessage(CommonErrorCode.INVALID_PARAM.getDesc())</span>
+<span class="nc" id="L117">                .build());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

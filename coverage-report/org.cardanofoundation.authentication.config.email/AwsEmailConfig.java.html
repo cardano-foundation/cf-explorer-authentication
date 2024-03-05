@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AwsEmailConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.config.email</a> &gt; <span class="el_source">AwsEmailConfig.java</span></div><h1>AwsEmailConfig.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.config.email;
 
-import org.cardanofoundation.authentication.util.SesSmtpCredentialGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,29 +8,30 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+import org.cardanofoundation.authentication.util.SesSmtpCredentialGenerator;
+
 @Profile(&quot;ses&quot;)
 @Configuration
-<span class="nc" id="L14">public class AwsEmailConfig {</span>
+<span class="nc" id="L15">public class AwsEmailConfig {</span>
 
-    @Value(&quot;${spring.mail.aws.access-key}&quot;)
-    private String accessKey;
+  @Value(&quot;${spring.mail.aws.access-key}&quot;)
+  private String accessKey;
 
-    @Value(&quot;${spring.mail.aws.secret-key}&quot;)
-    private String secretKey;
+  @Value(&quot;${spring.mail.aws.secret-key}&quot;)
+  private String secretKey;
 
-    @Value(&quot;${spring.mail.aws.region}&quot;)
-    private String region;
+  @Value(&quot;${spring.mail.aws.region}&quot;)
+  private String region;
 
-    @Primary
-    @Bean
-    public JavaMailSender javaMailSender(SesSmtpCredentialGenerator sesSmtpCredentialGenerator) {
-<span class="nc" id="L28">        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();</span>
-<span class="nc" id="L29">        javaMailSender.setUsername(accessKey);</span>
-<span class="nc" id="L30">        javaMailSender.setPassword(sesSmtpCredentialGenerator.generateSMTPPassword(secretKey));</span>
-<span class="nc" id="L31">        javaMailSender.setHost(&quot;email-smtp.&quot; + region + &quot;.amazonaws.com&quot;);</span>
-<span class="nc" id="L32">        javaMailSender.setPort(587);</span>
-<span class="nc" id="L33">        return javaMailSender;</span>
-    }
-
+  @Primary
+  @Bean
+  public JavaMailSender javaMailSender(SesSmtpCredentialGenerator sesSmtpCredentialGenerator) {
+<span class="nc" id="L29">    JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();</span>
+<span class="nc" id="L30">    javaMailSender.setUsername(accessKey);</span>
+<span class="nc" id="L31">    javaMailSender.setPassword(sesSmtpCredentialGenerator.generateSMTPPassword(secretKey));</span>
+<span class="nc" id="L32">    javaMailSender.setHost(&quot;email-smtp.&quot; + region + &quot;.amazonaws.com&quot;);</span>
+<span class="nc" id="L33">    javaMailSender.setPort(587);</span>
+<span class="nc" id="L34">    return javaMailSender;</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

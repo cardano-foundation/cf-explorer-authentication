@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthTokenFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.config</a> &gt; <span class="el_source">AuthTokenFilter.java</span></div><h1>AuthTokenFilter.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.config;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.authentication.constant.AuthConstant;
-import org.cardanofoundation.authentication.provider.JwtProvider;
-import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.UserRepresentation;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,8 +22,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-<span class="fc" id="L29">@Log4j2</span>
-<span class="fc" id="L30">@RequiredArgsConstructor</span>
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
+
+import org.cardanofoundation.authentication.constant.AuthConstant;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
+import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
+
+<span class="fc" id="L34">@Log4j2</span>
+<span class="fc" id="L35">@RequiredArgsConstructor</span>
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
@@ -38,41 +43,45 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   private final KeycloakProvider keycloakProvider;
 
   @Override
-  protected void doFilterInternal(@NotNull HttpServletRequest request,
-      @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
+  protected void doFilterInternal(
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull FilterChain filterChain)
       throws ServletException, IOException {
-<span class="nc" id="L44">    String token = jwtProvider.parseJwt(request);</span>
-<span class="nc" id="L45">    jwtProvider.validateJwtToken(token);</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">    if (redisProvider.isTokenBlacklisted(token)) {</span>
-<span class="nc" id="L47">      throw new InvalidAccessTokenException();</span>
+<span class="nc" id="L51">    String token = jwtProvider.parseJwt(request);</span>
+<span class="nc" id="L52">    jwtProvider.validateJwtToken(token);</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">    if (redisProvider.isTokenBlacklisted(token)) {</span>
+<span class="nc" id="L54">      throw new InvalidAccessTokenException();</span>
     }
 
-<span class="nc" id="L50">    String accountId = jwtProvider.getAccountIdFromJwtToken(token);</span>
-<span class="nc" id="L51">    UsersResource usersResource = keycloakProvider.getResource();</span>
-<span class="nc" id="L52">    UserRepresentation user = usersResource.get(accountId).toRepresentation();</span>
-<span class="nc" id="L53">    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(</span>
-<span class="nc" id="L54">        user.getUsername(), null, fillAuthorities(token));</span>
-<span class="nc" id="L55">    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
-<span class="nc" id="L56">    SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="nc" id="L57">    String accountId = jwtProvider.getAccountIdFromJwtToken(token);</span>
+<span class="nc" id="L58">    UsersResource usersResource = keycloakProvider.getResource();</span>
+<span class="nc" id="L59">    UserRepresentation user = usersResource.get(accountId).toRepresentation();</span>
+<span class="nc" id="L60">    UsernamePasswordAuthenticationToken authentication =</span>
+<span class="nc" id="L61">        new UsernamePasswordAuthenticationToken(user.getUsername(), null, fillAuthorities(token));</span>
+<span class="nc" id="L62">    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+<span class="nc" id="L63">    SecurityContextHolder.getContext().setAuthentication(authentication);</span>
 
-<span class="nc" id="L58">    filterChain.doFilter(request, response);</span>
-<span class="nc" id="L59">  }</span>
+<span class="nc" id="L65">    filterChain.doFilter(request, response);</span>
+<span class="nc" id="L66">  }</span>
 
   @Override
   protected boolean shouldNotFilter(@NotNull HttpServletRequest request) throws ServletException {
-<span class="nc" id="L63">    return Stream.of(AuthConstant.AUTH_WHITELIST, AuthConstant.USER_WHITELIST,</span>
-<span class="nc" id="L64">            AuthConstant.DOCUMENT_WHITELIST, AuthConstant.CLIENT_WHITELIST).flatMap(Stream::of)</span>
-<span class="nc" id="L65">        .anyMatch(x -&gt; new AntPathMatcher().match(x, request.getServletPath()));</span>
+<span class="nc" id="L70">    return Stream.of(</span>
+            AuthConstant.AUTH_WHITELIST,
+            AuthConstant.USER_WHITELIST,
+            AuthConstant.DOCUMENT_WHITELIST,
+            AuthConstant.CLIENT_WHITELIST)
+<span class="nc" id="L75">        .flatMap(Stream::of)</span>
+<span class="nc" id="L76">        .anyMatch(x -&gt; new AntPathMatcher().match(x, request.getServletPath()));</span>
   }
 
   private List&lt;SimpleGrantedAuthority&gt; fillAuthorities(String token) {
-<span class="nc" id="L69">    List&lt;String&gt; roles = jwtProvider.getRolesFromJwtToken(token);</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">    if (roles.isEmpty()) {</span>
-<span class="nc" id="L71">      return Collections.emptyList();</span>
+<span class="nc" id="L80">    List&lt;String&gt; roles = jwtProvider.getRolesFromJwtToken(token);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">    if (roles.isEmpty()) {</span>
+<span class="nc" id="L82">      return Collections.emptyList();</span>
     }
-<span class="nc" id="L73">    return roles.stream()</span>
-<span class="nc" id="L74">        .map(SimpleGrantedAuthority::new)</span>
-<span class="nc" id="L75">        .toList();</span>
+<span class="nc" id="L84">    return roles.stream().map(SimpleGrantedAuthority::new).toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

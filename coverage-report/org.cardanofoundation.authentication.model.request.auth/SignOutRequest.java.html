@@ -2,19 +2,16 @@
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-<span class="fc" id="L9">@Setter</span>
-<span class="fc" id="L10">public class SignOutRequest {</span>
+<span class="fc" id="L10">@Setter</span>
+<span class="fc" id="L11">public class SignOutRequest {</span>
 
-  @NotNull
-  @NotBlank
-<span class="fc" id="L14">  private String refreshJwt;</span>
+<span class="fc" id="L13">  @NotNull @NotBlank private String refreshJwt;</span>
 
-  @NotNull
-  @NotBlank
-<span class="fc" id="L18">  private String accountId;</span>
+<span class="fc" id="L15">  @NotNull @NotBlank private String accountId;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

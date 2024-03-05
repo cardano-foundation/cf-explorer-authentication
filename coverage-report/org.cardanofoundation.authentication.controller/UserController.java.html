@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import org.cardanofoundation.authentication.model.request.event.EventModel;
-import org.cardanofoundation.authentication.model.response.UserInfoResponse;
-import org.cardanofoundation.authentication.service.KeycloakService;
-import org.cardanofoundation.explorer.common.exceptions.ErrorResponse;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,6 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import org.cardanofoundation.authentication.model.request.event.EventModel;
+import org.cardanofoundation.authentication.model.response.UserInfoResponse;
+import org.cardanofoundation.authentication.service.KeycloakService;
+import org.cardanofoundation.explorer.common.exception.ErrorResponse;
+
 @RestController
 @RequestMapping(&quot;/api/v1/user&quot;)
 <span class="fc" id="L35">@RequiredArgsConstructor</span>
@@ -40,47 +40,77 @@ public class UserController {
 
   private final KeycloakService keycloakService;
 
-
   @Value(&quot;${secret-code}&quot;)
   private String secretCode;
 
   @Operation(description = &quot;Get account information&quot;)
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = UserInfoResponse.class))),
-      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = &quot;200&quot;,
+            description = &quot;Success&quot;,
+            content = @Content(schema = @Schema(implementation = UserInfoResponse.class))),
+        @ApiResponse(
+            responseCode = &quot;400&quot;,
+            description = &quot;Invalid input parameter error&quot;,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = &quot;401&quot;,
+            description = &quot;Authentication error unsuccessful&quot;,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = &quot;500&quot;,
+            description = &quot;Error not specified&quot;,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+      })
   @GetMapping(&quot;/info&quot;)
   public ResponseEntity&lt;UserInfoResponse&gt; info(HttpServletRequest httpServletRequest) {
-<span class="fc" id="L56">    return ResponseEntity.ok(keycloakService.infoUser(httpServletRequest));</span>
+<span class="fc" id="L68">    return ResponseEntity.ok(keycloakService.infoUser(httpServletRequest));</span>
   }
 
   @Operation(description = &quot;Check the existence of an email&quot;)
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;, content = @Content(schema = @Schema(implementation = Boolean.class))),
-      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input parameter error&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Authentication error unsuccessful&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error not specified&quot;, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = &quot;200&quot;,
+            description = &quot;Success&quot;,
+            content = @Content(schema = @Schema(implementation = Boolean.class))),
+        @ApiResponse(
+            responseCode = &quot;400&quot;,
+            description = &quot;Invalid input parameter error&quot;,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = &quot;401&quot;,
+            description = &quot;Authentication error unsuccessful&quot;,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = &quot;500&quot;,
+            description = &quot;Error not specified&quot;,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+      })
   @GetMapping(&quot;/exist-email&quot;)
   public ResponseEntity&lt;Boolean&gt; checkExistEmail(
       @Parameter(
-          name = &quot;email&quot;,
-          description = &quot;Email address&quot;,
-          example = &quot;phuc.viet@gmail.com&quot;,
-          required = true)
-      @RequestParam(&quot;email&quot;) @Email String email) {
-<span class="fc" id="L74">    return ResponseEntity.ok(keycloakService.checkExistEmail(email));</span>
+              name = &quot;email&quot;,
+              description = &quot;Email address&quot;,
+              example = &quot;phuc.viet@gmail.com&quot;,
+              required = true)
+          @RequestParam(&quot;email&quot;)
+          @Email
+          String email) {
+<span class="fc" id="L101">    return ResponseEntity.ok(keycloakService.checkExistEmail(email));</span>
   }
 
   @PostMapping(&quot;/role-mapping&quot;)
   public ResponseEntity&lt;Boolean&gt; roleMapping(@RequestBody EventModel model) {
-<span class="nc bnc" id="L79" title="All 2 branches missed.">    if (!model.getSecretCode().equals(secretCode)) {</span>
-<span class="nc" id="L80">      log.warn(&quot;Secret code is not correct! setup `{}`, received `{}` !&quot;, secretCode, model.getSecretCode());</span>
-<span class="nc" id="L81">      return new ResponseEntity&lt;&gt;(false, HttpStatus.BAD_REQUEST);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">    if (!model.getSecretCode().equals(secretCode)) {</span>
+<span class="nc" id="L107">      log.warn(</span>
+          &quot;Secret code is not correct! setup `{}`, received `{}` !&quot;,
+          secretCode,
+<span class="nc" id="L110">          model.getSecretCode());</span>
+<span class="nc" id="L111">      return new ResponseEntity&lt;&gt;(false, HttpStatus.BAD_REQUEST);</span>
     }
-<span class="nc" id="L83">    return new ResponseEntity&lt;&gt;(keycloakService.roleMapping(model), HttpStatus.CREATED);</span>
+<span class="nc" id="L113">    return new ResponseEntity&lt;&gt;(keycloakService.roleMapping(model), HttpStatus.CREATED);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

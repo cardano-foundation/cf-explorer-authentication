@@ -2,25 +2,26 @@
 
 import lombok.Getter;
 import lombok.Setter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = &quot;mail&quot;)
 @Getter
-<span class="nc" id="L11">@Setter</span>
-<span class="nc" id="L12">public class MailProperties {</span>
+<span class="nc" id="L12">@Setter</span>
+<span class="nc" id="L13">public class MailProperties {</span>
 
-<span class="nc" id="L14">  private String from;</span>
+<span class="nc" id="L15">  private String from;</span>
 
-<span class="nc" id="L16">  private String sender;</span>
+<span class="nc" id="L17">  private String sender;</span>
 
-<span class="nc" id="L18">  private String subjectRegistration;</span>
+<span class="nc" id="L19">  private String subjectRegistration;</span>
 
-<span class="nc" id="L20">  private String subjectResetPassword;</span>
+<span class="nc" id="L21">  private String subjectResetPassword;</span>
 
-<span class="nc" id="L22">  private String footer;</span>
+<span class="nc" id="L23">  private String footer;</span>
 
-<span class="nc" id="L24">  private Long expirationMs;</span>
+<span class="nc" id="L25">  private Long expirationMs;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

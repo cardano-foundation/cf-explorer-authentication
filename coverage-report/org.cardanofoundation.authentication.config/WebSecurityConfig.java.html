@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebSecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auth-service</a> &gt; <a href="index.source.html" class="el_package">org.cardanofoundation.authentication.config</a> &gt; <span class="el_source">WebSecurityConfig.java</span></div><h1>WebSecurityConfig.java</h1><pre class="source lang-java linenums">package org.cardanofoundation.authentication.config;
 
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.authentication.constant.AuthConstant;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,9 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.cardanofoundation.authentication.constant.AuthConstant;
+
 @Configuration
 @EnableWebSecurity
-<span class="nc" id="L19">@RequiredArgsConstructor</span>
+<span class="nc" id="L21">@RequiredArgsConstructor</span>
 public class WebSecurityConfig {
 
   private final AuthEntryPointJwt unauthorizedHandler;
@@ -25,32 +27,46 @@ public class WebSecurityConfig {
 
   @Bean
   public ExceptionHandlerFilter exceptionHandlerFilter() {
-<span class="nc" id="L28">    return new ExceptionHandlerFilter();</span>
+<span class="nc" id="L30">    return new ExceptionHandlerFilter();</span>
   }
 
   @Bean
   public AuthenticationManager authenticationManagerBean(
       AuthenticationConfiguration authenticationConfiguration) throws Exception {
-<span class="nc" id="L34">    return authenticationConfiguration.getAuthenticationManager();</span>
+<span class="nc" id="L36">    return authenticationConfiguration.getAuthenticationManager();</span>
   }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
-<span class="nc" id="L39">    return new BCryptPasswordEncoder();</span>
+<span class="nc" id="L41">    return new BCryptPasswordEncoder();</span>
   }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-<span class="nc" id="L44">    http.csrf().disable().cors().and().exceptionHandling()</span>
-<span class="nc" id="L45">        .authenticationEntryPoint(unauthorizedHandler).and().sessionManagement()</span>
-<span class="nc" id="L46">        .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeHttpRequests()</span>
-<span class="nc" id="L47">        .requestMatchers(AuthConstant.CLIENT_WHITELIST).permitAll()</span>
-<span class="nc" id="L48">        .requestMatchers(AuthConstant.AUTH_WHITELIST).permitAll()</span>
-<span class="nc" id="L49">        .requestMatchers(AuthConstant.USER_WHITELIST).permitAll()</span>
-<span class="nc" id="L50">        .requestMatchers(AuthConstant.DOCUMENT_WHITELIST).permitAll().anyRequest().authenticated();</span>
-<span class="nc" id="L51">    http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)</span>
-<span class="nc" id="L52">        .addFilterBefore(exceptionHandlerFilter(), AuthTokenFilter.class);</span>
-<span class="nc" id="L53">    return http.build();</span>
+<span class="nc" id="L46">    http.csrf()</span>
+<span class="nc" id="L47">        .disable()</span>
+<span class="nc" id="L48">        .cors()</span>
+<span class="nc" id="L49">        .and()</span>
+<span class="nc" id="L50">        .exceptionHandling()</span>
+<span class="nc" id="L51">        .authenticationEntryPoint(unauthorizedHandler)</span>
+<span class="nc" id="L52">        .and()</span>
+<span class="nc" id="L53">        .sessionManagement()</span>
+<span class="nc" id="L54">        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
+<span class="nc" id="L55">        .and()</span>
+<span class="nc" id="L56">        .authorizeHttpRequests()</span>
+<span class="nc" id="L57">        .requestMatchers(AuthConstant.CLIENT_WHITELIST)</span>
+<span class="nc" id="L58">        .permitAll()</span>
+<span class="nc" id="L59">        .requestMatchers(AuthConstant.AUTH_WHITELIST)</span>
+<span class="nc" id="L60">        .permitAll()</span>
+<span class="nc" id="L61">        .requestMatchers(AuthConstant.USER_WHITELIST)</span>
+<span class="nc" id="L62">        .permitAll()</span>
+<span class="nc" id="L63">        .requestMatchers(AuthConstant.DOCUMENT_WHITELIST)</span>
+<span class="nc" id="L64">        .permitAll()</span>
+<span class="nc" id="L65">        .anyRequest()</span>
+<span class="nc" id="L66">        .authenticated();</span>
+<span class="nc" id="L67">    http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)</span>
+<span class="nc" id="L68">        .addFilterBefore(exceptionHandlerFilter(), AuthTokenFilter.class);</span>
+<span class="nc" id="L69">    return http.build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

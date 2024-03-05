@@ -27,78 +27,83 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Profile(&quot;standalone&quot;)
 <span class="nc" id="L28">public class RedisStandaloneConfig implements CachingConfigurer {</span>
 
-    @Value(&quot;${spring.redis.standalone.host}&quot;)
-    private String hostname;
+  @Value(&quot;${spring.redis.standalone.host}&quot;)
+  private String hostname;
 
-    @Value(&quot;${spring.redis.standalone.port}&quot;)
-    private Integer port;
+  @Value(&quot;${spring.redis.standalone.port}&quot;)
+  private Integer port;
 
-    @Value(&quot;${spring.redis.password}&quot;)
-    private String password;
+  @Value(&quot;${spring.redis.password}&quot;)
+  private String password;
 
-    @Value(&quot;${spring.redis.standalone.useSsl}&quot;)
-    private boolean useSsl;
+  @Value(&quot;${spring.redis.standalone.useSsl}&quot;)
+  private boolean useSsl;
 
-    @Bean
-    RedisStandaloneConfiguration redisStandaloneConfiguration() {
-<span class="nc" id="L44">        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(hostname, port);</span>
-<span class="nc" id="L45">        redisStandaloneConfiguration.setPassword(password);</span>
-<span class="nc" id="L46">        return redisStandaloneConfiguration;</span>
+  @Bean
+  RedisStandaloneConfiguration redisStandaloneConfiguration() {
+<span class="nc" id="L44">    RedisStandaloneConfiguration redisStandaloneConfiguration =</span>
+<span class="nc" id="L45">        new RedisStandaloneConfiguration(hostname, port);</span>
+<span class="nc" id="L46">    redisStandaloneConfiguration.setPassword(password);</span>
+<span class="nc" id="L47">    return redisStandaloneConfiguration;</span>
+  }
+
+  @Bean(name = &quot;lettuceConnectionFactory&quot;)
+  @Autowired
+  LettuceConnectionFactory lettuceConnectionFactory(
+      RedisStandaloneConfiguration redisStandaloneConfiguration) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">    if (useSsl) {</span>
+<span class="nc" id="L55">      return new LettuceConnectionFactory(</span>
+<span class="nc" id="L56">          redisStandaloneConfiguration, LettuceClientConfiguration.builder().useSsl().build());</span>
+    } else {
+<span class="nc" id="L58">      return new LettuceConnectionFactory(redisStandaloneConfiguration);</span>
     }
+  }
 
-    @Bean(name = &quot;lettuceConnectionFactory&quot;)
-    @Autowired
-    LettuceConnectionFactory lettuceConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration) {
-<span class="nc bnc" id="L52" title="All 2 branches missed.">        if(useSsl) {</span>
-<span class="nc" id="L53">            return new LettuceConnectionFactory(redisStandaloneConfiguration, LettuceClientConfiguration.builder().useSsl().build());</span>
-        } else {
-<span class="nc" id="L55">            return new LettuceConnectionFactory(redisStandaloneConfiguration);</span>
-        }
-    }
+  @Bean
+  @Autowired
+  RedisTemplate&lt;String, ?&gt; redisTemplate( // NOSONAR
+      final LettuceConnectionFactory lettuceConnectionFactory) {
+<span class="nc" id="L66">    var redisTemplate = new RedisTemplate&lt;String, Object&gt;();</span>
+<span class="nc" id="L67">    redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
+<span class="nc" id="L68">    redisTemplate.setKeySerializer(new StringRedisSerializer());</span>
+<span class="nc" id="L69">    redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L70">    redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L71">    redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L72">    return redisTemplate;</span>
+  }
 
-    @Bean
-    @Autowired
-    RedisTemplate&lt;String, ?&gt; redisTemplate(//NOSONAR
-                                           final LettuceConnectionFactory lettuceConnectionFactory) {
-<span class="nc" id="L63">        var redisTemplate = new RedisTemplate&lt;String, Object&gt;();</span>
-<span class="nc" id="L64">        redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
-<span class="nc" id="L65">        redisTemplate.setKeySerializer(new StringRedisSerializer());</span>
-<span class="nc" id="L66">        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
-<span class="nc" id="L67">        redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());</span>
-<span class="nc" id="L68">        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
-<span class="nc" id="L69">        return redisTemplate;</span>
-    }
+  @Bean
+  @Autowired
+  RedisTemplate&lt;String, String&gt; redisTemplateString( // NOSONAR // TODO will remove in next version
+      final LettuceConnectionFactory lettuceConnectionFactory) {
+<span class="nc" id="L79">    var redisTemplate = new RedisTemplate&lt;String, String&gt;();</span>
+<span class="nc" id="L80">    redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
+<span class="nc" id="L81">    redisTemplate.setValueSerializer(new GenericToStringSerializer&lt;&gt;(Object.class));</span>
+<span class="nc" id="L82">    return redisTemplate;</span>
+  }
 
-    @Bean
-    @Autowired
-    RedisTemplate&lt;String, String&gt; redisTemplateString(//NOSONAR // TODO will remove in next version
-                                                      final LettuceConnectionFactory lettuceConnectionFactory) {
-<span class="nc" id="L76">        var redisTemplate = new RedisTemplate&lt;String, String&gt;();</span>
-<span class="nc" id="L77">        redisTemplate.setConnectionFactory(lettuceConnectionFactory);</span>
-<span class="nc" id="L78">        redisTemplate.setValueSerializer(new GenericToStringSerializer&lt;&gt;(Object.class));</span>
-<span class="nc" id="L79">        return redisTemplate;</span>
-    }
+  @Override
+  public KeyGenerator keyGenerator() {
+<span class="nc" id="L87">    return (target, method, params) -&gt; {</span>
+<span class="nc" id="L88">      val sb = new StringBuilder();</span>
+<span class="nc" id="L89">      sb.append(target.getClass().getName());</span>
+<span class="nc" id="L90">      sb.append(method.getName());</span>
+<span class="nc" id="L91">      Arrays.stream(params).sequential().forEach(sb::append);</span>
+<span class="nc" id="L92">      log.info(&quot;call Redis cache Key : &quot; + sb);</span>
+<span class="nc" id="L93">      return sb.toString();</span>
+    };
+  }
 
-    @Override
-    public KeyGenerator keyGenerator() {
-<span class="nc" id="L84">        return (target, method, params) -&gt; {</span>
-<span class="nc" id="L85">            val sb = new StringBuilder();</span>
-<span class="nc" id="L86">            sb.append(target.getClass().getName());</span>
-<span class="nc" id="L87">            sb.append(method.getName());</span>
-<span class="nc" id="L88">            Arrays.stream(params).sequential().forEach(sb::append);</span>
-<span class="nc" id="L89">            log.info(&quot;call Redis cache Key : &quot; + sb);</span>
-<span class="nc" id="L90">            return sb.toString();</span>
-        };
+  @Bean(name = &quot;jedisConnectionFactory&quot;)
+  @Autowired
+  JedisConnectionFactory jedisConnectionFactory(
+      RedisStandaloneConfiguration redisStandaloneConfiguration) {
+<span class="nc bnc" id="L101" title="All 2 branches missed.">    if (useSsl) {</span>
+<span class="nc" id="L102">      return new JedisConnectionFactory(</span>
+<span class="nc" id="L103">          redisStandaloneConfiguration, JedisClientConfiguration.builder().useSsl().build());</span>
+    } else {
+<span class="nc" id="L105">      return new JedisConnectionFactory(redisStandaloneConfiguration);</span>
     }
-
-    @Bean(name = &quot;jedisConnectionFactory&quot;)
-    @Autowired
-    JedisConnectionFactory jedisConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration) {
-<span class="nc bnc" id="L97" title="All 2 branches missed.">        if(useSsl) {</span>
-<span class="nc" id="L98">            return new JedisConnectionFactory(redisStandaloneConfiguration, JedisClientConfiguration.builder().useSsl().build());</span>
-        } else {
-<span class="nc" id="L100">            return new JedisConnectionFactory(redisStandaloneConfiguration);</span>
-        }
-    }
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

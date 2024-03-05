@@ -2,34 +2,35 @@
 
 import lombok.Getter;
 import lombok.Setter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = &quot;keycloak&quot;)
 @Getter
-<span class="nc" id="L11">@Setter</span>
-<span class="nc" id="L12">public class KeycloakProperties {</span>
+<span class="nc" id="L12">@Setter</span>
+<span class="nc" id="L13">public class KeycloakProperties {</span>
 
-<span class="nc" id="L14">  private String realm;</span>
+<span class="nc" id="L15">  private String realm;</span>
 
-<span class="nc" id="L16">  private String  authServerUrl;</span>
+<span class="nc" id="L17">  private String authServerUrl;</span>
 
-<span class="nc" id="L18">  private String sslRequired;</span>
+<span class="nc" id="L19">  private String sslRequired;</span>
 
-<span class="nc" id="L20">  private String resource;</span>
+<span class="nc" id="L21">  private String resource;</span>
 
-<span class="nc" id="L22">  private Credentials credentials;</span>
+<span class="nc" id="L23">  private Credentials credentials;</span>
 
-<span class="nc" id="L24">  private Boolean useResourceRoleMappings;</span>
+<span class="nc" id="L25">  private Boolean useResourceRoleMappings;</span>
 
-<span class="nc" id="L26">  private Boolean bearerOnly;</span>
+<span class="nc" id="L27">  private Boolean bearerOnly;</span>
 
   @Getter
-<span class="nc" id="L29">  @Setter</span>
-<span class="nc" id="L30">  public static class Credentials {</span>
+<span class="nc" id="L30">  @Setter</span>
+<span class="nc" id="L31">  public static class Credentials {</span>
 
-<span class="nc" id="L32">    private String secret;</span>
+<span class="nc" id="L33">    private String secret;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
