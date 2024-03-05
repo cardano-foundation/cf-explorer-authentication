@@ -4,7 +4,7 @@
 
 	<groupId>org.cardanofoundation.keycloak</groupId>
 	<artifactId>keycloak-spi</artifactId>
-	<version>0.1.16-SNAPSHOT</version>
+	<version>0.9.0</version>
 	<name>keycloak-spi</name>
 	<description>Event listeners for Keycloak</description>
 
