@@ -9,14 +9,14 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import org.cardanofoundation.authentication.constant.RedisConstant;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.cardanofoundation.explorer.common.utils.StringUtils;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+
+import org.cardanofoundation.authentication.constant.RedisConstant;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
+import org.cardanofoundation.explorer.common.utils.StringUtils;
 
 @Component
 @Log4j2
@@ -32,7 +32,6 @@ public class RedisProvider {
 
   private static final String ROLE_PREFIX = "ROLE_";
 
-
   /*
    * @since: 06/12/2022
    * description: Add access token + accountId to redis after logout or refresh token
@@ -40,7 +39,8 @@ public class RedisProvider {
    */
   public void blacklistJwt(String token, String accountId) {
     if (!isTokenBlacklisted(token)) {
-      redisTemplate.opsForValue()
+      redisTemplate
+          .opsForValue()
           .set(RedisConstant.JWT + token, accountId, timeToLiveRedisSignOut, TimeUnit.HOURS);
     }
   }
@@ -57,7 +57,6 @@ public class RedisProvider {
     return Boolean.TRUE.equals(redisTemplate.hasKey(RedisConstant.JWT + token));
   }
 
-
   /*
    * @since: 25/09/2023
    * description: get all key using prefix key
@@ -67,7 +66,7 @@ public class RedisProvider {
     return redisTemplate.keys(pattern);
   }
 
-  public String getUserPatternKey(String userId){
+  public String getUserPatternKey(String userId) {
     return USER_PREFIX + userId + "*";
   }
 
@@ -98,8 +97,9 @@ public class RedisProvider {
   }
 
   public Set<String> getAllHashKeyOfKey(String keys) {
-    return redisTemplate.opsForHash().keys(keys).stream().map(Object::toString).collect(
-        Collectors.toSet());
+    return redisTemplate.opsForHash().keys(keys).stream()
+        .map(Object::toString)
+        .collect(Collectors.toSet());
   }
 
   /*

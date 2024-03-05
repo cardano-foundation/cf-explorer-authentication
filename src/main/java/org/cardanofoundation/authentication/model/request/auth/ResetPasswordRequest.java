@@ -2,6 +2,7 @@ package org.cardanofoundation.authentication.model.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,11 +10,7 @@ import lombok.Setter;
 @Setter
 public class ResetPasswordRequest {
 
-  @NotNull
-  @NotBlank
-  private String code;
+  @NotNull @NotBlank private String code;
 
-  @NotNull
-  @NotBlank
-  private String password;
+  @NotNull @NotBlank private String password;
 }

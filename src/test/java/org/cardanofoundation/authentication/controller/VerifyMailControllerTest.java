@@ -7,16 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
-import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
-import org.cardanofoundation.authentication.model.response.MessageResponse;
-import org.cardanofoundation.authentication.provider.JwtProvider;
-import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.authentication.service.VerifyService;
-import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,49 +17,64 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.google.gson.Gson;
+
+import org.junit.jupiter.api.Test;
+
+import org.cardanofoundation.authentication.constant.CommonConstant;
+import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequest;
+import org.cardanofoundation.authentication.model.response.MessageResponse;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
+import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.service.VerifyService;
+
 @WebMvcTest(VerifyMailController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @MockBean(JpaMetamodelMappingContext.class)
 class VerifyMailControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockBean
-  private VerifyService verifyService;
+  @MockBean private VerifyService verifyService;
 
-  @MockBean
-  private KeycloakProvider keycloakProvider;
+  @MockBean private KeycloakProvider keycloakProvider;
 
-  @MockBean
-  private JwtProvider jwtProvider;
+  @MockBean private JwtProvider jwtProvider;
 
-  @MockBean
-  private RedisProvider redisProvider;
+  @MockBean private RedisProvider redisProvider;
 
   private final String CODE = "CodeVerifyMail123456";
 
   @Test
   void whenCallActive() throws Exception {
-    MessageResponse res = MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
-        .message(CommonConstant.RESPONSE_SUCCESS).build();
+    MessageResponse res =
+        MessageResponse.builder()
+            .code(CommonConstant.CODE_SUCCESS)
+            .message(CommonConstant.RESPONSE_SUCCESS)
+            .build();
     given(verifyService.checkVerifySignUpByEmail(CODE)).willReturn(res);
-    mockMvc.perform(get("/api/v1/verify/active")
-            .param("code", CODE)
-            .accept(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            get("/api/v1/verify/active").param("code", CODE).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
   }
 
   @Test
   void whenCallForgotPassword() throws Exception {
-    MessageResponse res = MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
-        .message(CommonConstant.RESPONSE_SUCCESS).build();
+    MessageResponse res =
+        MessageResponse.builder()
+            .code(CommonConstant.CODE_SUCCESS)
+            .message(CommonConstant.RESPONSE_SUCCESS)
+            .build();
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     given(verifyService.forgotPassword("Test@gmail.com", httpServletRequest)).willReturn(res);
-    mockMvc.perform(get("/api/v1/verify/forgot-password")
-            .param("email", "Test@gmail.com")
-            .accept(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            get("/api/v1/verify/forgot-password")
+                .param("email", "Test@gmail.com")
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
   }
@@ -77,12 +84,17 @@ class VerifyMailControllerTest {
     ResetPasswordRequest request = new ResetPasswordRequest();
     request.setPassword("@nhPhuc96");
     request.setCode(CODE);
-    MessageResponse res = MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
-        .message(CommonConstant.RESPONSE_SUCCESS).build();
+    MessageResponse res =
+        MessageResponse.builder()
+            .code(CommonConstant.CODE_SUCCESS)
+            .message(CommonConstant.RESPONSE_SUCCESS)
+            .build();
     given(verifyService.resetPassword(request)).willReturn(res);
-    mockMvc.perform(put("/api/v1/verify/reset-password")
-            .content(asJsonString(request))
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            put("/api/v1/verify/reset-password")
+                .content(asJsonString(request))
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
   }

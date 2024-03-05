@@ -20,8 +20,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.LocaleResolver;
 
 import com.mashape.unirest.http.JsonNode;
+import org.json.JSONObject;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+
 import org.cardanofoundation.authentication.constant.CommonConstant;
 import org.cardanofoundation.authentication.constant.RedisConstant;
+import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
@@ -37,14 +45,8 @@ import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.AuthenticationService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.authentication.util.NonceUtils;
-import org.cardanofoundation.explorer.common.exceptions.BusinessException;
-import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
-import org.json.JSONObject;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.cardanofoundation.explorer.common.exception.BusinessException;
+import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -85,9 +87,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     } catch (Exception e) {
       log.error("Exception authentication: " + e.getMessage());
       if (type == 0) {
-        throw new BusinessException(CommonErrorCode.USERNAME_OR_PASSWORD_INVALID);
+        throw new BusinessException(BusinessCode.USERNAME_OR_PASSWORD_INVALID);
       } else {
-        throw new BusinessException(CommonErrorCode.SIGNATURE_INVALID);
+        throw new BusinessException(BusinessCode.SIGNATURE_INVALID);
       }
     }
     UserRepresentation user = keycloakProvider.getUser(accountId);
@@ -106,35 +108,39 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     user.setAttributes(attributes);
     usersResource.get(user.getId()).update(user);
 
-    //add user id to token and refresh token
-    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()),
-        response.getToken());
-    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()),
-        response.getRefreshToken());
+    // add user id to token and refresh token
+    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()), response.getToken());
+    redisProvider.setValue(
+        redisProvider.getUserKeyByUserId(user.getId()), response.getRefreshToken());
 
-    //when user login successfully then will add user_id to each role group it contain
+    // when user login successfully then will add user_id to each role group it contain
     List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
-    roles.forEach(role -> {
-      String roleId = keycloakProvider.getRoleIdByRoleName(role);
-      redisProvider.addValueToMap(redisProvider.getRoleKeyByRoleId(roleId),user.getId(),"");
-    });
-    return SignInResponse.builder().token(response.getToken()).address(signInRequest.getAddress())
-        .email(signInRequest.getEmail()).tokenType(CommonConstant.TOKEN_TYPE)
-        .refreshToken(response.getRefreshToken()).build();
+    roles.forEach(
+        role -> {
+          String roleId = keycloakProvider.getRoleIdByRoleName(role);
+          redisProvider.addValueToMap(redisProvider.getRoleKeyByRoleId(roleId), user.getId(), "");
+        });
+    return SignInResponse.builder()
+        .token(response.getToken())
+        .address(signInRequest.getAddress())
+        .email(signInRequest.getEmail())
+        .tokenType(CommonConstant.TOKEN_TYPE)
+        .refreshToken(response.getRefreshToken())
+        .build();
   }
 
   @Override
-  public MessageResponse signUp(SignUpRequest signUpRequest,
-                                HttpServletRequest httpServletRequest) {
+  public MessageResponse signUp(
+      SignUpRequest signUpRequest, HttpServletRequest httpServletRequest) {
     Response response;
     String email = signUpRequest.getEmail();
     UserRepresentation userExist = keycloakProvider.getUser(email);
     if (Objects.nonNull(userExist) && userExist.isEnabled()) {
-      throw new BusinessException(CommonErrorCode.EMAIL_IS_ALREADY_EXIST);
+      throw new BusinessException(BusinessCode.EMAIL_IS_ALREADY_EXIST);
     }
     UsersResource usersResource = keycloakProvider.getResource();
-    CredentialRepresentation encodePassword = keycloakProvider.createPasswordCredentials(
-        signUpRequest.getPassword());
+    CredentialRepresentation encodePassword =
+        keycloakProvider.createPasswordCredentials(signUpRequest.getPassword());
     if (Objects.nonNull(userExist)) {
       userExist.setCredentials(Collections.singletonList(encodePassword));
       usersResource.get(userExist.getId()).update(userExist);
@@ -151,41 +157,49 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (response.getStatus() == 201) {
       String verifyCode = jwtProvider.generateCodeForVerify(email);
       sendMailExecutor.execute(
-          new MailHandler(mailProvider, email, EUserAction.CREATED,
-              localeResolver.resolveLocale(httpServletRequest), verifyCode));
-      return MessageResponse.builder().code(CommonConstant.CODE_SUCCESS)
-          .message(CommonConstant.RESPONSE_SUCCESS).build();
+          new MailHandler(
+              mailProvider,
+              email,
+              EUserAction.CREATED,
+              localeResolver.resolveLocale(httpServletRequest),
+              verifyCode));
+      return MessageResponse.builder()
+          .code(CommonConstant.CODE_SUCCESS)
+          .message(CommonConstant.RESPONSE_SUCCESS)
+          .build();
     }
     return new MessageResponse(CommonErrorCode.UNKNOWN_ERROR);
   }
 
   @Override
-  public RefreshTokenResponse refreshToken(String refreshJwt,
-                                           HttpServletRequest httpServletRequest) {
+  public RefreshTokenResponse refreshToken(
+      String refreshJwt, HttpServletRequest httpServletRequest) {
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
     if (redisProvider.isTokenBlacklisted(refreshJwt)) {
-      throw new BusinessException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
+      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);
     }
     try {
       JsonNode jsonNode = keycloakProvider.refreshToken(refreshJwt);
       JSONObject jsonObj = jsonNode.getObject();
       if (Objects.nonNull(jsonObj)) {
         redisProvider.blacklistJwt(accessToken, RedisConstant.JWT);
-        return RefreshTokenResponse.builder().accessToken(jsonObj.get("access_token").toString())
+        return RefreshTokenResponse.builder()
+            .accessToken(jsonObj.get("access_token").toString())
             .refreshToken(jsonObj.get("refresh_token").toString())
-            .tokenType(CommonConstant.TOKEN_TYPE).build();
+            .tokenType(CommonConstant.TOKEN_TYPE)
+            .build();
       }
     } catch (Exception ex) {
       log.error(
           "Error: when generate access token from refresh token by keycloak: " + ex.getMessage());
-      throw new BusinessException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
+      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);
     }
     return null;
   }
 
   @Override
-  public MessageResponse signOut(SignOutRequest signOutRequest,
-                                 HttpServletRequest httpServletRequest) {
+  public MessageResponse signOut(
+      SignOutRequest signOutRequest, HttpServletRequest httpServletRequest) {
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
     if (!redisProvider.isTokenBlacklisted(accessToken)) {
       redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());
@@ -207,8 +221,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));
       userExist.setAttributes(attributes);
       keycloakProvider.getResource().get(userExist.getId()).update(userExist);
-      return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS)
-          .nonce(nonce).build();
+      return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS).nonce(nonce).build();
     }
     UsersResource usersResource = keycloakProvider.getResource();
     UserRepresentation newUser = new UserRepresentation();
@@ -222,7 +235,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     attributes.put(CommonConstant.ATTRIBUTE_WALLET_NAME, List.of(walletName));
     newUser.setAttributes(attributes);
     usersResource.create(newUser);
-    return NonceResponse.builder().message(CommonConstant.CODE_FAILURE)
-        .nonce(nonce).build();
+    return NonceResponse.builder().message(CommonConstant.CODE_FAILURE).nonce(nonce).build();
   }
 }

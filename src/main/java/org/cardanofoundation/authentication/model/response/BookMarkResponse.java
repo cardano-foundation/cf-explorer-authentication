@@ -1,9 +1,8 @@
 package org.cardanofoundation.authentication.model.response;
 
-import lombok.Builder;
-import org.cardanofoundation.authentication.model.enums.EBookMarkType;
-import org.cardanofoundation.authentication.model.enums.ENetworkType;
 import java.time.Instant;
+
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 

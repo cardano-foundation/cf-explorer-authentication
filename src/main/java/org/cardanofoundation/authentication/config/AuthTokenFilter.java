@@ -1,23 +1,19 @@
 package org.cardanofoundation.authentication.config;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.cardanofoundation.authentication.constant.AuthConstant;
-import org.cardanofoundation.authentication.provider.JwtProvider;
-import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
-import org.cardanofoundation.explorer.common.exceptions.InvalidAccessTokenException;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.UserRepresentation;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +21,15 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
+
+import org.cardanofoundation.authentication.constant.AuthConstant;
+import org.cardanofoundation.authentication.provider.JwtProvider;
+import org.cardanofoundation.authentication.provider.KeycloakProvider;
+import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -38,8 +43,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   private final KeycloakProvider keycloakProvider;
 
   @Override
-  protected void doFilterInternal(@NotNull HttpServletRequest request,
-      @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
+  protected void doFilterInternal(
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull FilterChain filterChain)
       throws ServletException, IOException {
     String token = jwtProvider.parseJwt(request);
     jwtProvider.validateJwtToken(token);
@@ -50,8 +57,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     String accountId = jwtProvider.getAccountIdFromJwtToken(token);
     UsersResource usersResource = keycloakProvider.getResource();
     UserRepresentation user = usersResource.get(accountId).toRepresentation();
-    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-        user.getUsername(), null, fillAuthorities(token));
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(user.getUsername(), null, fillAuthorities(token));
     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -60,8 +67,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(@NotNull HttpServletRequest request) throws ServletException {
-    return Stream.of(AuthConstant.AUTH_WHITELIST, AuthConstant.USER_WHITELIST,
-            AuthConstant.DOCUMENT_WHITELIST, AuthConstant.CLIENT_WHITELIST).flatMap(Stream::of)
+    return Stream.of(
+            AuthConstant.AUTH_WHITELIST,
+            AuthConstant.USER_WHITELIST,
+            AuthConstant.DOCUMENT_WHITELIST,
+            AuthConstant.CLIENT_WHITELIST)
+        .flatMap(Stream::of)
         .anyMatch(x -> new AntPathMatcher().match(x, request.getServletPath()));
   }
 
@@ -70,8 +81,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     if (roles.isEmpty()) {
       return Collections.emptyList();
     }
-    return roles.stream()
-        .map(SimpleGrantedAuthority::new)
-        .toList();
+    return roles.stream().map(SimpleGrantedAuthority::new).toList();
   }
 }

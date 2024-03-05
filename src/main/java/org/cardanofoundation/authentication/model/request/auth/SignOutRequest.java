@@ -2,6 +2,7 @@ package org.cardanofoundation.authentication.model.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,11 +10,7 @@ import lombok.Setter;
 @Setter
 public class SignOutRequest {
 
-  @NotNull
-  @NotBlank
-  private String refreshJwt;
+  @NotNull @NotBlank private String refreshJwt;
 
-  @NotNull
-  @NotBlank
-  private String accountId;
+  @NotNull @NotBlank private String accountId;
 }

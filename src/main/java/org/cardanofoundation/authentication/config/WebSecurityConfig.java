@@ -1,7 +1,7 @@
 package org.cardanofoundation.authentication.config;
 
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.authentication.constant.AuthConstant;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import org.cardanofoundation.authentication.constant.AuthConstant;
 
 @Configuration
 @EnableWebSecurity
@@ -41,13 +43,27 @@ public class WebSecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf().disable().cors().and().exceptionHandling()
-        .authenticationEntryPoint(unauthorizedHandler).and().sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeHttpRequests()
-        .requestMatchers(AuthConstant.CLIENT_WHITELIST).permitAll()
-        .requestMatchers(AuthConstant.AUTH_WHITELIST).permitAll()
-        .requestMatchers(AuthConstant.USER_WHITELIST).permitAll()
-        .requestMatchers(AuthConstant.DOCUMENT_WHITELIST).permitAll().anyRequest().authenticated();
+    http.csrf()
+        .disable()
+        .cors()
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(unauthorizedHandler)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .authorizeHttpRequests()
+        .requestMatchers(AuthConstant.CLIENT_WHITELIST)
+        .permitAll()
+        .requestMatchers(AuthConstant.AUTH_WHITELIST)
+        .permitAll()
+        .requestMatchers(AuthConstant.USER_WHITELIST)
+        .permitAll()
+        .requestMatchers(AuthConstant.DOCUMENT_WHITELIST)
+        .permitAll()
+        .anyRequest()
+        .authenticated();
     http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(exceptionHandlerFilter(), AuthTokenFilter.class);
     return http.build();
