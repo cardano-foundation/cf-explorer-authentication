@@ -55,6 +55,7 @@ public class VerifyServiceImpl implements VerifyService {
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
+    System.out.println("accountId black list: " + accountId);
     redisProvider.blacklistJwt(code, accountId);
     UserRepresentation user = keycloakProvider.getUser(accountId);
     if (Objects.nonNull(user)) {

@@ -154,6 +154,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       newUser.setEmailVerified(true);
       response = usersResource.create(newUser);
     }
+    log.info("sign up email: " + email);
     if (response.getStatus() == 201) {
       String verifyCode = jwtProvider.generateCodeForVerify(email);
       sendMailExecutor.execute(
