@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
   public Boolean setTimezoneForUser(String timezone, HttpServletRequest httpServletRequest) {
     try {
       if (Objects.nonNull(timezone) && !timezone.isBlank()) {
-        timezone = timezone.trim().toLowerCase();
+        timezone = timezone.trim();
       } else {
         timezone = CommonConstant.DEFAULT_TIMEZONE;
       }

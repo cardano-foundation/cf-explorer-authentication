@@ -40,5 +40,5 @@ public class CommonConstant {
 
   public static final String TIMEZONE_KEY = "timezone";
 
-  public static final String DEFAULT_TIMEZONE = "utc";
+  public static final String DEFAULT_TIMEZONE = "UTC";
 }
