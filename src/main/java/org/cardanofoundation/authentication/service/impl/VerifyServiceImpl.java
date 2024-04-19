@@ -46,19 +46,23 @@ public class VerifyServiceImpl implements VerifyService {
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
     if (redisProvider.isTokenBlacklisted(code)) {
+      log.error("Code is blacklisted: " + code);
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     Boolean validateCode = jwtProvider.validateVerifyCode(code);
     if (validateCode.equals(Boolean.FALSE)) {
+      log.error("Code is invalid: " + code);
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
+    System.out.println("accountId black list: " + accountId);
     redisProvider.blacklistJwt(code, accountId);
     UserRepresentation user = keycloakProvider.getUser(accountId);
     if (Objects.nonNull(user)) {
       user.setEnabled(true);
       keycloakProvider.getResource().get(user.getId()).update(user);
     } else {
+      log.error("User not found: " + accountId);
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
@@ -68,10 +72,12 @@ public class VerifyServiceImpl implements VerifyService {
   public MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
     String code = resetPasswordRequest.getCode();
     if (redisProvider.isTokenBlacklisted(code)) {
+      log.error("Code is blacklisted: " + code);
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     Boolean validateCode = jwtProvider.validateVerifyCode(code);
     if (validateCode.equals(Boolean.FALSE)) {
+      log.error("Code is invalid: " + code);
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);

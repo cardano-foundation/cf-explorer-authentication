@@ -38,6 +38,7 @@ public class RedisProvider {
    * @update:
    */
   public void blacklistJwt(String token, String accountId) {
+    log.info("Blacklist token: " + token + " with accountId: " + accountId);
     if (!isTokenBlacklisted(token)) {
       redisTemplate
           .opsForValue()

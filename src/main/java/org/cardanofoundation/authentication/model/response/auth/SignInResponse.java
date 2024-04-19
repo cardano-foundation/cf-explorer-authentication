@@ -18,4 +18,6 @@ public class SignInResponse {
   private String refreshToken;
 
   private String address;
+
+  private String timezone;
 }
