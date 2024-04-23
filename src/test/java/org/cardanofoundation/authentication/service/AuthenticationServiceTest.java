@@ -4,8 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +15,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import co.nstant.in.cbor.CborDecoder;
+import co.nstant.in.cbor.CborException;
+import co.nstant.in.cbor.model.Array;
+import co.nstant.in.cbor.model.ByteString;
+import co.nstant.in.cbor.model.DataItem;
+import com.bloxbean.cardano.client.cip.cip8.SigStructure;
+import com.bloxbean.cardano.client.util.HexUtil;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONObject;
@@ -69,6 +78,8 @@ class AuthenticationServiceTest {
   @Mock private MailProvider mailProvider;
 
   @Mock private KeycloakProvider keycloakProvider;
+
+  @Mock private CborDecoder cborDecoder;
 
   private final String SIGNATURE_TEST =
       "84582aa201276761646472657373581de18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909a166686173686564f453393534353735313438313233323636333232355840850ff657e23963414e7c1bf708928dc994ecafea29790089c810af1ac7486aae12a4ed736d16528051aeff1991ee8d2aef19fe3d375f3ad019925ff1530ed608";
@@ -145,6 +156,108 @@ class AuthenticationServiceTest {
     SignInResponse res = authenticationService.signIn(signInRequest);
     Assertions.assertNotNull(res);
     Assertions.assertNotNull(res.getToken());
+  }
+
+  @Test
+  void test() throws CborException {
+    String signature =
+        "84582aa201276761646472657373581de16bc80fd23cf1be6f62185443a9cfa26454d793e704fe581a97ba670ca166686173686564f4581b373434333837303133393338393139373430323432383832353736584041be4aee6327705358a1a7c19598eac26e82eb90891383c02eb968a46756d6f17d7be6f03b7c7f79dfc734c7450abb47901a2674cb1133c1ec948ab2185d5200";
+
+    String address = "stake1u94usr7j8ncmummzrp2y82w05fj9f4unuuz0ukq6j7axwrqv9uf0w";
+
+    String nonce = "744387013938919740242882576";
+
+    List<DataItem> itemList = null;
+
+    itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));
+
+    List<DataItem> topArray = ((Array) itemList.get(0)).getDataItems();
+
+    ByteString messageToSign = (ByteString) topArray.get(2);
+    byte[] message = messageToSign.getBytes();
+    System.out.println(new String(message));
+
+    SigStructure sigStructure = SigStructure.deserialize(topArray.get(3));
+
+    System.out.println(Arrays.toString(sigStructure.payload()));
+
+    //    System.out.printf("Adddress: %s\n", Hex.encodeHexString(address.getBytes()));
+    //
+    //
+    //    COSESign1 coseSign1 = COSESign1.deserialize(HexUtil.decodeHexString(signature));
+    //
+    //    System.out.println(Hex.encodeHexString(coseSign1.headers()._protected().getBytes()));
+
+    //    List<DataItem> itemList = null;
+    //    try {
+    //      itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));
+    //    } catch (CborException e) {
+    //      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
+    //    }
+    //    List<DataItem> topArray = ((Array) itemList.get(0)).getDataItems();
+    //    ByteString messageToSign = (ByteString) topArray.get(2);
+    //    byte[] message = messageToSign.getBytes();
+    //    System.out.println(new String(message));
+    //    List<DataItem> itemList = null;
+    //    itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));
+    //    List<DataItem> topArray = ((Array) itemList.get(0)).getDataItems();
+
+    //    List<COSERecipient> recipients = messageToSign.getDataItems().stream()
+    //        .map(dataItem -> COSERecipient.deserialize((Array) dataItem))
+    //        .toList();
+
+    //    COSERecipient recipient = COSERecipient.deserialize((Array) topArray.get(3));
+    //
+    //    System.out.println(HexUtil.encodeHexString(recipient.ciphertext()));
+
+    //    itemList = CborDecoder.decode(message);
+    //
+    //    List<DataItem> array = ((Array) itemList.get(0)).getDataItems();
+    //    ByteString item = (ByteString) topArray.get(2);
+    //
+    //    byte[] message1 = item.getBytes();
+    //
+    //    System.out.println(Hex.encodeHexString(message1));
+
+    //    Headers headers = Headers.deserialize(new DataItem[]{topArray.get(0), topArray.get(1)});
+    //    Array cosRecptArray = new Array();
+    //    Arrays.stream(headers.serialize())
+    //        .forEach(header -> cosRecptArray.add(header));
+    //
+    //    cosRecptArray.add(new ByteString(address.getBytes()));
+    //
+    //    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //    new CborEncoder(baos).encode(cosRecptArray);
+    //    byte[] bytes = baos.toByteArray();
+    //
+    //    System.out.println(HexUtil.encodeHexString(bytes));
+
+    //    ByteString header = (ByteString) topArray.get(0);
+    //    byte[] headerMessage = header.getBytes();
+    //
+    //    System.out.printf("Header: %s\n", Hex.encodeHexString(headerMessage));
+    //
+    //    header = (ByteString) topArray.get(1);
+    //    headerMessage = header.getBytes();
+    //
+    //    System.out.printf("Header: %s\n", Hex.encodeHexString(headerMessage));
+
+    //    header = (ByteString) topArray.get(2);
+    //    headerMessage = header.getBytes();
+    //
+    //    System.out.printf("Header: %s\n", Hex.encodeHexString(headerMessage));
+
+    //    Array recipientArray = ((Array) topArray.get(3));
+
+    //    List<COSERecipient> recipients = recipientArray.getDataItems().stream()
+    //        .map(dataItem -> {
+    //          byte[] ciphertext = ((ByteString) dataItem.get(2)).getBytes();
+    //        })
+    //        .toList();
+    //    System.out.println(recipients.get(0));
+
+    //    System.out.println(Hex.encodeHexString(message));
+    //    System.out.println(topArray.get(3));
   }
 
   @Test
