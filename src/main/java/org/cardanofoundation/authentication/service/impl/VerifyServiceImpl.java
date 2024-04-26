@@ -18,6 +18,7 @@ import org.cardanofoundation.authentication.service.VerifyService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exceptions.enums.CommonErrorCode;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.LocaleResolver;
 
@@ -61,21 +62,26 @@ public class VerifyServiceImpl implements VerifyService {
 
   @Override
   public MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
-    String code = resetPasswordRequest.getCode();
-    if (redisProvider.isTokenBlacklisted(code)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+    try {
+      String code = resetPasswordRequest.getCode();
+      if (redisProvider.isTokenBlacklisted(code)) {
+        return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+      }
+      Boolean validateCode = jwtProvider.validateVerifyCode(code);
+      if (validateCode.equals(Boolean.FALSE)) {
+        return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
+      }
+      String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
+      redisProvider.blacklistJwt(code, accountId);
+      UserRepresentation user = keycloakProvider.getUser(accountId);
+      user.setCredentials(
+              Collections.singletonList(
+                      keycloakProvider.createPasswordCredentials(resetPasswordRequest.getPassword())));
+      keycloakProvider.getResource().get(user.getId()).update(user);
+    } catch (Exception e) {
+      log.warn("error", e);
+      throw e;
     }
-    Boolean validateCode = jwtProvider.validateVerifyCode(code);
-    if (validateCode.equals(Boolean.FALSE)) {
-      return new MessageResponse(CommonErrorCode.INVALID_VERIFY_CODE);
-    }
-    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
-    redisProvider.blacklistJwt(code, accountId);
-    UserRepresentation user = keycloakProvider.getUser(accountId);
-    user.setCredentials(
-        Collections.singletonList(
-            keycloakProvider.createPasswordCredentials(resetPasswordRequest.getPassword())));
-    keycloakProvider.getResource().get(user.getId()).update(user);
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
