@@ -38,12 +38,13 @@ public class RedisProvider {
    * @update:
    */
   public void blacklistJwt(String token, String accountId) {
-<span class="nc bnc" id="L41" title="All 2 branches missed.">    if (!isTokenBlacklisted(token)) {</span>
-<span class="nc" id="L42">      redisTemplate</span>
-<span class="nc" id="L43">          .opsForValue()</span>
-<span class="nc" id="L44">          .set(RedisConstant.JWT + token, accountId, timeToLiveRedisSignOut, TimeUnit.HOURS);</span>
+<span class="nc" id="L41">    log.info(&quot;Blacklist token: &quot; + token + &quot; with accountId: &quot; + accountId);</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">    if (!isTokenBlacklisted(token)) {</span>
+<span class="nc" id="L43">      redisTemplate</span>
+<span class="nc" id="L44">          .opsForValue()</span>
+<span class="nc" id="L45">          .set(RedisConstant.JWT + token, accountId, timeToLiveRedisSignOut, TimeUnit.HOURS);</span>
     }
-<span class="nc" id="L46">  }</span>
+<span class="nc" id="L47">  }</span>
 
   /*
    * @since: 06/12/2022
@@ -51,10 +52,10 @@ public class RedisProvider {
    * @update:
    */
   public boolean isTokenBlacklisted(String token) {
-<span class="nc bnc" id="L54" title="All 2 branches missed.">    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {</span>
-<span class="nc" id="L55">      throw new BusinessException(CommonErrorCode.INVALID_TOKEN);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">    if (Boolean.TRUE.equals(StringUtils.isNullOrEmpty(token))) {</span>
+<span class="nc" id="L56">      throw new BusinessException(CommonErrorCode.INVALID_TOKEN);</span>
     }
-<span class="nc" id="L57">    return Boolean.TRUE.equals(redisTemplate.hasKey(RedisConstant.JWT + token));</span>
+<span class="nc" id="L58">    return Boolean.TRUE.equals(redisTemplate.hasKey(RedisConstant.JWT + token));</span>
   }
 
   /*
@@ -63,11 +64,11 @@ public class RedisProvider {
    * @update:
    */
   public Set&lt;String&gt; getKeys(String pattern) {
-<span class="nc" id="L66">    return redisTemplate.keys(pattern);</span>
+<span class="nc" id="L67">    return redisTemplate.keys(pattern);</span>
   }
 
   public String getUserPatternKey(String userId) {
-<span class="nc" id="L70">    return USER_PREFIX + userId + &quot;*&quot;;</span>
+<span class="nc" id="L71">    return USER_PREFIX + userId + &quot;*&quot;;</span>
   }
 
   /*
@@ -76,11 +77,11 @@ public class RedisProvider {
    * @update:
    */
   public String getValue(String key) {
-<span class="nc" id="L79">    return redisTemplate.opsForValue().get(key);</span>
+<span class="nc" id="L80">    return redisTemplate.opsForValue().get(key);</span>
   }
 
   public List&lt;String&gt; getValues(Set&lt;String&gt; keys) {
-<span class="nc" id="L83">    return redisTemplate.opsForValue().multiGet(keys);</span>
+<span class="nc" id="L84">    return redisTemplate.opsForValue().multiGet(keys);</span>
   }
 
   /*
@@ -89,17 +90,17 @@ public class RedisProvider {
    * @update:
    */
   public void setValue(String key, String val) {
-<span class="nc" id="L92">    redisTemplate.opsForValue().set(key, val, timeToLiveRedisSignOut, TimeUnit.HOURS);</span>
-<span class="nc" id="L93">  }</span>
+<span class="nc" id="L93">    redisTemplate.opsForValue().set(key, val, timeToLiveRedisSignOut, TimeUnit.HOURS);</span>
+<span class="nc" id="L94">  }</span>
 
   public void addValueToMap(String key, String hashKey, String value) {
-<span class="nc" id="L96">    redisTemplate.opsForHash().put(key, hashKey, value);</span>
-<span class="nc" id="L97">  }</span>
+<span class="nc" id="L97">    redisTemplate.opsForHash().put(key, hashKey, value);</span>
+<span class="nc" id="L98">  }</span>
 
   public Set&lt;String&gt; getAllHashKeyOfKey(String keys) {
-<span class="nc" id="L100">    return redisTemplate.opsForHash().keys(keys).stream()</span>
-<span class="nc" id="L101">        .map(Object::toString)</span>
-<span class="nc" id="L102">        .collect(Collectors.toSet());</span>
+<span class="nc" id="L101">    return redisTemplate.opsForHash().keys(keys).stream()</span>
+<span class="nc" id="L102">        .map(Object::toString)</span>
+<span class="nc" id="L103">        .collect(Collectors.toSet());</span>
   }
 
   /*
@@ -108,15 +109,15 @@ public class RedisProvider {
    * @update:
    */
   public void remove(String key) {
-<span class="nc" id="L111">    redisTemplate.delete(key);</span>
-<span class="nc" id="L112">  }</span>
+<span class="nc" id="L112">    redisTemplate.delete(key);</span>
+<span class="nc" id="L113">  }</span>
 
   public String getRoleKeyByRoleId(String roleId) {
-<span class="nc" id="L115">    return ROLE_PREFIX + roleId;</span>
+<span class="nc" id="L116">    return ROLE_PREFIX + roleId;</span>
   }
 
   public String getUserKeyByUserId(String userId) {
-<span class="nc" id="L119">    return USER_PREFIX + userId + &quot;_&quot; + UUID.randomUUID();</span>
+<span class="nc" id="L120">    return USER_PREFIX + userId + &quot;_&quot; + UUID.randomUUID();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

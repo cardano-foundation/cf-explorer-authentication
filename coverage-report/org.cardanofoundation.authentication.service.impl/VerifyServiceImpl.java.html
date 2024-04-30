@@ -46,67 +46,73 @@ public class VerifyServiceImpl implements VerifyService {
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
 <span class="fc bfc" id="L48" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="fc" id="L49">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L49">      log.error(&quot;Code is blacklisted: &quot; + code);</span>
+<span class="fc" id="L50">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L51">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
-<span class="fc" id="L53">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L52">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
+<span class="fc" id="L54">      log.error(&quot;Code is invalid: &quot; + code);</span>
+<span class="fc" id="L55">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L55">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
-<span class="fc" id="L56">    redisProvider.blacklistJwt(code, accountId);</span>
-<span class="fc" id="L57">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">    if (Objects.nonNull(user)) {</span>
-<span class="fc" id="L59">      user.setEnabled(true);</span>
-<span class="fc" id="L60">      keycloakProvider.getResource().get(user.getId()).update(user);</span>
+<span class="fc" id="L57">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
+<span class="fc" id="L58">    System.out.println(&quot;accountId black list: &quot; + accountId);</span>
+<span class="fc" id="L59">    redisProvider.blacklistJwt(code, accountId);</span>
+<span class="fc" id="L60">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">    if (Objects.nonNull(user)) {</span>
+<span class="fc" id="L62">      user.setEnabled(true);</span>
+<span class="fc" id="L63">      keycloakProvider.getResource().get(user.getId()).update(user);</span>
     } else {
-<span class="fc" id="L62">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L65">      log.error(&quot;User not found: &quot; + accountId);</span>
+<span class="fc" id="L66">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L64">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L68">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
-<span class="fc" id="L69">    String code = resetPasswordRequest.getCode();</span>
-<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="fc" id="L71">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L73">    String code = resetPasswordRequest.getCode();</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="fc" id="L75">      log.error(&quot;Code is blacklisted: &quot; + code);</span>
+<span class="fc" id="L76">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L73">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
-<span class="fc bfc" id="L74" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
-<span class="fc" id="L75">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
+<span class="fc" id="L78">    Boolean validateCode = jwtProvider.validateVerifyCode(code);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">    if (validateCode.equals(Boolean.FALSE)) {</span>
+<span class="fc" id="L80">      log.error(&quot;Code is invalid: &quot; + code);</span>
+<span class="fc" id="L81">      return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);</span>
     }
-<span class="fc" id="L77">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
-<span class="fc" id="L78">    redisProvider.blacklistJwt(code, accountId);</span>
-<span class="fc" id="L79">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
-<span class="fc" id="L80">    user.setCredentials(</span>
-<span class="fc" id="L81">        Collections.singletonList(</span>
-<span class="fc" id="L82">            keycloakProvider.createPasswordCredentials(resetPasswordRequest.getPassword())));</span>
-<span class="fc" id="L83">    keycloakProvider.getResource().get(user.getId()).update(user);</span>
-<span class="fc" id="L84">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L83">    String accountId = jwtProvider.getAccountIdFromVerifyCode(code);</span>
+<span class="fc" id="L84">    redisProvider.blacklistJwt(code, accountId);</span>
+<span class="fc" id="L85">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
+<span class="fc" id="L86">    user.setCredentials(</span>
+<span class="fc" id="L87">        Collections.singletonList(</span>
+<span class="fc" id="L88">            keycloakProvider.createPasswordCredentials(resetPasswordRequest.getPassword())));</span>
+<span class="fc" id="L89">    keycloakProvider.getResource().get(user.getId()).update(user);</span>
+<span class="fc" id="L90">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public MessageResponse forgotPassword(String email, HttpServletRequest httpServletRequest) {
-<span class="fc" id="L89">    UserRepresentation user = keycloakProvider.getUser(email);</span>
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">    if (Objects.isNull(user)) {</span>
-<span class="fc" id="L91">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
+<span class="fc" id="L95">    UserRepresentation user = keycloakProvider.getUser(email);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">    if (Objects.isNull(user)) {</span>
+<span class="fc" id="L97">      return new MessageResponse(CommonConstant.CODE_FAILURE, CommonConstant.RESPONSE_FAILURE);</span>
     }
-<span class="nc" id="L93">    String code = jwtProvider.generateCodeForVerify(email);</span>
-<span class="nc" id="L94">    sendMailExecutor.execute(</span>
+<span class="nc" id="L99">    String code = jwtProvider.generateCodeForVerify(email);</span>
+<span class="nc" id="L100">    sendMailExecutor.execute(</span>
         new MailHandler(
             mailProvider,
             email,
             EUserAction.RESET_PASSWORD,
-<span class="nc" id="L99">            localeResolver.resolveLocale(httpServletRequest),</span>
+<span class="nc" id="L105">            localeResolver.resolveLocale(httpServletRequest),</span>
             code));
-<span class="nc" id="L101">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="nc" id="L107">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public Boolean checkExpiredCode(String code) {
-<span class="fc bfc" id="L106" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
-<span class="fc" id="L107">      return false;</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(code)) {</span>
+<span class="fc" id="L113">      return false;</span>
     }
-<span class="fc" id="L109">    return jwtProvider.validateVerifyCode(code);</span>
+<span class="fc" id="L115">    return jwtProvider.validateVerifyCode(code);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -2,7 +2,7 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 auth-service,org.cardanofoundation.authentication.controller,BookMarkController,0,39,0,0,0,8,0,5,0,5
 auth-service,org.cardanofoundation.authentication.controller,AuthController,0,40,0,0,0,6,0,6,0,6
 auth-service,org.cardanofoundation.authentication.controller,VerifyMailController,6,25,0,0,1,4,1,4,1,4
-auth-service,org.cardanofoundation.authentication.controller,UserController,29,22,2,0,5,4,2,4,1,4
+auth-service,org.cardanofoundation.authentication.controller,UserController,29,32,2,0,5,5,2,5,1,5
 auth-service,org.cardanofoundation.authentication.thread,MailHandler,45,0,0,0,15,0,3,0,3,0
 auth-service,org.cardanofoundation.authentication.config.redis.cluster,RedisClusterConfig,115,0,0,0,27,0,9,0,9,0
 auth-service,org.cardanofoundation.authentication.controller.advice,GlobalExceptionHandler,126,25,0,0,48,8,7,3,7,3
@@ -19,9 +19,9 @@ auth-service,org.cardanofoundation.authentication.model.request.auth,SignUpReque
 auth-service,org.cardanofoundation.authentication.model.response.auth,NonceResponse.NonceResponseBuilder,6,21,0,0,0,1,1,4,1,4
 auth-service,org.cardanofoundation.authentication.model.response.auth,NonceResponse,8,19,0,0,1,3,2,4,2,4
 auth-service,org.cardanofoundation.authentication.model.response.auth,RefreshTokenResponse,149,19,30,0,3,2,24,3,9,3
-auth-service,org.cardanofoundation.authentication.model.response.auth,SignInResponse.SignInResponseBuilder,12,42,0,0,0,1,1,7,1,7
+auth-service,org.cardanofoundation.authentication.model.response.auth,SignInResponse.SignInResponseBuilder,14,49,0,0,0,1,1,8,1,8
 auth-service,org.cardanofoundation.authentication.model.response.auth,RefreshTokenResponse.RefreshTokenResponseBuilder,8,28,0,0,0,1,1,5,1,5
-auth-service,org.cardanofoundation.authentication.model.response.auth,SignInResponse,32,25,0,0,5,2,9,3,9,3
+auth-service,org.cardanofoundation.authentication.model.response.auth,SignInResponse,39,28,0,0,6,2,11,3,11,3
 auth-service,org.cardanofoundation.authentication.config,ThreadPoolConfig,31,0,0,0,6,0,2,0,2,0
 auth-service,org.cardanofoundation.authentication.config,WebConfig,0,53,0,0,0,11,0,3,0,3
 auth-service,org.cardanofoundation.authentication.config,WebSecurityConfig,73,0,0,0,28,0,5,0,5,0
@@ -35,9 +35,10 @@ auth-service,org.cardanofoundation.authentication.config.redis.standalone,RedisS
 auth-service,org.cardanofoundation.authentication.util,SesSmtpCredentialGenerator,59,0,0,0,13,0,2,0,2,0
 auth-service,org.cardanofoundation.authentication.util,NonceUtils,11,55,0,0,3,13,0,3,0,3
 auth-service,org.cardanofoundation.authentication.service.impl,BookMarkServiceImpl,61,361,12,20,21,90,13,14,2,9
-auth-service,org.cardanofoundation.authentication.service.impl,VerifyServiceImpl,26,182,1,13,4,35,1,12,0,6
+auth-service,org.cardanofoundation.authentication.service.impl,VerifyServiceImpl,26,206,1,13,4,41,1,12,0,6
 auth-service,org.cardanofoundation.authentication.service.impl,KeycloakServiceImpl,117,52,10,2,29,10,9,5,4,4
-auth-service,org.cardanofoundation.authentication.service.impl,AuthenticationServiceImpl,120,389,10,16,32,91,9,12,1,7
+auth-service,org.cardanofoundation.authentication.service.impl,UserServiceImpl,70,0,4,0,16,0,5,0,3,0
+auth-service,org.cardanofoundation.authentication.service.impl,AuthenticationServiceImpl,132,397,11,17,34,94,10,12,1,7
 auth-service,org.cardanofoundation.authentication.config.properties,ThreadPoolProperties,31,0,0,0,6,0,9,0,9,0
 auth-service,org.cardanofoundation.authentication.config.properties,KeycloakProperties,52,0,0,0,9,0,15,0,15,0
 auth-service,org.cardanofoundation.authentication.config.properties,KeycloakProperties.Credentials,10,0,0,0,3,0,3,0,3,0
@@ -55,7 +56,7 @@ auth-service,org.cardanofoundation.authentication.model.request.event,EventModel
 auth-service,org.cardanofoundation.authentication.provider,MailProvider,118,4,3,0,24,1,4,1,2,1
 auth-service,org.cardanofoundation.authentication.provider,LocaleProvider,17,0,0,0,3,0,3,0,3,0
 auth-service,org.cardanofoundation.authentication.provider,JwtProvider,215,4,6,0,68,1,13,1,10,1
-auth-service,org.cardanofoundation.authentication.provider,RedisProvider,105,4,4,0,24,1,15,1,13,1
+auth-service,org.cardanofoundation.authentication.provider,RedisProvider,110,4,4,0,25,1,15,1,13,1
 auth-service,org.cardanofoundation.authentication.provider,KeycloakProvider,153,4,4,0,45,1,10,1,8,1
 auth-service,org.cardanofoundation.authentication.model.response,MessageResponse,11,30,0,0,2,8,3,5,3,5
 auth-service,org.cardanofoundation.authentication.model.response,BookMarkResponse,36,31,0,0,5,3,10,4,10,4
