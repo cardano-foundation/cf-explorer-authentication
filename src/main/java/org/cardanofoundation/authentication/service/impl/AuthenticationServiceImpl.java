@@ -106,6 +106,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
     attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));
     user.setAttributes(attributes);
+
+    String timezone =
+        attributes.containsKey(CommonConstant.TIMEZONE_KEY)
+            ? attributes.get(CommonConstant.TIMEZONE_KEY).get(0)
+            : CommonConstant.DEFAULT_TIMEZONE;
+
     usersResource.get(user.getId()).update(user);
 
     // add user id to token and refresh token
@@ -126,6 +132,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .email(signInRequest.getEmail())
         .tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(response.getRefreshToken())
+        .timezone(timezone)
         .build();
   }
 
@@ -154,6 +161,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       newUser.setEmailVerified(true);
       response = usersResource.create(newUser);
     }
+    log.info("sign up email: " + email);
     if (response.getStatus() == 201) {
       String verifyCode = jwtProvider.generateCodeForVerify(email);
       sendMailExecutor.execute(

@@ -2,6 +2,7 @@ package org.cardanofoundation.authentication.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -29,6 +30,7 @@ import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.KeycloakService;
+import org.cardanofoundation.authentication.service.UserService;
 
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -44,6 +46,8 @@ class UserControllerTest {
   @MockBean private RedisProvider redisProvider;
 
   @MockBean private KeycloakProvider keycloakProvider;
+
+  @MockBean private UserService userService;
 
   @Test
   void whenCallInfo() throws Exception {
@@ -81,6 +85,17 @@ class UserControllerTest {
                 .content(asJsonString(model))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError())
+        .andDo(print());
+  }
+
+  @Test
+  void setTimezoneForUser() throws Exception {
+    String timezone = "vi";
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+    when(userService.setTimezoneForUser(timezone, httpServletRequest)).thenReturn(true);
+    mockMvc
+        .perform(post("/api/v1/user/set-timezone").param("timezone", timezone))
+        .andExpect(status().isOk())
         .andDo(print());
   }
 

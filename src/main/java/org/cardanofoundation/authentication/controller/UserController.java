@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.service.KeycloakService;
+import org.cardanofoundation.authentication.service.UserService;
 import org.cardanofoundation.explorer.common.exception.ErrorResponse;
 
 @RestController
@@ -39,6 +41,8 @@ import org.cardanofoundation.explorer.common.exception.ErrorResponse;
 public class UserController {
 
   private final KeycloakService keycloakService;
+
+  private final UserService userService;
 
   @Value("${secret-code}")
   private String secretCode;
@@ -111,5 +115,28 @@ public class UserController {
       return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>(keycloakService.roleMapping(model), HttpStatus.CREATED);
+  }
+
+  @Operation(description = "Set timezone for user")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Success",
+            content = @Content(schema = @Schema(implementation = Boolean.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Authentication error unsuccessful",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Error not specified",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+      })
+  @PostMapping("/set-timezone")
+  public ResponseEntity<Boolean> setTimeZoneForUser(
+      @Valid @RequestParam(value = "timezone") String timezone,
+      HttpServletRequest httpServletRequest) {
+    return ResponseEntity.ok(userService.setTimezoneForUser(timezone, httpServletRequest));
   }
 }

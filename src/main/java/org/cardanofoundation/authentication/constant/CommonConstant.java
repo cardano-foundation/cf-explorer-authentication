@@ -37,4 +37,8 @@ public class CommonConstant {
   public static final String ENGLISH_URL = "/en";
 
   public static final String FRENCH_URL = "/fr";
+
+  public static final String TIMEZONE_KEY = "timezone";
+
+  public static final String DEFAULT_TIMEZONE = "UTC";
 }
