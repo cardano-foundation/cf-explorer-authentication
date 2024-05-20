@@ -2,6 +2,9 @@ package org.cardanofoundation.authentication.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.http.auth.UsernamePasswordCredentials;
+
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignOutRequest;
 import org.cardanofoundation.authentication.model.request.auth.SignUpRequest;
@@ -46,4 +49,7 @@ public interface AuthenticationService {
    * @update:
    */
   NonceResponse findNonceByAddress(String address, String walletName);
+
+  UsernamePasswordCredentials verifySignatureThenGetUserPassCredential(SignInRequest signInRequest)
+      throws JsonProcessingException;
 }

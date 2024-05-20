@@ -19,7 +19,13 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.LocaleResolver;
 
+import com.bloxbean.cardano.client.address.Address;
+import com.bloxbean.cardano.client.cip.cip30.CIP30DataSigner;
+import com.bloxbean.cardano.client.cip.cip30.DataSignature;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.json.JSONObject;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -67,7 +73,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public SignInResponse signIn(SignInRequest signInRequest) {
-    log.info("login is running...");
     String accountId = "";
     String password = "";
     int type = signInRequest.getType();
@@ -77,8 +82,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       password = signInRequest.getPassword();
     } else {
       log.info("login with cardano wallet...");
-      accountId = signInRequest.getAddress();
-      password = NonceUtils.getNonceFromSignature(signInRequest.getSignature());
+      UsernamePasswordCredentials userPass =
+          verifySignatureThenGetUserPassCredential(signInRequest);
+      accountId = userPass.getUserName();
+      password = userPass.getPassword();
     }
     AccessTokenResponse response;
     try {
@@ -128,7 +135,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         });
     return SignInResponse.builder()
         .token(response.getToken())
-        .address(signInRequest.getAddress())
+        .address(type == 0 ? null : accountId)
         .email(signInRequest.getEmail())
         .tokenType(CommonConstant.TOKEN_TYPE)
         .refreshToken(response.getRefreshToken())
@@ -244,5 +251,36 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     newUser.setAttributes(attributes);
     usersResource.create(newUser);
     return NonceResponse.builder().message(CommonConstant.CODE_FAILURE).nonce(nonce).build();
+  }
+
+  @Override
+  public UsernamePasswordCredentials verifySignatureThenGetUserPassCredential(
+      SignInRequest signInRequest) {
+    Map<String, String> data = new HashMap<>();
+    if (Objects.isNull(signInRequest.getSignature()) || Objects.isNull(signInRequest.getKey())) {
+      throw new BusinessException(BusinessCode.KEY_OR_SIGNATURE_MUST_NOT_BE_NULL);
+    }
+    data.put("signature", signInRequest.getSignature());
+    data.put("key", signInRequest.getKey());
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      String jacksonData = objectMapper.writeValueAsString(data);
+      DataSignature from = DataSignature.from(jacksonData);
+      DataSignature dataSignature = new DataSignature(from.signature(), from.key());
+      Address address = new Address(dataSignature.address());
+      String addressString = address.toBech32();
+      // verify
+      boolean verified = CIP30DataSigner.INSTANCE.verify(dataSignature);
+      if (!verified) {
+        throw new BusinessException(BusinessCode.SIGNATURE_NOT_VERIFIED);
+      }
+      String nonce = new String(dataSignature.coseSign1().payload());
+      return new UsernamePasswordCredentials(addressString, nonce);
+    } catch (JsonProcessingException e) {
+      log.error("Error when parsing to object: " + e.getMessage());
+    } catch (Exception e) {
+      log.error("Error when verified signature: " + e.getMessage());
+    }
+    return null;
   }
 }

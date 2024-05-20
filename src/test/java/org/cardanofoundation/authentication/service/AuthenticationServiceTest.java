@@ -4,10 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,16 +15,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import co.nstant.in.cbor.CborDecoder;
-import co.nstant.in.cbor.CborException;
-import co.nstant.in.cbor.model.Array;
-import co.nstant.in.cbor.model.ByteString;
-import co.nstant.in.cbor.model.DataItem;
-import com.bloxbean.cardano.client.cip.cip8.SigStructure;
-import com.bloxbean.cardano.client.util.HexUtil;
+import com.bloxbean.cardano.client.address.Address;
+import com.bloxbean.cardano.client.cip.cip30.CIP30DataSigner;
+import com.bloxbean.cardano.client.cip.cip30.DataSignature;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONObject;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
@@ -82,10 +81,14 @@ class AuthenticationServiceTest {
   @Mock private CborDecoder cborDecoder;
 
   private final String SIGNATURE_TEST =
-      "84582aa201276761646472657373581de18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909a166686173686564f453393534353735313438313233323636333232355840850ff657e23963414e7c1bf708928dc994ecafea29790089c810af1ac7486aae12a4ed736d16528051aeff1991ee8d2aef19fe3d375f3ad019925ff1530ed608";
+      "84582aa201276761646472657373581de1c5499cb224c743b5341fe2d2080403329d6ec2da8892ce1a6a37ecfba166686173686564f4581e31303232323233333337313233363038333031383230373536353532363258405f2478c9c741ce481f62c2ea3369594662feda77d8b536f5713beca3f95bffa8d70d7d9268777ec42ab82f3d39254aca9ee85097677ecb7b9cf8f853618e660d";
 
+  private final String KEY_TEST =
+      "a4010103272006215820e37cc80689be14f669fba240c3e1c4ce018d353e9a4f92dbdbea2b15a18a23be";
+
+  private final String NONCE_TEST = "102222333712360830182075655262";
   private final String ADDRESS_WALLET =
-      "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p";
+      "stake1u8z5n89jynr58df5rl3dyzqyqvef6mkzm2yf9ns6dgm7e7cjzn7df";
 
   private final String JWT =
       "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzb3RhdGVrIiwianRpIjoiMiIsImlhdCI6MTY3Mjk5Nzc0MSwiZXhwIjoxNjczMDg0MTQxfQ.B62gXo6iqQfHMT62q17zdhwMF8I77-P6xblKcx7ZI3-gij6YckvFYVVuoIa_qXgTTFnEeRDBQEVo3o20D1w6pffBrgbvxvMbjhOG0ONS9Xs1UQChwQs7v3lxkqoKZ8dNf0Eib43HxLZhBEBIeXa1kln4sS8osWf5iEgno0od7z9KwWK1N2Coj0o-1HE453fFyRveDJgd0DvXohbHADMmjH9t0WkXJwUK26Lv1tkqPlkIzGBPgYnYEIygdayqqt4EtP6CtgI9QOzCYSZUUFzxo-VVDzA0J7DpQbYn8G2PAuAbCXCO6lTkvmXMiyZAoZshqRhBNb7uDI66dwOJLV3NzuunSa8QOO8eNUaDoHHvR_9_J-yHTFBicoM69JHQ7UzJVyFHGmh1M8lHsJ9y6DdAobtBSyJFBhFeDj7S8bgpIvIyNoHDsf24xdlqCngE1qBsxjfp0L_yMPBxsIhW3Juopwe1c6btWTEaRaVaxhKE5yKbRsTtAzDDkdEyg_--9eXH";
@@ -97,29 +100,48 @@ class AuthenticationServiceTest {
   private final String PASSWORD = "password";
 
   @Test
-  void whenLoginUsingWallet_SignatureInValid_ThrowException() {
-    String signatureInValid = "Test123456789";
-    SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setSignature(signatureInValid);
-    signInRequest.setType(1);
-    Exception exception =
+  void whenLoginUsingWallet_SignatureIsNull_ThrowException() {
+    SignInRequest signInRequest = SignInRequest.builder().key(KEY_TEST).type(1).build();
+    BusinessException exception =
         Assertions.assertThrows(
-            Exception.class,
+            BusinessException.class,
             () -> {
               authenticationService.signIn(signInRequest);
             });
-    String expectedMessage = "Invalid hexadecimal";
-    String actualMessage = exception.getMessage();
-    Assertions.assertTrue(actualMessage.contains(expectedMessage));
+    String expectedCode = BusinessCode.KEY_OR_SIGNATURE_MUST_NOT_BE_NULL.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
   }
 
   @Test
-  void whenLoginUsingWallet_AuthenticateFail_ThrowException() {
-    String addressWallet = "Test123456789";
-    SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setSignature(SIGNATURE_TEST);
-    signInRequest.setAddress(addressWallet);
-    signInRequest.setType(1);
+  void whenLoginUsingWallet_KeyIsNull_ThrowException() {
+    SignInRequest signInRequest = SignInRequest.builder().signature(SIGNATURE_TEST).type(1).build();
+    BusinessException exception =
+        Assertions.assertThrows(
+            BusinessException.class,
+            () -> {
+              authenticationService.signIn(signInRequest);
+            });
+    String expectedCode = BusinessCode.KEY_OR_SIGNATURE_MUST_NOT_BE_NULL.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  void whenLoginUsingWallet_NonceInvalid_ThrowException() {
+    String NONCE = "102222333712360830182075655262";
+    SignInRequest signInRequest =
+        SignInRequest.builder().signature(SIGNATURE_TEST).key(KEY_TEST).type(1).build();
+    when(keycloakProvider.keycloakBuilderWhenLogin(ADDRESS_WALLET, NONCE))
+        .thenReturn(
+            KeycloakBuilder.builder()
+                .realm("test")
+                .serverUrl("http://test:9000/")
+                .clientId("test")
+                .clientSecret("test")
+                .username(ADDRESS_WALLET)
+                .password(NONCE)
+                .build());
     BusinessException exception =
         Assertions.assertThrows(
             BusinessException.class,
@@ -135,7 +157,7 @@ class AuthenticationServiceTest {
   void whenLoginUsingWallet_AuthenticateSuccess_returnResponse() {
     SignInRequest signInRequest = new SignInRequest();
     signInRequest.setSignature(SIGNATURE_TEST);
-    signInRequest.setAddress(ADDRESS_WALLET);
+    signInRequest.setKey(KEY_TEST);
     signInRequest.setType(1);
     AccessTokenResponse response = new AccessTokenResponse();
     response.setToken(JWT);
@@ -148,7 +170,7 @@ class AuthenticationServiceTest {
     UsersResource usersResource = Mockito.mock(UsersResource.class);
     UserResource userResource = Mockito.mock(UserResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
-    String NONCE = "9545751481232663225";
+    String NONCE = "102222333712360830182075655262";
     when(keycloakProvider.keycloakBuilderWhenLogin(ADDRESS_WALLET, NONCE)).thenReturn(keycloak);
     when(keycloakProvider.getUser(ADDRESS_WALLET)).thenReturn(userRepresentation);
     when(keycloakProvider.getResource()).thenReturn(usersResource);
@@ -156,108 +178,6 @@ class AuthenticationServiceTest {
     SignInResponse res = authenticationService.signIn(signInRequest);
     Assertions.assertNotNull(res);
     Assertions.assertNotNull(res.getToken());
-  }
-
-  @Test
-  void test() throws CborException {
-    String signature =
-        "84582aa201276761646472657373581de16bc80fd23cf1be6f62185443a9cfa26454d793e704fe581a97ba670ca166686173686564f4581b373434333837303133393338393139373430323432383832353736584041be4aee6327705358a1a7c19598eac26e82eb90891383c02eb968a46756d6f17d7be6f03b7c7f79dfc734c7450abb47901a2674cb1133c1ec948ab2185d5200";
-
-    String address = "stake1u94usr7j8ncmummzrp2y82w05fj9f4unuuz0ukq6j7axwrqv9uf0w";
-
-    String nonce = "744387013938919740242882576";
-
-    List<DataItem> itemList = null;
-
-    itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));
-
-    List<DataItem> topArray = ((Array) itemList.get(0)).getDataItems();
-
-    ByteString messageToSign = (ByteString) topArray.get(2);
-    byte[] message = messageToSign.getBytes();
-    System.out.println(new String(message));
-
-    SigStructure sigStructure = SigStructure.deserialize(topArray.get(3));
-
-    System.out.println(Arrays.toString(sigStructure.payload()));
-
-    //    System.out.printf("Adddress: %s\n", Hex.encodeHexString(address.getBytes()));
-    //
-    //
-    //    COSESign1 coseSign1 = COSESign1.deserialize(HexUtil.decodeHexString(signature));
-    //
-    //    System.out.println(Hex.encodeHexString(coseSign1.headers()._protected().getBytes()));
-
-    //    List<DataItem> itemList = null;
-    //    try {
-    //      itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));
-    //    } catch (CborException e) {
-    //      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);
-    //    }
-    //    List<DataItem> topArray = ((Array) itemList.get(0)).getDataItems();
-    //    ByteString messageToSign = (ByteString) topArray.get(2);
-    //    byte[] message = messageToSign.getBytes();
-    //    System.out.println(new String(message));
-    //    List<DataItem> itemList = null;
-    //    itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));
-    //    List<DataItem> topArray = ((Array) itemList.get(0)).getDataItems();
-
-    //    List<COSERecipient> recipients = messageToSign.getDataItems().stream()
-    //        .map(dataItem -> COSERecipient.deserialize((Array) dataItem))
-    //        .toList();
-
-    //    COSERecipient recipient = COSERecipient.deserialize((Array) topArray.get(3));
-    //
-    //    System.out.println(HexUtil.encodeHexString(recipient.ciphertext()));
-
-    //    itemList = CborDecoder.decode(message);
-    //
-    //    List<DataItem> array = ((Array) itemList.get(0)).getDataItems();
-    //    ByteString item = (ByteString) topArray.get(2);
-    //
-    //    byte[] message1 = item.getBytes();
-    //
-    //    System.out.println(Hex.encodeHexString(message1));
-
-    //    Headers headers = Headers.deserialize(new DataItem[]{topArray.get(0), topArray.get(1)});
-    //    Array cosRecptArray = new Array();
-    //    Arrays.stream(headers.serialize())
-    //        .forEach(header -> cosRecptArray.add(header));
-    //
-    //    cosRecptArray.add(new ByteString(address.getBytes()));
-    //
-    //    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    //    new CborEncoder(baos).encode(cosRecptArray);
-    //    byte[] bytes = baos.toByteArray();
-    //
-    //    System.out.println(HexUtil.encodeHexString(bytes));
-
-    //    ByteString header = (ByteString) topArray.get(0);
-    //    byte[] headerMessage = header.getBytes();
-    //
-    //    System.out.printf("Header: %s\n", Hex.encodeHexString(headerMessage));
-    //
-    //    header = (ByteString) topArray.get(1);
-    //    headerMessage = header.getBytes();
-    //
-    //    System.out.printf("Header: %s\n", Hex.encodeHexString(headerMessage));
-
-    //    header = (ByteString) topArray.get(2);
-    //    headerMessage = header.getBytes();
-    //
-    //    System.out.printf("Header: %s\n", Hex.encodeHexString(headerMessage));
-
-    //    Array recipientArray = ((Array) topArray.get(3));
-
-    //    List<COSERecipient> recipients = recipientArray.getDataItems().stream()
-    //        .map(dataItem -> {
-    //          byte[] ciphertext = ((ByteString) dataItem.get(2)).getBytes();
-    //        })
-    //        .toList();
-    //    System.out.println(recipients.get(0));
-
-    //    System.out.println(Hex.encodeHexString(message));
-    //    System.out.println(topArray.get(3));
   }
 
   @Test
@@ -464,5 +384,43 @@ class AuthenticationServiceTest {
     NonceResponse res = authenticationService.findNonceByAddress(ADDRESS_WALLET, "NAMI");
     String expectedCode = CommonConstant.CODE_SUCCESS;
     Assertions.assertEquals(expectedCode, res.getMessage());
+  }
+
+  @Test
+  void verifySignature() throws JsonProcessingException {
+    Map<String, String> data = new HashMap<>();
+    data.put("signature", SIGNATURE_TEST);
+    data.put("key", KEY_TEST);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String jacksonData = objectMapper.writeValueAsString(data);
+    DataSignature from = DataSignature.from(jacksonData);
+    DataSignature dataSignature = new DataSignature(from.signature(), from.key());
+    Address address = new Address(dataSignature.address());
+    String addressString = address.toBech32();
+    // verify
+    boolean verified = CIP30DataSigner.INSTANCE.verify(dataSignature);
+    String nonce = new String(dataSignature.coseSign1().payload());
+    Assertions.assertEquals(NONCE_TEST, nonce);
+    Assertions.assertEquals(ADDRESS_WALLET, addressString);
+    Assertions.assertTrue(verified);
+  }
+
+  @Test
+  void verifySignature_nonceIsInvalid() throws JsonProcessingException {
+    Map<String, String> data = new HashMap<>();
+    data.put("signature", SIGNATURE_TEST);
+    data.put("key", KEY_TEST);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String jacksonData = objectMapper.writeValueAsString(data);
+    DataSignature from = DataSignature.from(jacksonData);
+    DataSignature dataSignature = new DataSignature(from.signature(), from.key());
+    Address address = new Address(dataSignature.address());
+    String addressString = address.toBech32();
+    // verify
+    boolean verified = CIP30DataSigner.INSTANCE.verify(dataSignature);
+    String nonce = new String(dataSignature.coseSign1().payload());
+    Assertions.assertNotEquals("NONCE_TEST", nonce);
+    Assertions.assertNotEquals("ADDRESS_WALLET", addressString);
+    Assertions.assertTrue(verified);
   }
 }
