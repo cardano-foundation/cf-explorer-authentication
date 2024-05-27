@@ -37,7 +37,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: ${EXPLORER_DB_SCHEMA:preprod}
-        show_sql: true
+        show_sql: false
         format_sql: true
         jdbc:
           batch_size: 100
@@ -56,20 +56,6 @@ spring:
     validate-on-migrate: ${EXPLORER_FLYWAY_VALIDATE:false}
     out-of-order: true
 
-redis:
-  databaseIndex: 0
-  master: ${REDIS_SENTINEL_MASTER_NAME:mymaster}
-  password: ${REDIS_SENTINEL_PASSWORD:redis_sentinel_password}
-  testOnBorrow: false
-  maxTotal: 10
-  maxIdle: 5
-  minIdle: 3
-  testOnReturn: false
-  testWhileIdle: false
-  sentinels:
-    - host: ${REDIS_SENTINEL_HOST:127.0.0.1}
-      port: ${REDIS_SENTINEL_PORT:26379}
-
 keycloak:
   realm: ${KEYCLOAK_REALM_NAME:cardano_authen}
   auth-server-url: ${KEYCLOAK_SERVER_URL:http://10.4.21.151:8080/}
@@ -79,8 +65,6 @@ keycloak:
     secret: ${KEYCLOAK_CLIENT_SECRET:LuJVyHvOipnRFFAWO7AnUFWkyKCJ3ax4}
   use-resource-role-mappings: ${KEYCLOAK_ROLE_MAPPING:true}
   bearer-only: ${KEYCLOAK_BEARER_ONLY:true}
-
-timeToLiveRedisSignOut: ${TIME_TO_LIVE_REDIS_SIGN_OUT:48}
 
 rsa:
   key:

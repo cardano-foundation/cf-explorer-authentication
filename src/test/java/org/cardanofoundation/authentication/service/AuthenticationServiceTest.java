@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -59,7 +60,6 @@ import org.cardanofoundation.authentication.provider.MailProvider;
 import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl;
 import org.cardanofoundation.authentication.thread.MailHandler;
-import org.cardanofoundation.explorer.common.entity.explorer.TokenAuth;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -307,8 +307,7 @@ class AuthenticationServiceTest {
 
   @Test
   void whenRefreshToken_RefreshTokenIsInValid_ThrowException() {
-    when(jwtTokenService.findByToken(any(), any()))
-        .thenReturn(TokenAuth.builder().blackList(true).build());
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(true);
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
     BusinessException exception =
         Assertions.assertThrows(
@@ -322,13 +321,13 @@ class AuthenticationServiceTest {
   }
 
   @Test
-  void whenRefreshToken_RefreshTokenIsValid_returnResponse() throws UnirestException {
+  void whenRefreshToken_RefreshTokenIsValid_returnResponse()
+      throws UnirestException, JSONException {
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
     JsonNode jsonNode = Mockito.mock(JsonNode.class);
     JSONObject jsonObj = Mockito.mock(JSONObject.class);
     when(keycloakProvider.refreshToken(REFRESH_TOKEN)).thenReturn(jsonNode);
-    when(jwtTokenService.findByToken(any(), any()))
-        .thenReturn(TokenAuth.builder().blackList(false).build());
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jsonNode.getObject()).thenReturn(jsonObj);
     when(jsonObj.get(any())).thenReturn(JWT);
     RefreshTokenResponse response = authenticationService.refreshToken(REFRESH_TOKEN, any());

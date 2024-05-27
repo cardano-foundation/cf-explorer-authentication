@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -146,11 +145,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  @Transactional
   public MessageResponse signUp(
       SignUpRequest signUpRequest, HttpServletRequest httpServletRequest) {
     Response response;
-    String userId = null;
     String email = signUpRequest.getEmail();
     UserRepresentation userExist = keycloakProvider.getUser(email);
     if (Objects.nonNull(userExist) && userExist.isEnabled()) {
@@ -162,7 +159,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (Objects.nonNull(userExist)) {
       userExist.setCredentials(Collections.singletonList(encodePassword));
       usersResource.get(userExist.getId()).update(userExist);
-      userId = userExist.getId();
       response = Response.status(Status.CREATED).build();
     } else {
       UserRepresentation newUser = new UserRepresentation();
@@ -171,14 +167,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       newUser.setCredentials(Collections.singletonList(encodePassword));
       newUser.setEnabled(false);
       newUser.setEmailVerified(true);
-      userId = newUser.getId();
       response = usersResource.create(newUser);
     }
     log.info("sign up email: " + email);
     if (response.getStatus() == 201) {
       String verifyCode = jwtProvider.generateCodeForVerify(email);
-      TokenAuth verifyToken = new TokenAuth(verifyCode, userId, TokenAuthType.VERIFY_CODE);
-      jwtTokenService.saveToken(List.of(verifyToken));
       sendMailExecutor.execute(
           new MailHandler(
               mailProvider,
@@ -198,8 +191,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public RefreshTokenResponse refreshToken(
       String refreshJwt, HttpServletRequest httpServletRequest) {
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    TokenAuth tokenAuth = jwtTokenService.findByToken(refreshJwt, TokenAuthType.REFRESH_TOKEN);
-    if (tokenAuth.getBlackList()) {
+    Boolean isBlackList = jwtTokenService.isBlacklistToken(accessToken, TokenAuthType.ACCESS_TOKEN);
+    if (isBlackList) {
       throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);
     }
     try {
@@ -207,12 +200,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       JSONObject jsonObj = jsonNode.getObject();
       if (Objects.nonNull(jsonObj)) {
         jwtTokenService.blacklistToken(accessToken, TokenAuthType.ACCESS_TOKEN);
-        String newAccessToken = jsonObj.get("access_token").toString();
-        TokenAuth newTokenAuth =
-            new TokenAuth(newAccessToken, tokenAuth.getUserId(), TokenAuthType.ACCESS_TOKEN);
-        jwtTokenService.saveToken(List.of(newTokenAuth));
         return RefreshTokenResponse.builder()
-            .accessToken(newAccessToken)
+            .accessToken(jsonObj.get("access_token").toString())
             .refreshToken(jsonObj.get("refresh_token").toString())
             .tokenType(CommonConstant.TOKEN_TYPE)
             .build();
