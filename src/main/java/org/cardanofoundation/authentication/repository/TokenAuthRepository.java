@@ -30,5 +30,7 @@ public interface TokenAuthRepository extends JpaRepository<TokenAuth, Long> {
   Boolean isBlacklistToken(
       @Param("token") String token, @Param("tokenAuthType") TokenAuthType tokenAuthType);
 
-  List<TokenAuth> findByUserIdIn(Set<String> userId);
+  @Query(value = """
+   SELECT ta FROM TokenAuth ta WHERE ta.userId = :userIds""")
+  List<TokenAuth> findByUserIdIn(@Param("userIds") Set<String> userIds);
 }

@@ -59,21 +59,6 @@ spring:
     validate-on-migrate: ${FLYWAY_VALIDATE:false}
     out-of-order: true
 
-
-redis:
-  databaseIndex: 0
-  master: ${REDIS_MASTER_NAME:mymaster}
-  password: ${REDIS_SENTINEL_PASS:redis_sentinel_pass}
-  testOnBorrow: false
-  maxTotal: 10
-  maxIdle: 5
-  minIdle: 3
-  testOnReturn: false
-  testWhileIdle: false
-  sentinels:
-    - host: ${REDIS_SENTINEL_HOST:localhost}
-      port: 26379
-
 keycloak:
   realm: ${KEYCLOAK_REALM_NAME:cardano_authen}
   auth-server-url: ${KEYCLOAK_SERVER_URL:http://10.4.21.151:8080/}
@@ -83,8 +68,6 @@ keycloak:
     secret: ${KEYCLOAK_CLIENT_SECRET:LuJVyHvOipnRFFAWO7AnUFWkyKCJ3ax4}
   use-resource-role-mappings: ${KEYCLOAK_ROLE_MAPPING:true}
   bearer-only: ${KEYCLOAK_BEARER_ONLY:true}
-
-timeToLiveRedisSignOut: ${TIME_TO_LIVE_REDIS_SIGN_OUT:48}
 
 rsa:
   key:

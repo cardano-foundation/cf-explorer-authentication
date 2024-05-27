@@ -71,11 +71,11 @@ public class KeycloakServiceImpl implements KeycloakService {
         log.info("role id: " + resourceArr[1]);
         // get user prefix keys from role id
         Set<String> userIds = jwtTokenService.findUserByRoleId(resourceArr[1]);
-        jwtTokenService.deleteTokenByUserId(userIds);
+        jwtTokenService.blacklistTokenByUserId(userIds);
 
       } else { // REAM_ROLE_MAPPING: assign or unassign a role of user
         if (!resourceType.isEmpty()) {
-          jwtTokenService.deleteTokenByUserId(Set.of(resourceArr[1]));
+          jwtTokenService.blacklistTokenByUserId(Set.of(resourceArr[1]));
         }
       }
     }

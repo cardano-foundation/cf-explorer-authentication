@@ -9,13 +9,13 @@ import org.cardanofoundation.explorer.common.entity.explorer.TokenAuth;
 public interface JwtTokenService {
   void saveToken(List<TokenAuth> tokenAuths);
 
-  public TokenAuth findByToken(String token, TokenAuthType tokenAuthType);
+  Boolean isBlacklistToken(String token, TokenAuthType tokenAuthType);
 
-  public void blacklistToken(String token, TokenAuthType tokenAuthType);
+  void blacklistToken(String token, TokenAuthType tokenAuthType);
 
-  public void saveUserRoleMapping(String userId, String roleId);
+  void saveUserRoleMapping(String userId, String roleId);
 
-  public Set<String> findUserByRoleId(String roleId);
+  Set<String> findUserByRoleId(String roleId);
 
-  public void deleteTokenByUserId(Set<String> userIds);
+  void blacklistTokenByUserId(Set<String> userIds);
 }

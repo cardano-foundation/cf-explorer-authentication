@@ -1,6 +1,7 @@
 package org.cardanofoundation.authentication.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.transaction.Transactional;
@@ -10,14 +11,12 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.stereotype.Service;
 
-import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.repository.UserRoleRepository;
 import org.cardanofoundation.authentication.service.JwtTokenService;
 import org.cardanofoundation.explorer.common.entity.enumeration.TokenAuthType;
 import org.cardanofoundation.explorer.common.entity.explorer.TokenAuth;
 import org.cardanofoundation.explorer.common.entity.explorer.UserRole;
-import org.cardanofoundation.explorer.common.exception.BusinessException;
 
 @Service
 @RequiredArgsConstructor
@@ -34,23 +33,25 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     tokenAuthRepository.saveAllAndFlush(tokenAuths);
   }
 
-  public TokenAuth findByToken(String token, TokenAuthType tokenAuthType) {
-    return tokenAuthRepository
-        .findByToken(token, tokenAuthType)
-        .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-  }
-
   @Override
   @Transactional
   public void blacklistToken(String token, TokenAuthType tokenAuthType) {
-    TokenAuth tokenAuth =
-        tokenAuthRepository
-            .findByToken(token, tokenAuthType)
-            .orElseThrow(() -> new BusinessException(BusinessCode.TOKEN_NOT_FOUND));
-    if (!tokenAuth.getBlackList()) {
-      tokenAuth.setBlackList(Boolean.TRUE);
-      tokenAuthRepository.saveAndFlush(tokenAuth);
+    Optional<TokenAuth> tokenAuth = tokenAuthRepository.findByToken(token, tokenAuthType);
+    if (tokenAuth.isEmpty()) {
+      TokenAuth newToken = new TokenAuth(token, null, tokenAuthType);
+      newToken.setBlackList(Boolean.TRUE);
+      tokenAuthRepository.saveAndFlush(newToken);
+    } else {
+      tokenAuth.get().setBlackList(Boolean.TRUE);
+      tokenAuthRepository.saveAndFlush(tokenAuth.get());
     }
+  }
+
+  public Boolean isBlacklistToken(String token, TokenAuthType tokenAuthType) {
+    return tokenAuthRepository
+        .findByToken(token, tokenAuthType)
+        .map(TokenAuth::getBlackList)
+        .orElse(Boolean.FALSE);
   }
 
   @Override
@@ -66,9 +67,9 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
   @Override
   @Transactional
-  public void deleteTokenByUserId(Set<String> userIds) {
+  public void blacklistTokenByUserId(Set<String> userIds) {
     List<TokenAuth> tokenAuths = tokenAuthRepository.findByUserIdIn(userIds);
-    tokenAuths.forEach(e -> e.setBlackList(Boolean.TRUE));
+    tokenAuths.forEach(tokenAuth -> tokenAuth.setBlackList(Boolean.TRUE));
     tokenAuthRepository.saveAllAndFlush(tokenAuths);
   }
 
