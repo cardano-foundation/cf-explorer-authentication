@@ -36,13 +36,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: ${DB_SCHEMA:auth}
+        default_schema: ${EXPLORER_DB_SCHEMA:preprod}
         show_sql: true
         format_sql: true
         jdbc:
           batch_size: 100
   flyway:
-    enabled: ${FLYWAY_ENABLE:false}
+    enabled: ${EXPLORER_FLYWAY_ENABLE:false}
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
@@ -53,7 +53,7 @@ spring:
     locations: db/migration
     default-schema: ${spring.jpa.properties.hibernate.default_schema}
     schemas: ${spring.jpa.properties.hibernate.default_schema}
-    validate-on-migrate: ${FLYWAY_VALIDATE:false}
+    validate-on-migrate: ${EXPLORER_FLYWAY_VALIDATE:false}
     out-of-order: true
 
 redis:
