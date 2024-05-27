@@ -3,6 +3,8 @@ package org.cardanofoundation.authentication.exception;
 import org.cardanofoundation.explorer.common.exception.ErrorCode;
 
 public enum BusinessCode implements ErrorCode {
+  TOKEN_NOT_FOUND("2", "The token is not found"),
+  REFRESH_TOKEN_INVALID("3", "The refresh token is invalid"),
   REFRESH_TOKEN_EXPIRED("4", "The refresh token is expired"),
   SIGNATURE_INVALID("5", "The signature is invalid"),
   SIGNATURE_NOT_VERIFIED("6", "The signature is not verified"),

@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -34,7 +35,6 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
@@ -47,10 +47,12 @@ import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.AuthenticationService;
+import org.cardanofoundation.authentication.service.JwtTokenService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.authentication.util.NonceUtils;
+import org.cardanofoundation.explorer.common.entity.enumeration.TokenAuthType;
+import org.cardanofoundation.explorer.common.entity.explorer.TokenAuth;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
@@ -61,8 +63,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final JwtProvider jwtProvider;
 
-  private final RedisProvider redisProvider;
-
   private final MailProvider mailProvider;
 
   private final ThreadPoolExecutor sendMailExecutor;
@@ -70,6 +70,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final KeycloakProvider keycloakProvider;
 
   private final LocaleResolver localeResolver;
+
+  private final JwtTokenService jwtTokenService;
 
   @Override
   public SignInResponse signIn(SignInRequest signInRequest) {
@@ -121,17 +123,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     usersResource.get(user.getId()).update(user);
 
-    // add user id to token and refresh token
-    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()), response.getToken());
-    redisProvider.setValue(
-        redisProvider.getUserKeyByUserId(user.getId()), response.getRefreshToken());
-
+    TokenAuth accessToken =
+        new TokenAuth(response.getToken(), user.getId(), TokenAuthType.ACCESS_TOKEN);
+    TokenAuth refreshToken =
+        new TokenAuth(response.getRefreshToken(), user.getId(), TokenAuthType.REFRESH_TOKEN);
+    jwtTokenService.saveToken(List.of(accessToken, refreshToken));
     // when user login successfully then will add user_id to each role group it contain
     List<String> roles = jwtProvider.getRolesFromJwtToken(response.getToken());
     roles.forEach(
         role -> {
           String roleId = keycloakProvider.getRoleIdByRoleName(role);
-          redisProvider.addValueToMap(redisProvider.getRoleKeyByRoleId(roleId), user.getId(), "");
+          jwtTokenService.saveUserRoleMapping(user.getId(), roleId);
         });
     return SignInResponse.builder()
         .token(response.getToken())
@@ -144,9 +146,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
+  @Transactional
   public MessageResponse signUp(
       SignUpRequest signUpRequest, HttpServletRequest httpServletRequest) {
     Response response;
+    String userId = null;
     String email = signUpRequest.getEmail();
     UserRepresentation userExist = keycloakProvider.getUser(email);
     if (Objects.nonNull(userExist) && userExist.isEnabled()) {
@@ -158,6 +162,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (Objects.nonNull(userExist)) {
       userExist.setCredentials(Collections.singletonList(encodePassword));
       usersResource.get(userExist.getId()).update(userExist);
+      userId = userExist.getId();
       response = Response.status(Status.CREATED).build();
     } else {
       UserRepresentation newUser = new UserRepresentation();
@@ -166,11 +171,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       newUser.setCredentials(Collections.singletonList(encodePassword));
       newUser.setEnabled(false);
       newUser.setEmailVerified(true);
+      userId = newUser.getId();
       response = usersResource.create(newUser);
     }
     log.info("sign up email: " + email);
     if (response.getStatus() == 201) {
       String verifyCode = jwtProvider.generateCodeForVerify(email);
+      TokenAuth verifyToken = new TokenAuth(verifyCode, userId, TokenAuthType.VERIFY_CODE);
+      jwtTokenService.saveToken(List.of(verifyToken));
       sendMailExecutor.execute(
           new MailHandler(
               mailProvider,
@@ -190,16 +198,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public RefreshTokenResponse refreshToken(
       String refreshJwt, HttpServletRequest httpServletRequest) {
     final String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    if (redisProvider.isTokenBlacklisted(refreshJwt)) {
+    TokenAuth tokenAuth = jwtTokenService.findByToken(refreshJwt, TokenAuthType.REFRESH_TOKEN);
+    if (tokenAuth.getBlackList()) {
       throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);
     }
     try {
       JsonNode jsonNode = keycloakProvider.refreshToken(refreshJwt);
       JSONObject jsonObj = jsonNode.getObject();
       if (Objects.nonNull(jsonObj)) {
-        redisProvider.blacklistJwt(accessToken, RedisConstant.JWT);
+        jwtTokenService.blacklistToken(accessToken, TokenAuthType.ACCESS_TOKEN);
+        String newAccessToken = jsonObj.get("access_token").toString();
+        TokenAuth newTokenAuth =
+            new TokenAuth(newAccessToken, tokenAuth.getUserId(), TokenAuthType.ACCESS_TOKEN);
+        jwtTokenService.saveToken(List.of(newTokenAuth));
         return RefreshTokenResponse.builder()
-            .accessToken(jsonObj.get("access_token").toString())
+            .accessToken(newAccessToken)
             .refreshToken(jsonObj.get("refresh_token").toString())
             .tokenType(CommonConstant.TOKEN_TYPE)
             .build();
@@ -216,17 +229,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   public MessageResponse signOut(
       SignOutRequest signOutRequest, HttpServletRequest httpServletRequest) {
     String accessToken = jwtProvider.parseJwt(httpServletRequest);
-    if (!redisProvider.isTokenBlacklisted(accessToken)) {
-      redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());
-    }
-    if (!redisProvider.isTokenBlacklisted(signOutRequest.getRefreshJwt())) {
-      redisProvider.blacklistJwt(signOutRequest.getRefreshJwt(), signOutRequest.getAccountId());
-    }
+    jwtTokenService.blacklistToken(accessToken, TokenAuthType.ACCESS_TOKEN);
+    jwtTokenService.blacklistToken(signOutRequest.getRefreshJwt(), TokenAuthType.REFRESH_TOKEN);
     return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);
   }
 
   @Override
   public NonceResponse findNonceByAddress(String address, String walletName) {
+    log.info("Wallet {}: Get nonce by address: {}", walletName, address);
     UserRepresentation userExist = keycloakProvider.getUser(address);
     String nonce = NonceUtils.createNonce();
     if (Objects.nonNull(userExist)) {
