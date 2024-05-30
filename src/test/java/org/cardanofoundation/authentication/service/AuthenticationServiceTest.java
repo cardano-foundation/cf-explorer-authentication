@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -44,7 +45,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
@@ -57,7 +57,7 @@ import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
@@ -70,9 +70,11 @@ class AuthenticationServiceTest {
 
   @Mock private JwtProvider jwtProvider;
 
-  @Mock private RedisProvider redisProvider;
-
   @Mock private ThreadPoolExecutor sendMailExecutor;
+
+  @Mock private JwtTokenService jwtTokenService;
+
+  @Mock private TokenAuthRepository tokenAuthRepository;
 
   @Mock private MailProvider mailProvider;
 
@@ -305,8 +307,8 @@ class AuthenticationServiceTest {
 
   @Test
   void whenRefreshToken_RefreshTokenIsInValid_ThrowException() {
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(true);
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
-    when(redisProvider.isTokenBlacklisted(REFRESH_TOKEN)).thenReturn(true);
     BusinessException exception =
         Assertions.assertThrows(
             BusinessException.class,
@@ -319,14 +321,14 @@ class AuthenticationServiceTest {
   }
 
   @Test
-  void whenRefreshToken_RefreshTokenIsValid_returnResponse() throws UnirestException {
+  void whenRefreshToken_RefreshTokenIsValid_returnResponse()
+      throws UnirestException, JSONException {
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
-    when(redisProvider.isTokenBlacklisted(REFRESH_TOKEN)).thenReturn(false);
     JsonNode jsonNode = Mockito.mock(JsonNode.class);
     JSONObject jsonObj = Mockito.mock(JSONObject.class);
     when(keycloakProvider.refreshToken(REFRESH_TOKEN)).thenReturn(jsonNode);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jsonNode.getObject()).thenReturn(jsonObj);
-    doNothing().when(redisProvider).blacklistJwt(JWT, RedisConstant.JWT);
     when(jsonObj.get(any())).thenReturn(JWT);
     RefreshTokenResponse response = authenticationService.refreshToken(REFRESH_TOKEN, any());
     Assertions.assertEquals(JWT, response.getAccessToken());
@@ -338,10 +340,6 @@ class AuthenticationServiceTest {
     request.setRefreshJwt(REFRESH_TOKEN);
     request.setAccountId(EMAIL);
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
-    when(redisProvider.isTokenBlacklisted(JWT)).thenReturn(false);
-    when(redisProvider.isTokenBlacklisted(REFRESH_TOKEN)).thenReturn(false);
-    doNothing().when(redisProvider).blacklistJwt(JWT, EMAIL);
-    doNothing().when(redisProvider).blacklistJwt(REFRESH_TOKEN, EMAIL);
     MessageResponse response = authenticationService.signOut(request, any());
     String expectedCode = CommonConstant.CODE_SUCCESS;
     Assertions.assertEquals(expectedCode, response.getCode());
