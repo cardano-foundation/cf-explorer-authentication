@@ -53,7 +53,7 @@ spring:
     locations: db/migration
     default-schema: ${spring.jpa.properties.hibernate.default_schema}
     schemas: ${spring.jpa.properties.hibernate.default_schema}
-    validate-on-migrate: ${EXPLORER_FLYWAY_VALIDATE:false}
+    validate-on-migrate: false
     out-of-order: true
 
 keycloak:

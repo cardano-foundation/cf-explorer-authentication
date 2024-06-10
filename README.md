@@ -41,6 +41,13 @@ To ensure the stability and reliability of this project, unit and mutation tests
 ## Environment variables
 
 - `SPRING_PROFILES_ACTIVE` : Spring profile [local, dev, test, prod]. See Below. Default is local.
+- `EXPLORER_HOST`: Explorer database host.
+- `EXPLORER_PORT`: Explorer database port
+- `EXPLORER_USER`: Explorer database username
+- `EXPLORER_PASSWORD`: Explorer database password
+- `EXPLORER_DB`: Explorer database name
+- `EXPLORER_DB_SCHEMA`: Explorer database schema
+- `EXPLORER_FLYWAY_ENABLE`: Flyway schema enable, default `true`
 - `SWAGGER_CLIENT_URL` : Domain client
 - `SWAGGER_SERVER_URL` : Domain server
 
