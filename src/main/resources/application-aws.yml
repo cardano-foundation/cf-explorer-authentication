@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?currentSchema=${DB_SCHEMA}
     name: cardano-authentication
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${EXPLORER_HOST}:${EXPLORER_PORT}/${EXPLORER_DB}?currentSchema=${spring.jpa.properties.hibernate.default_schema}
+    username: ${EXPLORER_USER}
+    password: ${EXPLORER_PASSWORD}
     driver-class-name: org.postgresql.Driver
     tomcat:
       max-wait: 10000
@@ -38,7 +38,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: ${DB_SCHEMA}
+        default_schema: ${EXPLORER_DB_SCHEMA:preprod}
         show_sql: true
         format_sql: true
 
