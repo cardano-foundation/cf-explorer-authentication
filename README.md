@@ -40,25 +40,9 @@ To ensure the stability and reliability of this project, unit and mutation tests
 
 ## Environment variables
 
-- `SPRING_PROFILES_ACTIVE` : Spring profile [local, dev, test, prod], plus Redis Profiles. See Below. Default is local.
+- `SPRING_PROFILES_ACTIVE` : Spring profile [local, dev, test, prod]. See Below. Default is local.
 - `SWAGGER_CLIENT_URL` : Domain client
 - `SWAGGER_SERVER_URL` : Domain server
-- `TIME_TO_LIVE_REDIS_SIGN_OUT` : Time to live on Redis
-
-### We have 3 options for redis cache:
-- `redis standalone`
-    - `REDIS_STANDALONE_HOST` : Redis hostname eg. `127.0.0.1`.
-    - `REDIS_STANDALONE_PORT` : Redis ort, eg. `6379`.
-    - `REDIS_STANDALONE_PASSWORD` : Redis password. Default bitnami.
-    -
-- `redis sentinel`
-    - `REDIS_MASTER_NAME` : Redis master name. Default is mymaster.
-    - `REDIS_SENTINEL_PASS` : Redis sentinel password. Default is redis_sentinel_pass.
-    - `REDIS_SENTINEL_HOST` : Redis sentinel host. Default is  cardano.redis.sentinel.
-
-- `redis-cluster`
-    -  `NODE_ADDRESSES`: List of redis cluster nodes host and port.
-    -  `REDIS_CLUSTER_PASSWORD`: Password of redis cluster.
 
 ### RSA key
 - `RSA_PUBLIC_KEY_AUTH` : RSA Public Key used to decode the JWT string generated during login. This key obtained from Keycloak.

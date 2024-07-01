@@ -26,7 +26,7 @@ import org.cardanofoundation.authentication.model.request.auth.ResetPasswordRequ
 import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.service.VerifyService;
 
 @WebMvcTest(VerifyMailController.class)
@@ -42,7 +42,7 @@ class VerifyMailControllerTest {
 
   @MockBean private JwtProvider jwtProvider;
 
-  @MockBean private RedisProvider redisProvider;
+  @MockBean private TokenAuthRepository tokenAuthRepository;
 
   private final String CODE = "CodeVerifyMail123456";
 

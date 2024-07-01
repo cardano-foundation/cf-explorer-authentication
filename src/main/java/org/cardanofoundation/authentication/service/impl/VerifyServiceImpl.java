@@ -22,9 +22,10 @@ import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.service.JwtTokenService;
 import org.cardanofoundation.authentication.service.VerifyService;
 import org.cardanofoundation.authentication.thread.MailHandler;
+import org.cardanofoundation.explorer.common.entity.enumeration.TokenAuthType;
 
 @Service
 @RequiredArgsConstructor
@@ -35,18 +36,18 @@ public class VerifyServiceImpl implements VerifyService {
 
   private final JwtProvider jwtProvider;
 
-  private final RedisProvider redisProvider;
-
   private final ThreadPoolExecutor sendMailExecutor;
 
   private final KeycloakProvider keycloakProvider;
 
   private final LocaleResolver localeResolver;
 
+  private final JwtTokenService jwtTokenService;
+
   @Override
   public MessageResponse checkVerifySignUpByEmail(String code) {
-    if (redisProvider.isTokenBlacklisted(code)) {
-      log.error("Code is blacklisted: " + code);
+    Boolean isBlacklisted = jwtTokenService.isBlacklistToken(code, TokenAuthType.VERIFY_CODE);
+    if (isBlacklisted) {
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     Boolean validateCode = jwtProvider.validateVerifyCode(code);
@@ -55,8 +56,7 @@ public class VerifyServiceImpl implements VerifyService {
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
-    System.out.println("accountId black list: " + accountId);
-    redisProvider.blacklistJwt(code, accountId);
+    jwtTokenService.blacklistToken(code, TokenAuthType.VERIFY_CODE);
     UserRepresentation user = keycloakProvider.getUser(accountId);
     if (Objects.nonNull(user)) {
       user.setEnabled(true);
@@ -71,8 +71,8 @@ public class VerifyServiceImpl implements VerifyService {
   @Override
   public MessageResponse resetPassword(ResetPasswordRequest resetPasswordRequest) {
     String code = resetPasswordRequest.getCode();
-    if (redisProvider.isTokenBlacklisted(code)) {
-      log.error("Code is blacklisted: " + code);
+    Boolean isBlacklisted = jwtTokenService.isBlacklistToken(code, TokenAuthType.RESET_PASSWORD);
+    if (isBlacklisted) {
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     Boolean validateCode = jwtProvider.validateVerifyCode(code);
@@ -81,7 +81,7 @@ public class VerifyServiceImpl implements VerifyService {
       return new MessageResponse(BusinessCode.INVALID_VERIFY_CODE);
     }
     String accountId = jwtProvider.getAccountIdFromVerifyCode(code);
-    redisProvider.blacklistJwt(code, accountId);
+    jwtTokenService.blacklistToken(code, TokenAuthType.RESET_PASSWORD);
     UserRepresentation user = keycloakProvider.getUser(accountId);
     user.setCredentials(
         Collections.singletonList(
@@ -109,7 +109,11 @@ public class VerifyServiceImpl implements VerifyService {
 
   @Override
   public Boolean checkExpiredCode(String code) {
-    if (redisProvider.isTokenBlacklisted(code)) {
+    Boolean isBlacklistedVerifyCode =
+        jwtTokenService.isBlacklistToken(code, TokenAuthType.VERIFY_CODE);
+    Boolean isBlackListedResetToken =
+        jwtTokenService.isBlacklistToken(code, TokenAuthType.RESET_PASSWORD);
+    if (isBlacklistedVerifyCode || isBlackListedResetToken) {
       return false;
     }
     return jwtProvider.validateVerifyCode(code);

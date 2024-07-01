@@ -32,7 +32,6 @@ import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.impl.VerifyServiceImpl;
 import org.cardanofoundation.authentication.thread.MailHandler;
 
@@ -48,7 +47,7 @@ class VerifyServiceTest {
 
   @Mock private JwtProvider jwtProvider;
 
-  @Mock private RedisProvider redisProvider;
+  @Mock private JwtTokenService jwtTokenService;
 
   @Mock private ThreadPoolExecutor sendMailExecutor;
 
@@ -59,7 +58,7 @@ class VerifyServiceTest {
 
   @Test
   void whenCheckVerifySignUpByEmail_codeInValid1_throwException() {
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(true);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(true);
     MessageResponse response = verifyService.checkVerifySignUpByEmail(CODE);
     String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
     String actualCode = response.getCode();
@@ -68,7 +67,7 @@ class VerifyServiceTest {
 
   @Test
   void whenCheckVerifySignUpByEmail_codeInValid2_throwException() {
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(false);
     MessageResponse response = verifyService.checkVerifySignUpByEmail(CODE);
     String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
@@ -78,10 +77,9 @@ class VerifyServiceTest {
 
   @Test
   void whenCheckVerifySignUpByEmail_isNotExist_throwException() {
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(true);
     when(jwtProvider.getAccountIdFromVerifyCode(CODE)).thenReturn(EMAIL);
-    doNothing().when(redisProvider).blacklistJwt(CODE, EMAIL);
     when(keycloakProvider.getUser(EMAIL)).thenReturn(null);
     MessageResponse response = verifyService.checkVerifySignUpByEmail(CODE);
     String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
@@ -91,10 +89,9 @@ class VerifyServiceTest {
 
   @Test
   void whenCheckVerifySignUpByEmail_returnSuccess() {
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(true);
     when(jwtProvider.getAccountIdFromVerifyCode(CODE)).thenReturn(EMAIL);
-    doNothing().when(redisProvider).blacklistJwt(CODE, EMAIL);
     UserRepresentation user = new UserRepresentation();
     user.setId(EMAIL);
     user.setEnabled(false);
@@ -115,7 +112,7 @@ class VerifyServiceTest {
     ResetPasswordRequest request = new ResetPasswordRequest();
     request.setCode(CODE);
     request.setPassword("password");
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(true);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(true);
     MessageResponse response = verifyService.resetPassword(request);
     String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
     String actualCode = response.getCode();
@@ -127,7 +124,7 @@ class VerifyServiceTest {
     ResetPasswordRequest request = new ResetPasswordRequest();
     request.setCode(CODE);
     request.setPassword("password");
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(false);
     MessageResponse response = verifyService.resetPassword(request);
     String expectedCode = BusinessCode.INVALID_VERIFY_CODE.getServiceErrorCode();
@@ -140,10 +137,9 @@ class VerifyServiceTest {
     ResetPasswordRequest request = new ResetPasswordRequest();
     request.setCode(CODE);
     request.setPassword("password");
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(true);
     when(jwtProvider.getAccountIdFromVerifyCode(CODE)).thenReturn(EMAIL);
-    doNothing().when(redisProvider).blacklistJwt(CODE, EMAIL);
     UserRepresentation user = new UserRepresentation();
     user.setId(EMAIL);
     CredentialRepresentation passwordCredentials = new CredentialRepresentation();
@@ -191,14 +187,14 @@ class VerifyServiceTest {
 
   @Test
   void whenCheckExpiredCode_isInValid1_returnFalse() {
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(true);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(true);
     Boolean flag = verifyService.checkExpiredCode(CODE);
     Assertions.assertFalse(flag);
   }
 
   @Test
   void whenCheckExpiredCode_isInValid2_returnFalse() {
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(false);
     Boolean flag = verifyService.checkExpiredCode(CODE);
     Assertions.assertFalse(flag);
@@ -206,7 +202,7 @@ class VerifyServiceTest {
 
   @Test
   void whenCheckExpiredCode_isValid_returnTrue() {
-    when(redisProvider.isTokenBlacklisted(CODE)).thenReturn(false);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jwtProvider.validateVerifyCode(CODE)).thenReturn(true);
     Boolean flag = verifyService.checkExpiredCode(CODE);
     Assertions.assertTrue(flag);

@@ -28,7 +28,8 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.cardanofoundation.authentication.constant.AuthConstant;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.TokenAuthRepository;
+import org.cardanofoundation.explorer.common.entity.enumeration.TokenAuthType;
 import org.cardanofoundation.explorer.common.exception.InvalidAccessTokenException;
 
 @Log4j2
@@ -38,9 +39,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   private final JwtProvider jwtProvider;
 
-  private final RedisProvider redisProvider;
-
   private final KeycloakProvider keycloakProvider;
+
+  private final TokenAuthRepository tokenAuthRepository;
 
   @Override
   protected void doFilterInternal(
@@ -50,7 +51,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     String token = jwtProvider.parseJwt(request);
     jwtProvider.validateJwtToken(token);
-    if (redisProvider.isTokenBlacklisted(token)) {
+    if (Boolean.TRUE.equals(
+        tokenAuthRepository.isBlacklistToken(token, TokenAuthType.ACCESS_TOKEN))) {
       throw new InvalidAccessTokenException();
     }
 

@@ -28,7 +28,7 @@ import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.service.KeycloakService;
 import org.cardanofoundation.authentication.service.UserService;
 
@@ -43,7 +43,7 @@ class UserControllerTest {
 
   @MockBean private JwtProvider jwtProvider;
 
-  @MockBean private RedisProvider redisProvider;
+  @MockBean private TokenAuthRepository tokenAuthRepository;
 
   @MockBean private KeycloakProvider keycloakProvider;
 

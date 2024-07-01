@@ -75,7 +75,8 @@
 		<version.spring-boot-starter-aop>3.0.4</version.spring-boot-starter-aop>
 		<version.pitest>1.14.2</version.pitest>
 		<version.pitest-junit5>1.1.1</version.pitest-junit5>
-		<version.explorer-common>0.1.16-SNAPSHOT-PR173</version.explorer-common>
+		<version.explorer-common>0.9.0-PR222</version.explorer-common>
+		<version.flyway>9.16.0</version.flyway>
 		<version.keycloak>15.0.2</version.keycloak>
 		<version.jjwt>0.11.5</version.jjwt>
 		<version.bcprov-jdk15on>1.70</version.bcprov-jdk15on>
@@ -97,11 +98,17 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-redis</artifactId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>${version.flyway}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
