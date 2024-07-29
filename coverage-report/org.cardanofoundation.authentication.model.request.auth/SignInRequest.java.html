@@ -5,24 +5,29 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
-<span class="fc" id="L12">@Setter</span>
-<span class="fc" id="L13">public class SignInRequest {</span>
+<span class="fc" id="L15">@Setter</span>
+<span class="pc" id="L16">@SuperBuilder(toBuilder = true)</span>
+<span class="nc" id="L17">@AllArgsConstructor</span>
+<span class="fc" id="L18">@NoArgsConstructor</span>
+public class SignInRequest {
+<span class="fc" id="L20">  private String signature;</span>
 
-<span class="fc" id="L15">  private String address;</span>
+<span class="fc" id="L22">  private String key;</span>
 
-<span class="fc" id="L17">  private String signature;</span>
+<span class="fc" id="L24">  @Email private String email;</span>
 
-<span class="fc" id="L19">  @Email private String email;</span>
-
-<span class="fc" id="L21">  private String password;</span>
+<span class="fc" id="L26">  private String password;</span>
 
   @NotNull
   @Max(1)
   @Min(0)
-<span class="fc" id="L26">  private Integer type;</span>
+<span class="fc" id="L31">  private Integer type;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -19,7 +19,13 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.LocaleResolver;
 
+import com.bloxbean.cardano.client.address.Address;
+import com.bloxbean.cardano.client.cip.cip30.CIP30DataSigner;
+import com.bloxbean.cardano.client.cip.cip30.DataSignature;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.json.JSONObject;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -28,7 +34,6 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
@@ -41,21 +46,21 @@ import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
 import org.cardanofoundation.authentication.service.AuthenticationService;
+import org.cardanofoundation.authentication.service.JwtTokenService;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.authentication.util.NonceUtils;
+import org.cardanofoundation.explorer.common.entity.enumeration.TokenAuthType;
+import org.cardanofoundation.explorer.common.entity.explorer.TokenAuth;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
 import org.cardanofoundation.explorer.common.exception.CommonErrorCode;
 
 @Service
-<span class="fc" id="L52">@RequiredArgsConstructor</span>
-<span class="fc" id="L53">@Log4j2</span>
+<span class="fc" id="L59">@RequiredArgsConstructor</span>
+<span class="fc" id="L60">@Log4j2</span>
 public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final JwtProvider jwtProvider;
-
-  private final RedisProvider redisProvider;
 
   private final MailProvider mailProvider;
 
@@ -65,185 +70,217 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private final LocaleResolver localeResolver;
 
+  private final JwtTokenService jwtTokenService;
+
   @Override
   public SignInResponse signIn(SignInRequest signInRequest) {
-<span class="fc" id="L70">    log.info(&quot;login is running...&quot;);</span>
-<span class="fc" id="L71">    String accountId = &quot;&quot;;</span>
-<span class="fc" id="L72">    String password = &quot;&quot;;</span>
-<span class="fc" id="L73">    int type = signInRequest.getType();</span>
-<span class="fc bfc" id="L74" title="All 2 branches covered.">    if (type == 0) {</span>
-<span class="fc" id="L75">      log.info(&quot;login with email and password...&quot;);</span>
-<span class="fc" id="L76">      accountId = signInRequest.getEmail();</span>
-<span class="fc" id="L77">      password = signInRequest.getPassword();</span>
+<span class="fc" id="L77">    String accountId = &quot;&quot;;</span>
+<span class="fc" id="L78">    String password = &quot;&quot;;</span>
+<span class="fc" id="L79">    int type = signInRequest.getType();</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">    if (type == 0) {</span>
+<span class="fc" id="L81">      log.info(&quot;login with email and password...&quot;);</span>
+<span class="fc" id="L82">      accountId = signInRequest.getEmail();</span>
+<span class="fc" id="L83">      password = signInRequest.getPassword();</span>
     } else {
-<span class="fc" id="L79">      log.info(&quot;login with cardano wallet...&quot;);</span>
-<span class="fc" id="L80">      accountId = signInRequest.getAddress();</span>
-<span class="fc" id="L81">      password = NonceUtils.getNonceFromSignature(signInRequest.getSignature());</span>
+<span class="fc" id="L85">      log.info(&quot;login with cardano wallet...&quot;);</span>
+<span class="fc" id="L86">      UsernamePasswordCredentials userPass =</span>
+<span class="fc" id="L87">          verifySignatureThenGetUserPassCredential(signInRequest);</span>
+<span class="fc" id="L88">      accountId = userPass.getUserName();</span>
+<span class="fc" id="L89">      password = userPass.getPassword();</span>
     }
     AccessTokenResponse response;
     try {
-<span class="fc" id="L85">      Keycloak keycloak = keycloakProvider.keycloakBuilderWhenLogin(accountId, password);</span>
-<span class="fc" id="L86">      response = keycloak.tokenManager().getAccessToken();</span>
-<span class="fc" id="L87">    } catch (Exception e) {</span>
-<span class="fc" id="L88">      log.error(&quot;Exception authentication: &quot; + e.getMessage());</span>
-<span class="fc bfc" id="L89" title="All 2 branches covered.">      if (type == 0) {</span>
-<span class="fc" id="L90">        throw new BusinessException(BusinessCode.USERNAME_OR_PASSWORD_INVALID);</span>
+<span class="fc" id="L93">      Keycloak keycloak = keycloakProvider.keycloakBuilderWhenLogin(accountId, password);</span>
+<span class="fc" id="L94">      response = keycloak.tokenManager().getAccessToken();</span>
+<span class="fc" id="L95">    } catch (Exception e) {</span>
+<span class="fc" id="L96">      log.error(&quot;Exception authentication: &quot; + e.getMessage());</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">      if (type == 0) {</span>
+<span class="fc" id="L98">        throw new BusinessException(BusinessCode.USERNAME_OR_PASSWORD_INVALID);</span>
       } else {
-<span class="fc" id="L92">        throw new BusinessException(BusinessCode.SIGNATURE_INVALID);</span>
+<span class="fc" id="L100">        throw new BusinessException(BusinessCode.SIGNATURE_INVALID);</span>
       }
-<span class="fc" id="L94">    }</span>
-<span class="fc" id="L95">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
-<span class="fc" id="L96">    UsersResource usersResource = keycloakProvider.getResource();</span>
-<span class="fc" id="L97">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">    if (Objects.isNull(attributes)) {</span>
-<span class="fc" id="L99">      attributes = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L102">    }</span>
+<span class="fc" id="L103">    UserRepresentation user = keycloakProvider.getUser(accountId);</span>
+<span class="fc" id="L104">    UsersResource usersResource = keycloakProvider.getResource();</span>
+<span class="fc" id="L105">    Map&lt;String, List&lt;String&gt;&gt; attributes = user.getAttributes();</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    if (Objects.isNull(attributes)) {</span>
+<span class="fc" id="L107">      attributes = new HashMap&lt;&gt;();</span>
     }
-<span class="fc bfc" id="L101" title="All 2 branches covered.">    if (type == 1) {</span>
-<span class="fc" id="L102">      String nonce = NonceUtils.createNonce();</span>
-<span class="fc" id="L103">      attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));</span>
-<span class="fc" id="L104">      user.setCredentials(</span>
-<span class="fc" id="L105">          Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">    if (type == 1) {</span>
+<span class="fc" id="L110">      String nonce = NonceUtils.createNonce();</span>
+<span class="fc" id="L111">      attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));</span>
+<span class="fc" id="L112">      user.setCredentials(</span>
+<span class="fc" id="L113">          Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));</span>
     }
-<span class="fc" id="L107">    attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));</span>
-<span class="fc" id="L108">    user.setAttributes(attributes);</span>
+<span class="fc" id="L115">    attributes.put(CommonConstant.ATTRIBUTE_LOGIN_TIME, List.of(String.valueOf(Instant.now())));</span>
+<span class="fc" id="L116">    user.setAttributes(attributes);</span>
 
     String timezone =
-<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        attributes.containsKey(CommonConstant.TIMEZONE_KEY)</span>
-<span class="nc" id="L112">            ? attributes.get(CommonConstant.TIMEZONE_KEY).get(0)</span>
-<span class="fc" id="L113">            : CommonConstant.DEFAULT_TIMEZONE;</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        attributes.containsKey(CommonConstant.TIMEZONE_KEY)</span>
+<span class="nc" id="L120">            ? attributes.get(CommonConstant.TIMEZONE_KEY).get(0)</span>
+<span class="fc" id="L121">            : CommonConstant.DEFAULT_TIMEZONE;</span>
 
-<span class="fc" id="L115">    usersResource.get(user.getId()).update(user);</span>
+<span class="fc" id="L123">    usersResource.get(user.getId()).update(user);</span>
 
-    // add user id to token and refresh token
-<span class="fc" id="L118">    redisProvider.setValue(redisProvider.getUserKeyByUserId(user.getId()), response.getToken());</span>
-<span class="fc" id="L119">    redisProvider.setValue(</span>
-<span class="fc" id="L120">        redisProvider.getUserKeyByUserId(user.getId()), response.getRefreshToken());</span>
-
+<span class="fc" id="L125">    TokenAuth accessToken =</span>
+<span class="fc" id="L126">        new TokenAuth(response.getToken(), user.getId(), TokenAuthType.ACCESS_TOKEN);</span>
+<span class="fc" id="L127">    TokenAuth refreshToken =</span>
+<span class="fc" id="L128">        new TokenAuth(response.getRefreshToken(), user.getId(), TokenAuthType.REFRESH_TOKEN);</span>
+<span class="fc" id="L129">    jwtTokenService.saveToken(List.of(accessToken, refreshToken));</span>
     // when user login successfully then will add user_id to each role group it contain
-<span class="fc" id="L123">    List&lt;String&gt; roles = jwtProvider.getRolesFromJwtToken(response.getToken());</span>
-<span class="fc" id="L124">    roles.forEach(</span>
+<span class="fc" id="L131">    List&lt;String&gt; roles = jwtProvider.getRolesFromJwtToken(response.getToken());</span>
+<span class="fc" id="L132">    roles.forEach(</span>
         role -&gt; {
-<span class="nc" id="L126">          String roleId = keycloakProvider.getRoleIdByRoleName(role);</span>
-<span class="nc" id="L127">          redisProvider.addValueToMap(redisProvider.getRoleKeyByRoleId(roleId), user.getId(), &quot;&quot;);</span>
-<span class="nc" id="L128">        });</span>
-<span class="fc" id="L129">    return SignInResponse.builder()</span>
-<span class="fc" id="L130">        .token(response.getToken())</span>
-<span class="fc" id="L131">        .address(signInRequest.getAddress())</span>
-<span class="fc" id="L132">        .email(signInRequest.getEmail())</span>
-<span class="fc" id="L133">        .tokenType(CommonConstant.TOKEN_TYPE)</span>
-<span class="fc" id="L134">        .refreshToken(response.getRefreshToken())</span>
-<span class="fc" id="L135">        .timezone(timezone)</span>
-<span class="fc" id="L136">        .build();</span>
+<span class="nc" id="L134">          String roleId = keycloakProvider.getRoleIdByRoleName(role);</span>
+<span class="nc" id="L135">          jwtTokenService.saveUserRoleMapping(user.getId(), roleId);</span>
+<span class="nc" id="L136">        });</span>
+<span class="fc" id="L137">    return SignInResponse.builder()</span>
+<span class="fc" id="L138">        .token(response.getToken())</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        .address(type == 0 ? null : accountId)</span>
+<span class="fc" id="L140">        .email(signInRequest.getEmail())</span>
+<span class="fc" id="L141">        .tokenType(CommonConstant.TOKEN_TYPE)</span>
+<span class="fc" id="L142">        .refreshToken(response.getRefreshToken())</span>
+<span class="fc" id="L143">        .timezone(timezone)</span>
+<span class="fc" id="L144">        .build();</span>
   }
 
   @Override
   public MessageResponse signUp(
       SignUpRequest signUpRequest, HttpServletRequest httpServletRequest) {
     Response response;
-<span class="fc" id="L143">    String email = signUpRequest.getEmail();</span>
-<span class="fc" id="L144">    UserRepresentation userExist = keycloakProvider.getUser(email);</span>
-<span class="pc bpc" id="L145" title="2 of 4 branches missed.">    if (Objects.nonNull(userExist) &amp;&amp; userExist.isEnabled()) {</span>
-<span class="fc" id="L146">      throw new BusinessException(BusinessCode.EMAIL_IS_ALREADY_EXIST);</span>
+<span class="fc" id="L151">    String email = signUpRequest.getEmail();</span>
+<span class="fc" id="L152">    UserRepresentation userExist = keycloakProvider.getUser(email);</span>
+<span class="pc bpc" id="L153" title="2 of 4 branches missed.">    if (Objects.nonNull(userExist) &amp;&amp; userExist.isEnabled()) {</span>
+<span class="fc" id="L154">      throw new BusinessException(BusinessCode.EMAIL_IS_ALREADY_EXIST);</span>
     }
-<span class="nc" id="L148">    UsersResource usersResource = keycloakProvider.getResource();</span>
-<span class="nc" id="L149">    CredentialRepresentation encodePassword =</span>
-<span class="nc" id="L150">        keycloakProvider.createPasswordCredentials(signUpRequest.getPassword());</span>
-<span class="nc bnc" id="L151" title="All 2 branches missed.">    if (Objects.nonNull(userExist)) {</span>
-<span class="nc" id="L152">      userExist.setCredentials(Collections.singletonList(encodePassword));</span>
-<span class="nc" id="L153">      usersResource.get(userExist.getId()).update(userExist);</span>
-<span class="nc" id="L154">      response = Response.status(Status.CREATED).build();</span>
+<span class="nc" id="L156">    UsersResource usersResource = keycloakProvider.getResource();</span>
+<span class="nc" id="L157">    CredentialRepresentation encodePassword =</span>
+<span class="nc" id="L158">        keycloakProvider.createPasswordCredentials(signUpRequest.getPassword());</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">    if (Objects.nonNull(userExist)) {</span>
+<span class="nc" id="L160">      userExist.setCredentials(Collections.singletonList(encodePassword));</span>
+<span class="nc" id="L161">      usersResource.get(userExist.getId()).update(userExist);</span>
+<span class="nc" id="L162">      response = Response.status(Status.CREATED).build();</span>
     } else {
-<span class="nc" id="L156">      UserRepresentation newUser = new UserRepresentation();</span>
-<span class="nc" id="L157">      newUser.setUsername(email);</span>
-<span class="nc" id="L158">      newUser.setEmail(email);</span>
-<span class="nc" id="L159">      newUser.setCredentials(Collections.singletonList(encodePassword));</span>
-<span class="nc" id="L160">      newUser.setEnabled(false);</span>
-<span class="nc" id="L161">      newUser.setEmailVerified(true);</span>
-<span class="nc" id="L162">      response = usersResource.create(newUser);</span>
+<span class="nc" id="L164">      UserRepresentation newUser = new UserRepresentation();</span>
+<span class="nc" id="L165">      newUser.setUsername(email);</span>
+<span class="nc" id="L166">      newUser.setEmail(email);</span>
+<span class="nc" id="L167">      newUser.setCredentials(Collections.singletonList(encodePassword));</span>
+<span class="nc" id="L168">      newUser.setEnabled(false);</span>
+<span class="nc" id="L169">      newUser.setEmailVerified(true);</span>
+<span class="nc" id="L170">      response = usersResource.create(newUser);</span>
     }
-<span class="nc" id="L164">    log.info(&quot;sign up email: &quot; + email);</span>
-<span class="nc bnc" id="L165" title="All 2 branches missed.">    if (response.getStatus() == 201) {</span>
-<span class="nc" id="L166">      String verifyCode = jwtProvider.generateCodeForVerify(email);</span>
-<span class="nc" id="L167">      sendMailExecutor.execute(</span>
+<span class="nc" id="L172">    log.info(&quot;sign up email: &quot; + email);</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">    if (response.getStatus() == 201) {</span>
+<span class="nc" id="L174">      String verifyCode = jwtProvider.generateCodeForVerify(email);</span>
+<span class="nc" id="L175">      sendMailExecutor.execute(</span>
           new MailHandler(
               mailProvider,
               email,
               EUserAction.CREATED,
-<span class="nc" id="L172">              localeResolver.resolveLocale(httpServletRequest),</span>
+<span class="nc" id="L180">              localeResolver.resolveLocale(httpServletRequest),</span>
               verifyCode));
-<span class="nc" id="L174">      return MessageResponse.builder()</span>
-<span class="nc" id="L175">          .code(CommonConstant.CODE_SUCCESS)</span>
-<span class="nc" id="L176">          .message(CommonConstant.RESPONSE_SUCCESS)</span>
-<span class="nc" id="L177">          .build();</span>
+<span class="nc" id="L182">      return MessageResponse.builder()</span>
+<span class="nc" id="L183">          .code(CommonConstant.CODE_SUCCESS)</span>
+<span class="nc" id="L184">          .message(CommonConstant.RESPONSE_SUCCESS)</span>
+<span class="nc" id="L185">          .build();</span>
     }
-<span class="nc" id="L179">    return new MessageResponse(CommonErrorCode.UNKNOWN_ERROR);</span>
+<span class="nc" id="L187">    return new MessageResponse(CommonErrorCode.UNKNOWN_ERROR);</span>
   }
 
   @Override
   public RefreshTokenResponse refreshToken(
       String refreshJwt, HttpServletRequest httpServletRequest) {
-<span class="fc" id="L185">    final String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
-<span class="fc bfc" id="L186" title="All 2 branches covered.">    if (redisProvider.isTokenBlacklisted(refreshJwt)) {</span>
-<span class="fc" id="L187">      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);</span>
+<span class="fc" id="L193">    final String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
+<span class="fc" id="L194">    Boolean isBlackList = jwtTokenService.isBlacklistToken(accessToken, TokenAuthType.ACCESS_TOKEN);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">    if (isBlackList) {</span>
+<span class="fc" id="L196">      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);</span>
     }
     try {
-<span class="fc" id="L190">      JsonNode jsonNode = keycloakProvider.refreshToken(refreshJwt);</span>
-<span class="fc" id="L191">      JSONObject jsonObj = jsonNode.getObject();</span>
-<span class="pc bpc" id="L192" title="1 of 2 branches missed.">      if (Objects.nonNull(jsonObj)) {</span>
-<span class="fc" id="L193">        redisProvider.blacklistJwt(accessToken, RedisConstant.JWT);</span>
-<span class="fc" id="L194">        return RefreshTokenResponse.builder()</span>
-<span class="fc" id="L195">            .accessToken(jsonObj.get(&quot;access_token&quot;).toString())</span>
-<span class="fc" id="L196">            .refreshToken(jsonObj.get(&quot;refresh_token&quot;).toString())</span>
-<span class="fc" id="L197">            .tokenType(CommonConstant.TOKEN_TYPE)</span>
-<span class="fc" id="L198">            .build();</span>
+<span class="fc" id="L199">      JsonNode jsonNode = keycloakProvider.refreshToken(refreshJwt);</span>
+<span class="fc" id="L200">      JSONObject jsonObj = jsonNode.getObject();</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">      if (Objects.nonNull(jsonObj)) {</span>
+<span class="fc" id="L202">        jwtTokenService.blacklistToken(accessToken, TokenAuthType.ACCESS_TOKEN);</span>
+<span class="fc" id="L203">        return RefreshTokenResponse.builder()</span>
+<span class="fc" id="L204">            .accessToken(jsonObj.get(&quot;access_token&quot;).toString())</span>
+<span class="fc" id="L205">            .refreshToken(jsonObj.get(&quot;refresh_token&quot;).toString())</span>
+<span class="fc" id="L206">            .tokenType(CommonConstant.TOKEN_TYPE)</span>
+<span class="fc" id="L207">            .build();</span>
       }
-<span class="nc" id="L200">    } catch (Exception ex) {</span>
-<span class="nc" id="L201">      log.error(</span>
-<span class="nc" id="L202">          &quot;Error: when generate access token from refresh token by keycloak: &quot; + ex.getMessage());</span>
-<span class="nc" id="L203">      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);</span>
-<span class="nc" id="L204">    }</span>
-<span class="nc" id="L205">    return null;</span>
+<span class="nc" id="L209">    } catch (Exception ex) {</span>
+<span class="nc" id="L210">      log.error(</span>
+<span class="nc" id="L211">          &quot;Error: when generate access token from refresh token by keycloak: &quot; + ex.getMessage());</span>
+<span class="nc" id="L212">      throw new BusinessException(BusinessCode.REFRESH_TOKEN_EXPIRED);</span>
+<span class="nc" id="L213">    }</span>
+<span class="nc" id="L214">    return null;</span>
   }
 
   @Override
   public MessageResponse signOut(
       SignOutRequest signOutRequest, HttpServletRequest httpServletRequest) {
-<span class="fc" id="L211">    String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
-<span class="pc bpc" id="L212" title="1 of 2 branches missed.">    if (!redisProvider.isTokenBlacklisted(accessToken)) {</span>
-<span class="fc" id="L213">      redisProvider.blacklistJwt(accessToken, signOutRequest.getAccountId());</span>
-    }
-<span class="pc bpc" id="L215" title="1 of 2 branches missed.">    if (!redisProvider.isTokenBlacklisted(signOutRequest.getRefreshJwt())) {</span>
-<span class="fc" id="L216">      redisProvider.blacklistJwt(signOutRequest.getRefreshJwt(), signOutRequest.getAccountId());</span>
-    }
-<span class="fc" id="L218">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
+<span class="fc" id="L220">    String accessToken = jwtProvider.parseJwt(httpServletRequest);</span>
+<span class="fc" id="L221">    jwtTokenService.blacklistToken(accessToken, TokenAuthType.ACCESS_TOKEN);</span>
+<span class="fc" id="L222">    jwtTokenService.blacklistToken(signOutRequest.getRefreshJwt(), TokenAuthType.REFRESH_TOKEN);</span>
+<span class="fc" id="L223">    return new MessageResponse(CommonConstant.CODE_SUCCESS, CommonConstant.RESPONSE_SUCCESS);</span>
   }
 
   @Override
   public NonceResponse findNonceByAddress(String address, String walletName) {
-<span class="fc" id="L223">    UserRepresentation userExist = keycloakProvider.getUser(address);</span>
-<span class="fc" id="L224">    String nonce = NonceUtils.createNonce();</span>
-<span class="fc bfc" id="L225" title="All 2 branches covered.">    if (Objects.nonNull(userExist)) {</span>
-<span class="fc" id="L226">      userExist.setCredentials(</span>
-<span class="fc" id="L227">          Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));</span>
-<span class="fc" id="L228">      Map&lt;String, List&lt;String&gt;&gt; attributes = userExist.getAttributes();</span>
-<span class="fc" id="L229">      attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));</span>
-<span class="fc" id="L230">      userExist.setAttributes(attributes);</span>
-<span class="fc" id="L231">      keycloakProvider.getResource().get(userExist.getId()).update(userExist);</span>
-<span class="fc" id="L232">      return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS).nonce(nonce).build();</span>
+<span class="fc" id="L228">    log.info(&quot;Wallet {}: Get nonce by address: {}&quot;, walletName, address);</span>
+<span class="fc" id="L229">    UserRepresentation userExist = keycloakProvider.getUser(address);</span>
+<span class="fc" id="L230">    String nonce = NonceUtils.createNonce();</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">    if (Objects.nonNull(userExist)) {</span>
+<span class="fc" id="L232">      userExist.setCredentials(</span>
+<span class="fc" id="L233">          Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));</span>
+<span class="fc" id="L234">      Map&lt;String, List&lt;String&gt;&gt; attributes = userExist.getAttributes();</span>
+<span class="fc" id="L235">      attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));</span>
+<span class="fc" id="L236">      userExist.setAttributes(attributes);</span>
+<span class="fc" id="L237">      keycloakProvider.getResource().get(userExist.getId()).update(userExist);</span>
+<span class="fc" id="L238">      return NonceResponse.builder().message(CommonConstant.CODE_SUCCESS).nonce(nonce).build();</span>
     }
-<span class="fc" id="L234">    UsersResource usersResource = keycloakProvider.getResource();</span>
-<span class="fc" id="L235">    UserRepresentation newUser = new UserRepresentation();</span>
-<span class="fc" id="L236">    newUser.setUsername(address);</span>
-<span class="fc" id="L237">    newUser.setCredentials(</span>
-<span class="fc" id="L238">        Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));</span>
-<span class="fc" id="L239">    newUser.setEnabled(true);</span>
-<span class="fc" id="L240">    newUser.setEmailVerified(true);</span>
-<span class="fc" id="L241">    Map&lt;String, List&lt;String&gt;&gt; attributes = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L242">    attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));</span>
-<span class="fc" id="L243">    attributes.put(CommonConstant.ATTRIBUTE_WALLET_NAME, List.of(walletName));</span>
-<span class="fc" id="L244">    newUser.setAttributes(attributes);</span>
-<span class="fc" id="L245">    usersResource.create(newUser);</span>
-<span class="fc" id="L246">    return NonceResponse.builder().message(CommonConstant.CODE_FAILURE).nonce(nonce).build();</span>
+<span class="fc" id="L240">    UsersResource usersResource = keycloakProvider.getResource();</span>
+<span class="fc" id="L241">    UserRepresentation newUser = new UserRepresentation();</span>
+<span class="fc" id="L242">    newUser.setUsername(address);</span>
+<span class="fc" id="L243">    newUser.setCredentials(</span>
+<span class="fc" id="L244">        Collections.singletonList(keycloakProvider.createPasswordCredentials(nonce)));</span>
+<span class="fc" id="L245">    newUser.setEnabled(true);</span>
+<span class="fc" id="L246">    newUser.setEmailVerified(true);</span>
+<span class="fc" id="L247">    Map&lt;String, List&lt;String&gt;&gt; attributes = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L248">    attributes.put(CommonConstant.ATTRIBUTE_NONCE, List.of(nonce));</span>
+<span class="fc" id="L249">    attributes.put(CommonConstant.ATTRIBUTE_WALLET_NAME, List.of(walletName));</span>
+<span class="fc" id="L250">    newUser.setAttributes(attributes);</span>
+<span class="fc" id="L251">    usersResource.create(newUser);</span>
+<span class="fc" id="L252">    return NonceResponse.builder().message(CommonConstant.CODE_FAILURE).nonce(nonce).build();</span>
+  }
+
+  @Override
+  public UsernamePasswordCredentials verifySignatureThenGetUserPassCredential(
+      SignInRequest signInRequest) {
+<span class="fc" id="L258">    Map&lt;String, String&gt; data = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L259" title="All 4 branches covered.">    if (Objects.isNull(signInRequest.getSignature()) || Objects.isNull(signInRequest.getKey())) {</span>
+<span class="fc" id="L260">      throw new BusinessException(BusinessCode.KEY_OR_SIGNATURE_MUST_NOT_BE_NULL);</span>
+    }
+<span class="fc" id="L262">    data.put(&quot;signature&quot;, signInRequest.getSignature());</span>
+<span class="fc" id="L263">    data.put(&quot;key&quot;, signInRequest.getKey());</span>
+    try {
+<span class="fc" id="L265">      ObjectMapper objectMapper = new ObjectMapper();</span>
+<span class="fc" id="L266">      String jacksonData = objectMapper.writeValueAsString(data);</span>
+<span class="fc" id="L267">      DataSignature from = DataSignature.from(jacksonData);</span>
+<span class="fc" id="L268">      DataSignature dataSignature = new DataSignature(from.signature(), from.key());</span>
+<span class="fc" id="L269">      Address address = new Address(dataSignature.address());</span>
+<span class="fc" id="L270">      String addressString = address.toBech32();</span>
+      // verify
+<span class="fc" id="L272">      boolean verified = CIP30DataSigner.INSTANCE.verify(dataSignature);</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">      if (!verified) {</span>
+<span class="nc" id="L274">        throw new BusinessException(BusinessCode.SIGNATURE_NOT_VERIFIED);</span>
+      }
+<span class="fc" id="L276">      String nonce = new String(dataSignature.coseSign1().payload());</span>
+<span class="fc" id="L277">      return new UsernamePasswordCredentials(addressString, nonce);</span>
+<span class="nc" id="L278">    } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L279">      log.error(&quot;Error when parsing to object: &quot; + e.getMessage());</span>
+<span class="nc" id="L280">    } catch (Exception e) {</span>
+<span class="nc" id="L281">      log.error(&quot;Error when verified signature: &quot; + e.getMessage());</span>
+<span class="nc" id="L282">    }</span>
+<span class="nc" id="L283">    return null;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

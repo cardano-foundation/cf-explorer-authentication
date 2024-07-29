@@ -3,36 +3,40 @@
 import org.cardanofoundation.explorer.common.exception.ErrorCode;
 
 <span class="fc" id="L5">public enum BusinessCode implements ErrorCode {</span>
-<span class="fc" id="L6">  REFRESH_TOKEN_EXPIRED(&quot;4&quot;, &quot;The refresh token is expired&quot;),</span>
-<span class="fc" id="L7">  SIGNATURE_INVALID(&quot;5&quot;, &quot;The signature is invalid&quot;),</span>
-<span class="fc" id="L8">  LIMIT_BOOKMARK_IS_2000(&quot;14&quot;, &quot;Bookmarks do not exceed 2000 records&quot;),</span>
-<span class="fc" id="L9">  BOOKMARK_IS_EXIST(&quot;16&quot;, &quot;Bookmark is already exists&quot;),</span>
-<span class="fc" id="L10">  INVALID_VERIFY_CODE(&quot;21&quot;, &quot;The verify code is invalid&quot;),</span>
-<span class="fc" id="L11">  VERIFY_CODE_NOT_PENDING(&quot;22&quot;, &quot;User is not ready to active&quot;),</span>
-<span class="fc" id="L12">  EMAIL_IS_ALREADY_EXIST(&quot;23&quot;, &quot;Email is already exist&quot;),</span>
-<span class="fc" id="L13">  USERNAME_OR_PASSWORD_INVALID(&quot;24&quot;, &quot;Username or password is invalid&quot;);</span>
+<span class="fc" id="L6">  TOKEN_NOT_FOUND(&quot;2&quot;, &quot;The token is not found&quot;),</span>
+<span class="fc" id="L7">  REFRESH_TOKEN_INVALID(&quot;3&quot;, &quot;The refresh token is invalid&quot;),</span>
+<span class="fc" id="L8">  REFRESH_TOKEN_EXPIRED(&quot;4&quot;, &quot;The refresh token is expired&quot;),</span>
+<span class="fc" id="L9">  SIGNATURE_INVALID(&quot;5&quot;, &quot;The signature is invalid&quot;),</span>
+<span class="fc" id="L10">  SIGNATURE_NOT_VERIFIED(&quot;6&quot;, &quot;The signature is not verified&quot;),</span>
+<span class="fc" id="L11">  LIMIT_BOOKMARK_IS_2000(&quot;14&quot;, &quot;Bookmarks do not exceed 2000 records&quot;),</span>
+<span class="fc" id="L12">  BOOKMARK_IS_EXIST(&quot;16&quot;, &quot;Bookmark is already exists&quot;),</span>
+<span class="fc" id="L13">  INVALID_VERIFY_CODE(&quot;21&quot;, &quot;The verify code is invalid&quot;),</span>
+<span class="fc" id="L14">  VERIFY_CODE_NOT_PENDING(&quot;22&quot;, &quot;User is not ready to active&quot;),</span>
+<span class="fc" id="L15">  EMAIL_IS_ALREADY_EXIST(&quot;23&quot;, &quot;Email is already exist&quot;),</span>
+<span class="fc" id="L16">  USERNAME_OR_PASSWORD_INVALID(&quot;24&quot;, &quot;Username or password is invalid&quot;),</span>
+<span class="fc" id="L17">  KEY_OR_SIGNATURE_MUST_NOT_BE_NULL(&quot;1&quot;, &quot;The signature and the key must not be null&quot;);</span>
 
   private final String code;
   private final String desc;
 
-<span class="fc" id="L18">  private BusinessCode(String code, String desc) {</span>
-<span class="fc" id="L19">    this.code = code;</span>
-<span class="fc" id="L20">    this.desc = desc;</span>
-<span class="fc" id="L21">  }</span>
+<span class="fc" id="L22">  private BusinessCode(String code, String desc) {</span>
+<span class="fc" id="L23">    this.code = code;</span>
+<span class="fc" id="L24">    this.desc = desc;</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
   public String getCode() {
-<span class="fc" id="L25">    return this.code;</span>
+<span class="fc" id="L29">    return this.code;</span>
   }
 
   @Override
   public String getDesc() {
-<span class="fc" id="L30">    return this.desc;</span>
+<span class="fc" id="L34">    return this.desc;</span>
   }
 
   @Override
   public String getServicePrefix() {
-<span class="fc" id="L35">    return &quot;COMMON_ERROR&quot;;</span>
+<span class="fc" id="L39">    return &quot;COMMON_ERROR&quot;;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

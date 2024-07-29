@@ -41,17 +41,17 @@ public class NonceUtils {
    * @update:
    */
   public static String getNonceFromSignature(String signature) {
-<span class="fc" id="L44">    List&lt;DataItem&gt; itemList = null;</span>
+<span class="nc" id="L44">    List&lt;DataItem&gt; itemList = null;</span>
     try {
-<span class="fc" id="L46">      itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));</span>
+<span class="nc" id="L46">      itemList = CborDecoder.decode(HexUtil.decodeHexString(signature));</span>
 <span class="nc" id="L47">    } catch (CborException e) {</span>
 <span class="nc" id="L48">      log.error(&quot;Exception decode cbor: &quot; + e.getMessage());</span>
 <span class="nc" id="L49">      throw new BusinessException(CommonErrorCode.UNKNOWN_ERROR);</span>
-<span class="fc" id="L50">    }</span>
-<span class="fc" id="L51">    List&lt;DataItem&gt; topArray = ((Array) itemList.get(0)).getDataItems();</span>
-<span class="fc" id="L52">    ByteString messageToSign = (ByteString) topArray.get(2);</span>
-<span class="fc" id="L53">    byte[] message = messageToSign.getBytes();</span>
-<span class="fc" id="L54">    return new String(message);</span>
+<span class="nc" id="L50">    }</span>
+<span class="nc" id="L51">    List&lt;DataItem&gt; topArray = ((Array) itemList.get(0)).getDataItems();</span>
+<span class="nc" id="L52">    ByteString messageToSign = (ByteString) topArray.get(2);</span>
+<span class="nc" id="L53">    byte[] message = messageToSign.getBytes();</span>
+<span class="nc" id="L54">    return new String(message);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
