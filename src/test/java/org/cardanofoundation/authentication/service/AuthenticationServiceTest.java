@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,10 +14,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import co.nstant.in.cbor.CborDecoder;
+import com.bloxbean.cardano.client.address.Address;
+import com.bloxbean.cardano.client.cip.cip30.CIP30DataSigner;
+import com.bloxbean.cardano.client.cip.cip30.DataSignature;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
@@ -36,7 +45,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.authentication.constant.CommonConstant;
-import org.cardanofoundation.authentication.constant.RedisConstant;
 import org.cardanofoundation.authentication.exception.BusinessCode;
 import org.cardanofoundation.authentication.model.enums.EUserAction;
 import org.cardanofoundation.authentication.model.request.auth.SignInRequest;
@@ -49,7 +57,7 @@ import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
 import org.cardanofoundation.authentication.provider.MailProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.service.impl.AuthenticationServiceImpl;
 import org.cardanofoundation.authentication.thread.MailHandler;
 import org.cardanofoundation.explorer.common.exception.BusinessException;
@@ -62,19 +70,27 @@ class AuthenticationServiceTest {
 
   @Mock private JwtProvider jwtProvider;
 
-  @Mock private RedisProvider redisProvider;
-
   @Mock private ThreadPoolExecutor sendMailExecutor;
+
+  @Mock private JwtTokenService jwtTokenService;
+
+  @Mock private TokenAuthRepository tokenAuthRepository;
 
   @Mock private MailProvider mailProvider;
 
   @Mock private KeycloakProvider keycloakProvider;
 
-  private final String SIGNATURE_TEST =
-      "84582aa201276761646472657373581de18a18031ff10e307f9ceff8929608c5f58bdba08304e380c034f85909a166686173686564f453393534353735313438313233323636333232355840850ff657e23963414e7c1bf708928dc994ecafea29790089c810af1ac7486aae12a4ed736d16528051aeff1991ee8d2aef19fe3d375f3ad019925ff1530ed608";
+  @Mock private CborDecoder cborDecoder;
 
+  private final String SIGNATURE_TEST =
+      "84582aa201276761646472657373581de1c5499cb224c743b5341fe2d2080403329d6ec2da8892ce1a6a37ecfba166686173686564f4581e31303232323233333337313233363038333031383230373536353532363258405f2478c9c741ce481f62c2ea3369594662feda77d8b536f5713beca3f95bffa8d70d7d9268777ec42ab82f3d39254aca9ee85097677ecb7b9cf8f853618e660d";
+
+  private final String KEY_TEST =
+      "a4010103272006215820e37cc80689be14f669fba240c3e1c4ce018d353e9a4f92dbdbea2b15a18a23be";
+
+  private final String NONCE_TEST = "102222333712360830182075655262";
   private final String ADDRESS_WALLET =
-      "stake1u80n7nvm3qlss9ls0krp5xh7sqxlazp8kz6n3fp5sgnul5cnxyg4p";
+      "stake1u8z5n89jynr58df5rl3dyzqyqvef6mkzm2yf9ns6dgm7e7cjzn7df";
 
   private final String JWT =
       "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzb3RhdGVrIiwianRpIjoiMiIsImlhdCI6MTY3Mjk5Nzc0MSwiZXhwIjoxNjczMDg0MTQxfQ.B62gXo6iqQfHMT62q17zdhwMF8I77-P6xblKcx7ZI3-gij6YckvFYVVuoIa_qXgTTFnEeRDBQEVo3o20D1w6pffBrgbvxvMbjhOG0ONS9Xs1UQChwQs7v3lxkqoKZ8dNf0Eib43HxLZhBEBIeXa1kln4sS8osWf5iEgno0od7z9KwWK1N2Coj0o-1HE453fFyRveDJgd0DvXohbHADMmjH9t0WkXJwUK26Lv1tkqPlkIzGBPgYnYEIygdayqqt4EtP6CtgI9QOzCYSZUUFzxo-VVDzA0J7DpQbYn8G2PAuAbCXCO6lTkvmXMiyZAoZshqRhBNb7uDI66dwOJLV3NzuunSa8QOO8eNUaDoHHvR_9_J-yHTFBicoM69JHQ7UzJVyFHGmh1M8lHsJ9y6DdAobtBSyJFBhFeDj7S8bgpIvIyNoHDsf24xdlqCngE1qBsxjfp0L_yMPBxsIhW3Juopwe1c6btWTEaRaVaxhKE5yKbRsTtAzDDkdEyg_--9eXH";
@@ -86,29 +102,48 @@ class AuthenticationServiceTest {
   private final String PASSWORD = "password";
 
   @Test
-  void whenLoginUsingWallet_SignatureInValid_ThrowException() {
-    String signatureInValid = "Test123456789";
-    SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setSignature(signatureInValid);
-    signInRequest.setType(1);
-    Exception exception =
+  void whenLoginUsingWallet_SignatureIsNull_ThrowException() {
+    SignInRequest signInRequest = SignInRequest.builder().key(KEY_TEST).type(1).build();
+    BusinessException exception =
         Assertions.assertThrows(
-            Exception.class,
+            BusinessException.class,
             () -> {
               authenticationService.signIn(signInRequest);
             });
-    String expectedMessage = "Invalid hexadecimal";
-    String actualMessage = exception.getMessage();
-    Assertions.assertTrue(actualMessage.contains(expectedMessage));
+    String expectedCode = BusinessCode.KEY_OR_SIGNATURE_MUST_NOT_BE_NULL.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
   }
 
   @Test
-  void whenLoginUsingWallet_AuthenticateFail_ThrowException() {
-    String addressWallet = "Test123456789";
-    SignInRequest signInRequest = new SignInRequest();
-    signInRequest.setSignature(SIGNATURE_TEST);
-    signInRequest.setAddress(addressWallet);
-    signInRequest.setType(1);
+  void whenLoginUsingWallet_KeyIsNull_ThrowException() {
+    SignInRequest signInRequest = SignInRequest.builder().signature(SIGNATURE_TEST).type(1).build();
+    BusinessException exception =
+        Assertions.assertThrows(
+            BusinessException.class,
+            () -> {
+              authenticationService.signIn(signInRequest);
+            });
+    String expectedCode = BusinessCode.KEY_OR_SIGNATURE_MUST_NOT_BE_NULL.getServiceErrorCode();
+    String actualCode = exception.getErrorCode();
+    Assertions.assertEquals(expectedCode, actualCode);
+  }
+
+  @Test
+  void whenLoginUsingWallet_NonceInvalid_ThrowException() {
+    String NONCE = "102222333712360830182075655262";
+    SignInRequest signInRequest =
+        SignInRequest.builder().signature(SIGNATURE_TEST).key(KEY_TEST).type(1).build();
+    when(keycloakProvider.keycloakBuilderWhenLogin(ADDRESS_WALLET, NONCE))
+        .thenReturn(
+            KeycloakBuilder.builder()
+                .realm("test")
+                .serverUrl("http://test:9000/")
+                .clientId("test")
+                .clientSecret("test")
+                .username(ADDRESS_WALLET)
+                .password(NONCE)
+                .build());
     BusinessException exception =
         Assertions.assertThrows(
             BusinessException.class,
@@ -124,7 +159,7 @@ class AuthenticationServiceTest {
   void whenLoginUsingWallet_AuthenticateSuccess_returnResponse() {
     SignInRequest signInRequest = new SignInRequest();
     signInRequest.setSignature(SIGNATURE_TEST);
-    signInRequest.setAddress(ADDRESS_WALLET);
+    signInRequest.setKey(KEY_TEST);
     signInRequest.setType(1);
     AccessTokenResponse response = new AccessTokenResponse();
     response.setToken(JWT);
@@ -137,7 +172,7 @@ class AuthenticationServiceTest {
     UsersResource usersResource = Mockito.mock(UsersResource.class);
     UserResource userResource = Mockito.mock(UserResource.class);
     when(usersResource.get(any())).thenReturn(userResource);
-    String NONCE = "9545751481232663225";
+    String NONCE = "102222333712360830182075655262";
     when(keycloakProvider.keycloakBuilderWhenLogin(ADDRESS_WALLET, NONCE)).thenReturn(keycloak);
     when(keycloakProvider.getUser(ADDRESS_WALLET)).thenReturn(userRepresentation);
     when(keycloakProvider.getResource()).thenReturn(usersResource);
@@ -272,8 +307,8 @@ class AuthenticationServiceTest {
 
   @Test
   void whenRefreshToken_RefreshTokenIsInValid_ThrowException() {
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(true);
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
-    when(redisProvider.isTokenBlacklisted(REFRESH_TOKEN)).thenReturn(true);
     BusinessException exception =
         Assertions.assertThrows(
             BusinessException.class,
@@ -286,14 +321,14 @@ class AuthenticationServiceTest {
   }
 
   @Test
-  void whenRefreshToken_RefreshTokenIsValid_returnResponse() throws UnirestException {
+  void whenRefreshToken_RefreshTokenIsValid_returnResponse()
+      throws UnirestException, JSONException {
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
-    when(redisProvider.isTokenBlacklisted(REFRESH_TOKEN)).thenReturn(false);
     JsonNode jsonNode = Mockito.mock(JsonNode.class);
     JSONObject jsonObj = Mockito.mock(JSONObject.class);
     when(keycloakProvider.refreshToken(REFRESH_TOKEN)).thenReturn(jsonNode);
+    when(jwtTokenService.isBlacklistToken(any(), any())).thenReturn(false);
     when(jsonNode.getObject()).thenReturn(jsonObj);
-    doNothing().when(redisProvider).blacklistJwt(JWT, RedisConstant.JWT);
     when(jsonObj.get(any())).thenReturn(JWT);
     RefreshTokenResponse response = authenticationService.refreshToken(REFRESH_TOKEN, any());
     Assertions.assertEquals(JWT, response.getAccessToken());
@@ -305,10 +340,6 @@ class AuthenticationServiceTest {
     request.setRefreshJwt(REFRESH_TOKEN);
     request.setAccountId(EMAIL);
     when(jwtProvider.parseJwt(any())).thenReturn(JWT);
-    when(redisProvider.isTokenBlacklisted(JWT)).thenReturn(false);
-    when(redisProvider.isTokenBlacklisted(REFRESH_TOKEN)).thenReturn(false);
-    doNothing().when(redisProvider).blacklistJwt(JWT, EMAIL);
-    doNothing().when(redisProvider).blacklistJwt(REFRESH_TOKEN, EMAIL);
     MessageResponse response = authenticationService.signOut(request, any());
     String expectedCode = CommonConstant.CODE_SUCCESS;
     Assertions.assertEquals(expectedCode, response.getCode());
@@ -351,5 +382,43 @@ class AuthenticationServiceTest {
     NonceResponse res = authenticationService.findNonceByAddress(ADDRESS_WALLET, "NAMI");
     String expectedCode = CommonConstant.CODE_SUCCESS;
     Assertions.assertEquals(expectedCode, res.getMessage());
+  }
+
+  @Test
+  void verifySignature() throws JsonProcessingException {
+    Map<String, String> data = new HashMap<>();
+    data.put("signature", SIGNATURE_TEST);
+    data.put("key", KEY_TEST);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String jacksonData = objectMapper.writeValueAsString(data);
+    DataSignature from = DataSignature.from(jacksonData);
+    DataSignature dataSignature = new DataSignature(from.signature(), from.key());
+    Address address = new Address(dataSignature.address());
+    String addressString = address.toBech32();
+    // verify
+    boolean verified = CIP30DataSigner.INSTANCE.verify(dataSignature);
+    String nonce = new String(dataSignature.coseSign1().payload());
+    Assertions.assertEquals(NONCE_TEST, nonce);
+    Assertions.assertEquals(ADDRESS_WALLET, addressString);
+    Assertions.assertTrue(verified);
+  }
+
+  @Test
+  void verifySignature_nonceIsInvalid() throws JsonProcessingException {
+    Map<String, String> data = new HashMap<>();
+    data.put("signature", SIGNATURE_TEST);
+    data.put("key", KEY_TEST);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String jacksonData = objectMapper.writeValueAsString(data);
+    DataSignature from = DataSignature.from(jacksonData);
+    DataSignature dataSignature = new DataSignature(from.signature(), from.key());
+    Address address = new Address(dataSignature.address());
+    String addressString = address.toBech32();
+    // verify
+    boolean verified = CIP30DataSigner.INSTANCE.verify(dataSignature);
+    String nonce = new String(dataSignature.coseSign1().payload());
+    Assertions.assertNotEquals("NONCE_TEST", nonce);
+    Assertions.assertNotEquals("ADDRESS_WALLET", addressString);
+    Assertions.assertTrue(verified);
   }
 }

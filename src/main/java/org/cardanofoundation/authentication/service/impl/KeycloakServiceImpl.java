@@ -1,7 +1,6 @@
 package org.cardanofoundation.authentication.service.impl;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,7 +19,7 @@ import org.cardanofoundation.authentication.model.request.event.EventModel;
 import org.cardanofoundation.authentication.model.response.UserInfoResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.service.JwtTokenService;
 import org.cardanofoundation.authentication.service.KeycloakService;
 
 @Service
@@ -32,7 +31,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
   private final JwtProvider jwtProvider;
 
-  private final RedisProvider redisProvider;
+  private final JwtTokenService jwtTokenService;
 
   @Override
   public Boolean checkExistEmail(String email) {
@@ -71,35 +70,15 @@ public class KeycloakServiceImpl implements KeycloakService {
               .isEmpty()) { // delete role of system then remove all token of user has this role
         log.info("role id: " + resourceArr[1]);
         // get user prefix keys from role id
-        Set<String> userIds =
-            redisProvider.getAllHashKeyOfKey(redisProvider.getRoleKeyByRoleId(resourceArr[1]));
-
-        Set<String> userKeys = new HashSet<>();
-        userIds.forEach(
-            userId ->
-                userKeys.addAll(redisProvider.getKeys(redisProvider.getUserPatternKey(userId))));
-        setInValidToken(userKeys);
+        Set<String> userIds = jwtTokenService.findUserByRoleId(resourceArr[1]);
+        jwtTokenService.blacklistTokenByUserId(userIds);
 
       } else { // REAM_ROLE_MAPPING: assign or unassign a role of user
         if (!resourceType.isEmpty()) {
-          log.warn("user id: {}", resourceArr[1]);
-          Set<String> userKeys =
-              redisProvider.getKeys(redisProvider.getUserPatternKey(resourceArr[1]));
-          setInValidToken(userKeys);
+          jwtTokenService.blacklistTokenByUserId(Set.of(resourceArr[1]));
         }
       }
     }
     return true;
-  }
-
-  private void setInValidToken(Set<String> keys) {
-    keys.forEach(
-        key -> {
-          String val = redisProvider.getValue(key);
-          if (Objects.nonNull(val)) {
-            redisProvider.blacklistJwt(val, key);
-            log.info("black list success: " + val);
-          }
-        });
   }
 }

@@ -31,7 +31,7 @@ import org.cardanofoundation.authentication.model.response.auth.RefreshTokenResp
 import org.cardanofoundation.authentication.model.response.auth.SignInResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.service.AuthenticationService;
 
 @WebMvcTest(AuthController.class)
@@ -45,9 +45,9 @@ class AuthControllerTest {
 
   @MockBean private JwtProvider jwtProvider;
 
-  @MockBean private RedisProvider redisProvider;
-
   @MockBean private KeycloakProvider keycloakProvider;
+
+  @MockBean private TokenAuthRepository tokenAuthRepository;
 
   private final String JWT =
       "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzb3RhdGVrIiwianRpIjoiMiIsImlhdCI6MTY3Mjk5Nzc0MSwiZXhwIjoxNjczMDg0MTQxfQ.B62gXo6iqQfHMT62q17zdhwMF8I77-P6xblKcx7ZI3-gij6YckvFYVVuoIa_qXgTTFnEeRDBQEVo3o20D1w6pffBrgbvxvMbjhOG0ONS9Xs1UQChwQs7v3lxkqoKZ8dNf0Eib43HxLZhBEBIeXa1kln4sS8osWf5iEgno0od7z9KwWK1N2Coj0o-1HE453fFyRveDJgd0DvXohbHADMmjH9t0WkXJwUK26Lv1tkqPlkIzGBPgYnYEIygdayqqt4EtP6CtgI9QOzCYSZUUFzxo-VVDzA0J7DpQbYn8G2PAuAbCXCO6lTkvmXMiyZAoZshqRhBNb7uDI66dwOJLV3NzuunSa8QOO8eNUaDoHHvR_9_J-yHTFBicoM69JHQ7UzJVyFHGmh1M8lHsJ9y6DdAobtBSyJFBhFeDj7S8bgpIvIyNoHDsf24xdlqCngE1qBsxjfp0L_yMPBxsIhW3Juopwe1c6btWTEaRaVaxhKE5yKbRsTtAzDDkdEyg_--9eXH";

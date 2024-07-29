@@ -34,7 +34,7 @@ import org.cardanofoundation.authentication.model.response.MessageResponse;
 import org.cardanofoundation.authentication.model.response.base.BasePageResponse;
 import org.cardanofoundation.authentication.provider.JwtProvider;
 import org.cardanofoundation.authentication.provider.KeycloakProvider;
-import org.cardanofoundation.authentication.provider.RedisProvider;
+import org.cardanofoundation.authentication.repository.TokenAuthRepository;
 import org.cardanofoundation.authentication.service.BookMarkService;
 
 @WebMvcTest(BookMarkController.class)
@@ -48,7 +48,7 @@ class BookMarkControllerTest {
 
   @MockBean private JwtProvider jwtProvider;
 
-  @MockBean private RedisProvider redisProvider;
+  @MockBean private TokenAuthRepository tokenAuthRepository;
 
   @MockBean private KeycloakProvider keycloakProvider;
 
